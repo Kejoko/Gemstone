@@ -1,0 +1,14 @@
+# Compilation stuff
+build/*
+release_build/*
+App
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+
+# OS dependent stuff
+.DS_Store
+
+# IDE stuff
+.vscode
