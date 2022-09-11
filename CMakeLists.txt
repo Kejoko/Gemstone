@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.14)
 project(
     ${PROJECT_NAME}
     VERSION ${GEMSTONE_MAJOR_VER}.${GEMSTONE_MINOR_VER}.${GEMSTONE_PATCH_VER}
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -46,11 +46,35 @@ set(VENDOR_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/vendor")
 set(LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
 
 # The source directories within the vendor directory
+set(GLAD_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glad")
+set(GLFW_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glfw")
 set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
 
 #====================================================================
 # Third party vendor libraries
+#
+# @todo We should do these all in .cmake modules to not pollute this file
 #====================================================================
+set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+
+# Glad
+add_library(
+    glad
+    SHARED
+    ${GLAD_SOURCE_DIR}/include/glad/glad.h
+    ${GLAD_SOURCE_DIR}/src/glad.c
+)
+list(APPEND VENDOR_INCLUDE_DIRS ${GLAD_SOURCE_DIR}/include)
+list(APPEND VENDOR_LIBS glad)
+
+# GLFW
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(${GLFW_SOURCE_DIR})
+list(APPEND VENDOR_INCLUDE_DIRS ${GLFW_SOURCE_DIR}/include)
+list(APPEND VENDOR_LIBS glfw)
+
 # SpdLog
 add_subdirectory(${SPDLOG_SOURCE_DIR})
 list(APPEND VENDOR_INCLUDE_DIRS ${SPDLOG_SOURCE_DIR}/include)
