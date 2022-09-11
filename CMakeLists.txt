@@ -1,5 +1,5 @@
 #====================================================================
-# Gemstone
+# Gemstone and Application
 #====================================================================
 set(PROJECT_NAME "Gemstone")
 set(GEMSTONE_MAJOR_VER 0)
@@ -27,16 +27,49 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#====================================================================
-# Create the target(s)
-#====================================================================
-set(GEMSTONE_ROOT_DIR "${PROJECT_SOURCE_DIR}/gemstone")
+#======================================================================
+# Subdirectories containing source code
+#======================================================================
+# The two base level source directories
 set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/application")
+set(GEMSTONE_ROOT_DIR "${PROJECT_SOURCE_DIR}/gemstone")
 
-set(UTIL_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/util")
-set(GEMSTONE_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/gemstone")
+# The source directories within the application root directory
 set(APPLICATION_SOURCE_DIR "${APPLICATION_ROOT_DIR}/application")
 
+# The source directories within the gemstone root directory
+set(GEMSTONE_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/gemstone")
+set(UTIL_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/util")
+set(VENDOR_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/vendor")
+
+# The source directories within the util directory
+set(LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
+
+# The source directories within the vendor directory
+set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
+
+#====================================================================
+# Third party vendor libraries
+#====================================================================
+# SpdLog
+add_subdirectory(${SPDLOG_SOURCE_DIR})
+list(APPEND VENDOR_INCLUDE_DIRS ${SPDLOG_SOURCE_DIR}/include)
+list(APPEND VENDOR_LIBS spdlog)
+
+#====================================================================
+# Juniper utility libraries
+#====================================================================
+add_library(
+    GEM_Logger
+    SHARED
+    ${LOGGER_SOURCE_DIR}/Logger.hpp
+    ${LOGGER_SOURCE_DIR}/Logger.cpp
+)
+list(APPEND UTIL_LIBS GEM_Logger)
+
+#====================================================================
+# Create the target
+#====================================================================
 add_executable(
     ${APPLICATION_NAME} ${APPLICATION_SOURCE_DIR}/main.cpp
 )
@@ -44,13 +77,25 @@ add_executable(
 #====================================================================
 # Specify include directories
 #====================================================================
+# We want everything to be able to include from these directories
 include_directories(
     ${GEMSTONE_ROOT_DIR}
+    ${VENDOR_INCLUDE_DIRS}
 )
 
+# We only want the application to be able to include from the application directory
 target_include_directories(
     ${APPLICATION_NAME}
     PUBLIC ${APPLICATION_ROOT_DIR}
+)
+
+#====================================================================
+# Link libraries
+#====================================================================
+target_link_libraries(
+    ${APPLICATION_NAME}
+    PRIVATE ${VENDOR_LIBS}
+    PRIVATE ${UTIL_LIBS}
 )
 
 #====================================================================
@@ -58,7 +103,7 @@ target_include_directories(
 #====================================================================
 # @todo: debug mode by default, release mode if `cmake -DCMAKE_BUILD_TYPE=Release`
 # @todo: we want to have a way to sepcify debug for Gemstone and for App seperately, an example
-# case is where we want to debug App while Gemstone is in release version
+# case is where we want to debug Application while Gemstone is in release version
 add_compile_definitions(DEBUG)
 
 add_compile_definitions(

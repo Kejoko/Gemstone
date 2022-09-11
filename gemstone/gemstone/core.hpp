@@ -7,13 +7,13 @@
  * are undefined. By doing this the macros will always be defined
  */
 #ifdef GEMSTONE_VER
-#define GT_MAJOR_VER GEMSTONE_MAJOR_VER
-#define GT_MINOR_VER GEMSTONE_MINOR_VER
-#define GT_PATCH_VER GEMSTONE_PATCH_VER
+#define GEM_MAJOR_VER GEMSTONE_MAJOR_VER
+#define GEM_MINOR_VER GEMSTONE_MINOR_VER
+#define GEM_PATCH_VER GEMSTONE_PATCH_VER
 #else
-#define GT_MAJOR_VER -1
-#define GT_MINOR_VER -1
-#define GT_PATCH_VER -1
+#define GEM_MAJOR_VER -1
+#define GEM_MINOR_VER -1
+#define GEM_PATCH_VER -1
 #endif
 
 /**
@@ -22,12 +22,12 @@
  * compiled correctly with all of the information that we need.
  */
 #ifdef DEBUG
-#define ASSERT_GT_VER() \
-static_assert(GT_MAJOR_VER >= 0); \
-static_assert(GT_MINOR_VER >= 0); \
-static_assert(GT_PATCH_VER >= 0); \
+#define ASSERT_GEM_VER() \
+static_assert(GEM_MAJOR_VER >= 0); \
+static_assert(GEM_MINOR_VER >= 0); \
+static_assert(GEM_PATCH_VER >= 0); \
 REQUIRE_SEMICOLON
 #else
-#define ASSERT_GT_VER() \
+#define ASSERT_GEM_VER() \
 REQUIRE_SEMICOLON
 #endif

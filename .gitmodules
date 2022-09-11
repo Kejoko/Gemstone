@@ -1,0 +1,3 @@
+[submodule "gemstone/vendor/spdlog"]
+	path = gemstone/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git
