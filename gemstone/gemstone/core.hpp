@@ -6,14 +6,14 @@
  * @brief This is so we don't get linting warnings showing that the version macros
  * are undefined. By doing this the macros will always be defined
  */
-#ifdef GEMSTONE_VER
-#define GEM_MAJOR_VER GEMSTONE_MAJOR_VER
-#define GEM_MINOR_VER GEMSTONE_MINOR_VER
-#define GEM_PATCH_VER GEMSTONE_PATCH_VER
+#ifdef GEMSTONE_VERSION
+#define GEM_MAJOR_VERSION GEMSTONE_MAJOR_VERSION
+#define GEM_MINOR_VERSION GEMSTONE_MINOR_VERSION
+#define GEM_PATCH_VERSION GEMSTONE_PATCH_VERSION
 #else
-#define GEM_MAJOR_VER -1
-#define GEM_MINOR_VER -1
-#define GEM_PATCH_VER -1
+#define GEM_MAJOR_VERSION -1
+#define GEM_MINOR_VERSION -1
+#define GEM_PATCH_VERSION -1
 #endif
 
 /**
@@ -22,12 +22,15 @@
  * compiled correctly with all of the information that we need.
  */
 #ifdef DEBUG
-#define ASSERT_GEM_VER() \
-static_assert(GEM_MAJOR_VER >= 0); \
-static_assert(GEM_MINOR_VER >= 0); \
-static_assert(GEM_PATCH_VER >= 0); \
+#define ASSERT_GEM_VERSION() \
+static_assert(GEM_MAJOR_VERSION >= 0); \
+static_assert(GEM_MINOR_VERSION >= 0); \
+static_assert(GEM_PATCH_VERSION >= 0); \
 REQUIRE_SEMICOLON
 #else
-#define ASSERT_GEM_VER() \
+#define ASSERT_GEM_VERSION() \
 REQUIRE_SEMICOLON
 #endif
+
+#define GEM_GLFW_MAJOR_VERSION 3
+#define GEM_GLFW_MINOR_VERSION 3

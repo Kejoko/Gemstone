@@ -2,20 +2,20 @@
 # Gemstone and Application
 #====================================================================
 set(PROJECT_NAME "Gemstone")
-set(GEMSTONE_MAJOR_VER 0)
-set(GEMSTONE_MINOR_VER 0)
-set(GEMSTONE_PATCH_VER 1)
+set(GEMSTONE_MAJOR_VERSION 0)
+set(GEMSTONE_MINOR_VERSION 0)
+set(GEMSTONE_PATCH_VERSION 1)
 
 set(APPLICATION_NAME "App")
-set(APPLICATION_MAJOR_VER 0)
-set(APPLICATION_MINOR_VER 0)
-set(APPLICATION_PATCH_VER 0)
+set(APPLICATION_MAJOR_VERSION 0)
+set(APPLICATION_MINOR_VERSION 0)
+set(APPLICATION_PATCH_VERSION 0)
 
 cmake_minimum_required(VERSION 3.14)
 
 project(
     ${PROJECT_NAME}
-    VERSION ${GEMSTONE_MAJOR_VER}.${GEMSTONE_MINOR_VER}.${GEMSTONE_PATCH_VER}
+    VERSION ${GEMSTONE_MAJOR_VERSION}.${GEMSTONE_MINOR_VERSION}.${GEMSTONE_PATCH_VERSION}
     LANGUAGES CXX C
 )
 
@@ -56,6 +56,9 @@ set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
 # @todo We should do these all in .cmake modules to not pollute this file
 #====================================================================
 set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
+
+# OpenGL
+find_package(OpenGL REQUIRED)
 
 # Glad
 add_library(
@@ -99,7 +102,7 @@ add_executable(
 )
 
 #====================================================================
-# Specify include directories
+# Specify include directories for gemstone and the application
 #====================================================================
 # We want everything to be able to include from these directories
 include_directories(
@@ -131,16 +134,16 @@ target_link_libraries(
 add_compile_definitions(DEBUG)
 
 add_compile_definitions(
-    GEMSTONE_VER
-    GEMSTONE_MAJOR_VER=${GEMSTONE_MAJOR_VER}
-    GEMSTONE_MINOR_VER=${GEMSTONE_MINOR_VER}
-    GEMSTONE_PATCH_VER=${GEMSTONE_PATCH_VER}
+    GEMSTONE_VERSION
+    GEMSTONE_MAJOR_VERSION=${GEMSTONE_MAJOR_VERSION}
+    GEMSTONE_MINOR_VERSION=${GEMSTONE_MINOR_VERSION}
+    GEMSTONE_PATCH_VERSION=${GEMSTONE_PATCH_VERSION}
 )
 
 target_compile_definitions(
     ${APPLICATION_NAME}
-    PUBLIC APPLICATION_VER
-    PUBLIC APPLICATION_MINOR_VER=${APPLICATION_MINOR_VER}
-    PUBLIC APPLICATION_PATCH_VER=${APPLICATION_PATCH_VER}
-    PUBLIC APPLICATION_MAJOR_VER=${APPLICATION_MAJOR_VER}
+    PUBLIC APPLICATION_VERSION
+    PUBLIC APPLICATION_MINOR_VERSION=${APPLICATION_MINOR_VERSION}
+    PUBLIC APPLICATION_PATCH_VERSION=${APPLICATION_PATCH_VERSION}
+    PUBLIC APPLICATION_MAJOR_VERSION=${APPLICATION_MAJOR_VERSION}
 )
