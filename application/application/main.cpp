@@ -20,6 +20,18 @@ void framebufferSizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPix
     glViewport(0, 0, updatedWindowWidthPixels, updatedWindowHeightPixels);
 }
 
+/**
+ * @brief Get user input
+ * 
+ * @param p_glfwWindow A pointer to the glfw window
+ */
+void processInput(GLFWwindow* p_glfwWindow) {
+    // End it all! ... if the user presses the escape key ...
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(p_glfwWindow, true);
+    }
+}
+
 int main(int argc, char* argv[]) {
     ASSERT_GEM_VERSION();
     ASSERT_APP_VERSION();
@@ -37,6 +49,7 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GEM_GLFW_MAJOR_VERSION);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GEM_GLFW_MINOR_VERSION);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // Doens't actually fix the red/black flickering effect
 #ifdef ON_MAC
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // For mac os
 #endif
@@ -53,6 +66,10 @@ int main(int argc, char* argv[]) {
     // Make the context the current context
     glfwMakeContextCurrent(p_glfwWindow);
 
+    // Tell opengl to use the framebuffer size callback when the window is resized
+    // This will be called once upon start up so we don't need to call glViewport right away
+    glfwSetFramebufferSizeCallback(p_glfwWindow, framebufferSizeCallback);
+
     // Initialize glad
     // Give glad the function to load the address of the OS specific OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -60,14 +77,18 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Tell opengl the size of the rendering window
-    glViewport(0, 0, initialWindowWidthPixels, initialWindowHeightPixels);
-
-    // Tell opengl to use the framebuffer size callback when the window is resized
-    glfwSetFramebufferSizeCallback(p_glfwWindow, framebufferSizeCallback);
+    // Determine what color we want to clear the screen to
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     // Create the render loop
     while (!glfwWindowShouldClose(p_glfwWindow)) {
+        // Get input
+        processInput(p_glfwWindow);
+
+        // Render
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Checdk and call events and swap buffers
         glfwSwapBuffers(p_glfwWindow);
         glfwPollEvents();
     }
