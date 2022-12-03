@@ -14,7 +14,8 @@ namespace GEM {
  * 
  * @todo Allow for the ability to have different loggers. Perhaps one for each component (ex:
  * one for renderer, one for physics, one for networking, etc...) which we can manually change
- * the levels for each so we don't get all logs from everything
+ * the levels for each so we don't get all logs from everything. All this will require is
+ * mainting a map of strings/indices to shared pointer instead of a single shared pointer
  * 
  * @todo Allow us to specify the format of the logs and the log file upon creation in case we
  * want to use a different thing than what we are doing now

@@ -22,10 +22,12 @@ project(
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #====================================================================
-# C++ 17 Support
+# C++ 17 Support and compiler flags
 #====================================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 
 #======================================================================
 # Subdirectories containing source code
@@ -110,7 +112,9 @@ include_directories(
     ${VENDOR_INCLUDE_DIRS}
 )
 
-# We only want the application to be able to include from the application directory
+# We only want the application to be able to include from the application directory.
+# This is so Gemstone doesn't include application source and become dependent upon
+# the application
 target_include_directories(
     ${APPLICATION_NAME}
     PUBLIC ${APPLICATION_ROOT_DIR}
@@ -130,7 +134,8 @@ target_link_libraries(
 #====================================================================
 # @todo: debug mode by default, release mode if `cmake -DCMAKE_BUILD_TYPE=Release`
 # @todo: we want to have a way to sepcify debug for Gemstone and for App seperately, an example
-# case is where we want to debug Application while Gemstone is in release version
+#        case is where we want to debug Application while Gemstone is in release version. This
+#        will require us to have two different release mode macros (EX: GEM_DEBUG , APP_DEBUG) 
 add_compile_definitions(DEBUG)
 
 add_compile_definitions(

@@ -17,3 +17,5 @@
  * @example Check out ASSERT_GEM_VERSION() in gemstone/core.hpp
  */
 #define REQUIRE_SEMICOLON static_assert(true)
+
+#define UNUSED(x) (void)(x); REQUIRE_SEMICOLON
