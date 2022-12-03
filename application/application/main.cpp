@@ -1,5 +1,7 @@
+#include <exception>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <glad/glad.h>
 
@@ -10,26 +12,7 @@
 #include "util/logger/Logger.hpp"
 #include "gemstone/core.hpp"
 #include "application/core.hpp"
-
-const char* vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "\n"
-    "void main() {\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\n"
-    "\0"
-;
-
-const char* fragmentShaderSource = 
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "\n"
-    "void main() {\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n"
-    "\0"
-;
+#include "application/shaders.hpp"
 
 /**
  * @brief A function that gets called every time the window is resized
@@ -64,6 +47,7 @@ void processInput(GLFWwindow* p_glfwWindow) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
     }
 }
+
 
 int main(int argc, char* argv[]) {
     UNUSED(argc);
@@ -119,57 +103,13 @@ int main(int argc, char* argv[]) {
 
     GEM::Logger::info("Managing shaders");
 
-    // Create a shader object, attach the shader source code, and compile
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    // Give: The vertex shader to compile, how many strings we are giving it as source,
-    // the actual source code, and nullptr (why no length?)
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-
-    // Check for successful compilation of the vertex shader
-    int vertexShaderCompilationSuccess;
-    char vertexShaderCompilationInfoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexShaderCompilationSuccess);
-    if (!vertexShaderCompilationSuccess) {
-        glGetShaderInfoLog(vertexShader, sizeof(vertexShaderCompilationInfoLog), nullptr, vertexShaderCompilationInfoLog);
-        GEM::Logger::critical("Vertex Shader failed to compile: " + std::string(vertexShaderCompilationInfoLog));
+    std::vector<uint32_t> shaderPrograms;
+    try {
+        shaderPrograms = GEM::createShaderPrograms();
+    } catch (const std::exception& ex) {
+        GEM::Logger::critical("Caught exception when trying to create shader programs: " + std::string(ex.what()));
         return 1;
     }
-
-    // Fragment shader time
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    // Check for successful compilation of the fragment shader
-    int fragmentShaderCompilationSuccess;
-    char fragmentShaderCompilationInfoLog[512];
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentShaderCompilationSuccess);
-    if (!fragmentShaderCompilationSuccess) {
-        glGetShaderInfoLog(vertexShader, sizeof(fragmentShaderCompilationInfoLog), nullptr, fragmentShaderCompilationInfoLog);
-        GEM::Logger::critical("Fragment Shader failed to compile: " + std::string(fragmentShaderCompilationInfoLog));
-        return 1;
-    }
-
-    // Create a shader program to link the vertex and fragment shaders and attach the compiled shaders
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    // Check that shader program linking was successful
-    int shaderProgramLinkSuccess;
-    char shaderProgramLinkInfoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &shaderProgramLinkSuccess);
-    if (!shaderProgramLinkSuccess) {
-        glGetProgramInfoLog(shaderProgram, sizeof(shaderProgramLinkInfoLog), nullptr, shaderProgramLinkInfoLog);
-        GEM::Logger::critical("Shader program failed to link: " + std::string(shaderProgramLinkInfoLog));
-        return 1;
-    }
-
-    // Delete the shaders after we've linked them to the program
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
     /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
 
@@ -177,16 +117,30 @@ int main(int argc, char* argv[]) {
 
     // The vertices for each corner of the rectangle
     const float rectangleVertices[] = {
+        // Middle rectangle
          0.5f,  0.5f, 0.0f,  // top right
          0.5f, -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left
+        -0.5f,  0.5f, 0.0f,  // top left
+
+        // Right triangle Point
+         0.9f,  0.0f, 0.0f,
+
+        // Top Triangle point
+         0.0f,  0.9f, 0.0f
     };
 
     // The indices we are using to reference the rectangle's vertices for the two triangles we need to draw
     const uint32_t rectangleIndices[] = {
+        // Middle rectangle
         0, 1, 3, // first triangle
-        1, 2, 3  // second triangle  
+        1, 2, 3, // second triangle
+
+        // Right triangle
+        0, 4, 1,
+
+        // Top triangle
+        3, 5, 0
     };
 
     // Create a vertex array object to store all of our vertex attribute's informations
@@ -255,7 +209,7 @@ int main(int argc, char* argv[]) {
         // Render
         // ------------------
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderProgram);
+        glUseProgram(shaderPrograms[0]);
         glBindVertexArray(vertexArrayObject);
 
         // For drawing triangles:
@@ -270,7 +224,7 @@ int main(int argc, char* argv[]) {
 
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
-            6,                  // The number of elements to be rendered
+            12,                 // The number of elements to be rendered
             GL_UNSIGNED_INT,    // The type of the values in the indices
             0                   // The offset into the EBO
         );
@@ -285,7 +239,7 @@ int main(int argc, char* argv[]) {
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderPrograms[0]);
 
     // Clear all previously allocated glfw resources
     GEM::Logger::info("Terminating GLFW");
