@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
     UNUSED(argc);
     UNUSED(argv);
 
+
     ASSERT_GEM_VERSION();
     ASSERT_APP_VERSION();
 
@@ -149,13 +150,13 @@ int main(int argc, char* argv[]) {
     // stored for later use
     // The moment we want to draw one of our objects we bind the corresponding VAO,
     // draw it, then unbind the VAO
-    unsigned int vertexArrayObject;
+    uint32_t vertexArrayObject;
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
 
     // Create the vertex buffer object and bind it so any call on GL_ARRAY_BUFFER target
     // will be used to configure the vertex buffer object
-    unsigned int vertexBufferObject;
+    uint32_t vertexBufferObject;
     glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 
@@ -166,7 +167,7 @@ int main(int argc, char* argv[]) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), rectangleVertices, GL_STATIC_DRAW);
 
     // Create the element buffer object (EBO)
-    unsigned int elementBufferObject;
+    uint32_t elementBufferObject;
     glGenBuffers(1, &elementBufferObject);
 
     // Similar to the VBO, bind the EBO and copy the indices into the buffer
@@ -209,24 +210,22 @@ int main(int argc, char* argv[]) {
         // Render
         // ------------------
         glClear(GL_COLOR_BUFFER_BIT);
-        glUseProgram(shaderPrograms[0]);
         glBindVertexArray(vertexArrayObject);
 
-        // For drawing triangles:
-
-        // glDrawArrays(
-        //     GL_TRIANGLES,   // The type of primitive
-        //     0,              // The starting index of the vertex array we'd like to draw
-        //     3               // How many vertices we want to draw
-        // );
-
-        // For drawing elements
-
+        glUseProgram(shaderPrograms[0]);
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
-            12,                 // The number of elements to be rendered
+            6,                  // The number of elements to be rendered
             GL_UNSIGNED_INT,    // The type of the values in the indices
             0                   // The offset into the EBO
+        );
+
+        glUseProgram(shaderPrograms[1]);
+        glDrawElements(
+            GL_TRIANGLES,                   // The type of primitive
+            6,                              // The number of elements to be rendered
+            GL_UNSIGNED_INT,                // The type of the values in the indices
+            (void*)(6 * sizeof(uint32_t))   // The offset into the EBO
         );
 
         // Check and call events and swap buffers

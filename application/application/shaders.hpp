@@ -20,33 +20,15 @@ namespace GEM {
 }
 
 const char* vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "\n"
-    "void main() {\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\n"
-    "\0"
+#include "shaders/literals/vertex.vert"
 ;
 
 const char* fragmentShaderSource = 
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "\n"
-    "void main() {\n"
-    "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n"
-    "\0"
+#include "shaders/literals/fragment.frag"
 ;
 
 const char* fragmentShader2Source = 
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "\n"
-    "void main() {\n"
-    "    FragColor = vec4(0.2f, 0.5f, 1.0f, 1.0f);\n"
-    "}\n"
-    "\0"
+#include "shaders/literals/fragment2.frag"
 ;
 
 /**
@@ -75,7 +57,10 @@ uint32_t GEM::compileShader(const char* shaderSource, const GLenum shaderType) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderCompilationSuccess);
     if (!shaderCompilationSuccess) {
         glGetShaderInfoLog(shader, sizeof(shaderCompilationInfoLog), nullptr, shaderCompilationInfoLog);
-        const std::string errorMessage = "Vertex Shader failed to compile: " + std::string(shaderCompilationInfoLog);
+
+        const std::string shaderTypeString = shaderType == GL_VERTEX_SHADER ? "Vertex" : "Fragment";
+        const std::string errorMessage = shaderTypeString + " shader failed to compile: " + std::string(shaderCompilationInfoLog);
+        
         GEM::Logger::critical(errorMessage);
         throw std::invalid_argument(errorMessage);
     }

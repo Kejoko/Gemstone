@@ -1,7 +1,4 @@
-# Compilation stuff
-build/*
-release_build/*
-App
+# Cmake stuff
 CMakeCache.txt
 CMakeFiles
 Makefile
@@ -12,3 +9,12 @@ cmake_install.cmake
 
 # IDE stuff
 .vscode
+
+# Compiled stuff
+build/
+release_build/
+App
+
+# Converted shaders
+application/shaders/literals/
+gemstone/shaders/literals/

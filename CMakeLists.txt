@@ -30,6 +30,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 
 #======================================================================
+# A function to convert files to be included as raw string literals
+#======================================================================
+function(make_file_includable_raw_string input_file)
+    # Get the directory and name of the iput file so we can use the "literals" subdirectory
+    get_filename_component(input_file_directory ${input_file} DIRECTORY)
+    get_filename_component(input_file_name ${input_file} NAME)
+    set(output_file ${input_file_directory}/literals/${input_file_name})
+    message(STATUS "Making ${input_file} an includable raw string file at ${output_file}")
+    
+    # Read in the contents of the file
+    file(READ ${input_file} input_contents)
+
+    # Wrap the contents of a file in R"( ... )" with proper newlines
+    set(literal_wrapped_contents "R\"(\n${input_contents})\"")
+    
+    # Write the raw string literal wrapped contents to the new output file
+    file(WRITE ${output_file} "${literal_wrapped_contents}")
+endfunction()
+
+#======================================================================
 # Subdirectories containing source code
 #======================================================================
 # The two base level source directories
@@ -38,6 +58,7 @@ set(GEMSTONE_ROOT_DIR "${PROJECT_SOURCE_DIR}/gemstone")
 
 # The source directories within the application root directory
 set(APPLICATION_SOURCE_DIR "${APPLICATION_ROOT_DIR}/application")
+set(APPLICATION_SHADER_SOURCE_DIR "${APPLICATION_ROOT_DIR}/shaders")
 
 # The source directories within the gemstone root directory
 set(GEMSTONE_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/gemstone")
@@ -128,6 +149,14 @@ target_link_libraries(
     PRIVATE ${VENDOR_LIBS}
     PRIVATE ${UTIL_LIBS}
 )
+
+#====================================================================
+# Convert the glsl shaders to raw string literal files so we can
+# nicely include them in C++ strings
+#====================================================================
+make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/vertex.vert)
+make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/fragment.frag)
+make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
 
 #====================================================================
 # Add preprocessor directives
