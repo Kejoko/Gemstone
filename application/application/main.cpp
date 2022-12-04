@@ -119,17 +119,19 @@ int main(int argc, char* argv[]) {
 
     // The vertices for each corner of the rectangle
     const float rectangleVertices[] = {
+        // Positions            colors
+        
         // Middle rectangle
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f,  // top left
+         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   // top right (red)
+         0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   // bottom right (blue)
+        -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom left (green)
+        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   // top left (yellow)
 
         // Right triangle Point
-         0.9f,  0.0f, 0.0f,
+         0.9f,  0.0f, 0.0f,     1.0f, 1.0f, 1.0f,   // white
 
         // Top Triangle point
-         0.0f,  0.9f, 0.0f
+         0.0f,  0.9f, 0.0f,     0.0f, 0.0f, 0.0f    // black
     };
 
     // The indices we are using to reference the rectangle's vertices for the two triangles we need to draw
@@ -177,16 +179,28 @@ int main(int argc, char* argv[]) {
 
     // Tell OpenGL how it should interpret the vertex data
     // First two parameters should be configured to match the information in our vertex shader, it seems
-    const int p_vertexAttribute = 0;
+    const int p_vertexPositionAttribute = 0;
     glVertexAttribPointer(
-        p_vertexAttribute,      // The vertex attribute we want to configure (0 because we used 'location = 0' in our vertex shader, we want to pass this to our vertex shader)
-        3,                      // The size of the vertex attribute (vec3 has 3 values)
-        GL_FLOAT,               // Data type (vec<N> in GLSL consists of floating point values)
-        GL_FALSE,               // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
-        3 * sizeof(float),      // The stride length, the space between consecutive vertex attributes (each vertex is 3 floats so the starts of each vertex differs by 3 floats)
-        static_cast<void*>(0)   // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
+        p_vertexPositionAttribute,  // The vertex attribute we want to configure (0 because we used 'location = 0' in our vertex shader, we want to pass this to our vertex shader)
+        3,                          // The size of the vertex attribute (vec3 has 3 values)
+        GL_FLOAT,                   // Data type (vec<N> in GLSL consists of floating point values)
+        GL_FALSE,                   // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
+        6 * sizeof(float),          // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
+        static_cast<void*>(0)       // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
     );
-    glEnableVertexAttribArray(p_vertexAttribute);
+    glEnableVertexAttribArray(p_vertexPositionAttribute);
+
+    // Configure the color vertex attribute the same way we did the positions
+    const int p_vertexColorAttribute = 1;
+    glVertexAttribPointer(
+        p_vertexColorAttribute,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        6 * sizeof(float),          // Stride of length 6 because 3 for position + 3 for color
+        (void*)(3 * sizeof(float))  // Offset 3 floats into the array because the first 3 vlaues are position data
+    );
+    glEnableVertexAttribArray(p_vertexColorAttribute);
 
     // The call to glVertexAttribPointer registered the VBO as te vertex attribute's bound VBO, so we can safely unbind afterwards
     // We must not unbind the EBO because it is stored in the VAO
