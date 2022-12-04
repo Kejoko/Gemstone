@@ -1,6 +1,12 @@
 #version 330 core
-out vec4 FragColor;
+
+// Color set from opengl
+uniform vec4 ourColor;
+
+// The output color
+out vec4 fragmentColor;
 
 void main() {
-    FragColor = vec4(0.2f, 0.5f, 1.0f, 1.0f);
+    // fragmentColor = ourColor;
+    fragmentColor = ourColor;
 }

@@ -14,6 +14,7 @@
 #include "util/logger/Logger.hpp"
 
 namespace GEM {
+    std::string getShaderTypeString(const GLenum shaderType);
     uint32_t compileShader(const char* shaderSource, const GLenum shaderType);
     uint32_t createShaderProgram(const uint32_t vertexShader, const uint32_t fragmentShader);
     std::vector<uint32_t> createShaderPrograms();
@@ -32,6 +33,22 @@ const char* fragmentShader2Source =
 ;
 
 /**
+ * @brief Convert the shader type enum to a string for printing purposes
+ * 
+ * @param shaderType The type of shader
+ * @return std::string A string representation of the shader
+ */
+std::string GEM::getShaderTypeString(const GLenum shaderType) {
+    if (shaderType == GL_VERTEX_SHADER) {
+        return "Vertex";
+    } else if (shaderType == GL_FRAGMENT_SHADER) {
+        return "Fragment";
+    }
+
+    return "Unkown";
+}
+
+/**
  * @brief Compile a shader given it's source code and the type of shader 
  * 
  * @note This function will throw an exception if the shader fails to compile
@@ -41,7 +58,7 @@ const char* fragmentShader2Source =
  * @return uint32_t The compiled shader
  */
 uint32_t GEM::compileShader(const char* shaderSource, const GLenum shaderType) {
-    GEM::Logger::trace("Copmiling shader of type " + std::to_string(shaderType));
+    GEM::Logger::trace("Compiling " + getShaderTypeString(shaderType) + " shader");
 
     // Create a shader object, attach the shader source code, and compile
     uint32_t shader = glCreateShader(shaderType);
@@ -57,10 +74,7 @@ uint32_t GEM::compileShader(const char* shaderSource, const GLenum shaderType) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &shaderCompilationSuccess);
     if (!shaderCompilationSuccess) {
         glGetShaderInfoLog(shader, sizeof(shaderCompilationInfoLog), nullptr, shaderCompilationInfoLog);
-
-        const std::string shaderTypeString = shaderType == GL_VERTEX_SHADER ? "Vertex" : "Fragment";
-        const std::string errorMessage = shaderTypeString + " shader failed to compile: " + std::string(shaderCompilationInfoLog);
-        
+        const std::string errorMessage = getShaderTypeString(shaderType) + " shader failed to compile: " + std::string(shaderCompilationInfoLog);
         GEM::Logger::critical(errorMessage);
         throw std::invalid_argument(errorMessage);
     }
@@ -78,6 +92,8 @@ uint32_t GEM::compileShader(const char* shaderSource, const GLenum shaderType) {
  * @return uint32_t The linked shader program
  */
 uint32_t GEM::createShaderProgram(const uint32_t vertexShader, const uint32_t fragmentShader) {
+    GEM::Logger::trace("Creating shader program from vertex shader (" + std::to_string(vertexShader) + ") and fragment shader (" + std::to_string(fragmentShader) + ")");
+
     // Create a shader program to link the vertex and fragment shaders and attach the compiled shaders
     uint32_t shaderProgram = glCreateProgram();
     glAttachShader(shaderProgram, vertexShader);
@@ -106,7 +122,11 @@ uint32_t GEM::createShaderProgram(const uint32_t vertexShader, const uint32_t fr
  * @return std::vector<uint32_t> A vector of shader programs to use
  */
 std::vector<uint32_t> GEM::createShaderPrograms() {
-    GEM::Logger::trace("Creating shader programs");
+    GEM::Logger::info("Creating shader programs");
+
+    int maxVertexAttributes;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttributes);
+    GEM::Logger::info("Maximum number of vertex attributes supported: " + std::to_string(maxVertexAttributes));
 
     // Create the shaders
     uint32_t vertexShader = GEM::compileShader(vertexShaderSource, GL_VERTEX_SHADER);

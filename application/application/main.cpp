@@ -1,3 +1,4 @@
+#include <cmath>
 #include <exception>
 #include <iostream>
 #include <string>
@@ -201,18 +202,19 @@ int main(int argc, char* argv[]) {
     // Create the render loop
     GEM::Logger::info("Starting render loop");
     while (!glfwWindowShouldClose(p_glfwWindow)) {
-        // ------------------
-        // Get input
-        // ------------------
+        // ----- Get input ----- //
+
         processInput(p_glfwWindow);
 
-        // ------------------
-        // Render
-        // ------------------
+        // ----- Rendering ----- //
+
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(vertexArrayObject);
 
+        // Rectangle
+
         glUseProgram(shaderPrograms[0]);
+        
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
             6,                  // The number of elements to be rendered
@@ -220,7 +222,23 @@ int main(int argc, char* argv[]) {
             0                   // The offset into the EBO
         );
 
+        // Outside triangles
+
+        // Determine the color we want to use
+        float timeValue = glfwGetTime();
+        float greenValue = (std::sin(timeValue) / 2.0f) + 0.5f;
+
+        // We don't need to use the shader program to find the uniform but we do need
+        // to use the shader program to assign it, because it assigns to the current shader program
+        const std::string uniformName = "ourColor";
+        int vertexColorLocation = glGetUniformLocation(shaderPrograms[1], uniformName.c_str());
+        if (vertexColorLocation == -1) {
+            GEM::Logger::critical("Could not find location of uniform: " + uniformName);
+            break;
+        }
         glUseProgram(shaderPrograms[1]);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        
         glDrawElements(
             GL_TRIANGLES,                   // The type of primitive
             6,                              // The number of elements to be rendered

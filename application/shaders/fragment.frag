@@ -1,6 +1,11 @@
 #version 330 core
-out vec4 FragColor;
+
+// The input from the vertex shader (same type and name)
+in vec4 vertexColor;
+
+// The output color
+out vec4 fragmentColor;
 
 void main() {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    fragmentColor = vertexColor;
 }
