@@ -13,6 +13,8 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+uint32_t GEM::Logger::Scoper::indentationCount = 0;
+
 bool GEM::Logger::m_initialized = false;
 std::shared_ptr<spdlog::async_logger> GEM::Logger::mp_logger = nullptr;
 
@@ -80,32 +82,36 @@ void GEM::Logger::assertInitialized() {
     }
 }
 
+std::string GEM::Logger::createIndentationString() {
+    return std::string(GEM::Logger::Scoper::getIndentationCount() * 4, ' ');
+}
+
 void GEM::Logger::trace(const std::string& message) {
     assertInitialized();
-    mp_logger->trace(message);
+    mp_logger->trace(GEM::Logger::createIndentationString() + message);
 }
 
 void GEM::Logger::debug(const std::string& message) {
     assertInitialized();
-    mp_logger->debug(message);
+    mp_logger->debug(GEM::Logger::createIndentationString() + message);
 }
 
 void GEM::Logger::info(const std::string& message) {
     assertInitialized();
-    mp_logger->info(message);
+    mp_logger->info(GEM::Logger::createIndentationString() + message);
 }
 
 void GEM::Logger::warn(const std::string& message) {
     assertInitialized();
-    mp_logger->warn(message);
+    mp_logger->warn(GEM::Logger::createIndentationString() + message);
 }
 
 void GEM::Logger::error(const std::string& message) {
     assertInitialized();
-    mp_logger->error(message);
+    mp_logger->error(GEM::Logger::createIndentationString() + message);
 }
 
 void GEM::Logger::critical(const std::string& message) {
     assertInitialized();
-    mp_logger->critical(message);
+    mp_logger->critical(GEM::Logger::createIndentationString() + message);
 }

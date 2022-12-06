@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <memory>
 
 #include "spdlog/async.h"
@@ -24,7 +25,33 @@ namespace GEM {
  * while stdout is what changes based on build mode
  */
 class GEM::Logger {
-public:
+public: // public classes
+    class Scoper {
+    public: // public static
+        static uint32_t getIndentationCount() { return GEM::Logger::Scoper::indentationCount; }
+
+    private: // private static
+        static uint32_t indentationCount;
+
+    public: // public members
+        Scoper() {
+            // Log an opening curly brace to the correct logger at the correct level
+            GEM::Logger::trace("{");
+
+            // Increment the indentation count so the logger knows how much to indent before printing
+            GEM::Logger::Scoper::indentationCount++;
+        }
+
+        ~Scoper() {
+            // Decrement the indentation count so the logger knows how much to indent before printing
+            GEM::Logger::Scoper::indentationCount--;
+
+            // Log a closing curly brace to the correct logger at the correct level
+            GEM::Logger::trace("}");
+        }
+    };
+
+public: // public static
     /**
      * @brief A function allowing us to initialize the logger so we don't need to do a
      * conditional check for initialization everytime we want to log something
@@ -39,9 +66,7 @@ public:
     static void error(const std::string& message);
     static void critical(const std::string& message);
 
-    Logger() = delete;
-
-private:
+private: // private static
     /**
      * @brief A function allowing us to ensure that we have been initialized prior to attempting
      * to log anything.
@@ -50,6 +75,34 @@ private:
      */
     static void assertInitialized();
 
+    static std::string createIndentationString();
+
     static bool m_initialized;
     static std::shared_ptr<spdlog::async_logger> mp_logger;
+
+public: // public members
+    Logger() = delete;
 };
+
+// ----- logging a scope ----- //
+
+// With the correct logger and at the correct logging level:
+// 1. Log an opening curly brace {
+// 2. Increment the indentation count
+// ...
+// 3. Decrement the indentation count
+// 4. Log a closing curly brace }
+
+#define LOG_SCOPE_CHANGE() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)
+
+// ----- logging a function call ----- //
+
+// With the correct logger and at the correct logging level:
+// 1. Log the function information
+// 2. Log a scope
+
+#define LOG_FUNCTION_CALL(message) \
+    GEM::Logger::info(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]")); \
+    LOG_SCOPE_CHANGE()
+    

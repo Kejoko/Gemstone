@@ -188,7 +188,7 @@ uint32_t GEM::CompiledShader::getCompiledShaderID(const size_t shaderSourceHash,
  * @return uint32_t The compiled shader
  */
 uint32_t GEM::CompiledShader::compileShader(const char* shaderSource, const GLenum shaderType) {
-    GEM::Logger::info("Compiling " + getShaderTypeString(shaderType) + " shader");
+    LOG_FUNCTION_CALL(getShaderTypeString(shaderType) + " shader");
 
     // Before we actually try to compile, check if this shader has already been compiled
     // If it has been compiled before, use that index and increment the counter
