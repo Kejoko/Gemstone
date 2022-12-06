@@ -1,0 +1,19 @@
+# Cmake stuff
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+
+# OS dependent stuff
+.DS_Store
+
+# IDE stuff
+.vscode
+
+# Compiled stuff
+build/
+release_build/
+App
+
+# Converted shaders
+application/assets/shaders/literals/
