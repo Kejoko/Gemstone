@@ -52,26 +52,40 @@ endfunction()
 #======================================================================
 # Subdirectories containing source code
 #======================================================================
+
+# ---------- root level ---------- #
+
 # The two base level source directories
 set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/application")
 set(GEMSTONE_ROOT_DIR "${PROJECT_SOURCE_DIR}/gemstone")
 
-# The source directories within the application root directory
+# ----- within application ----- #
+
+# The source directories within the application root directory and the
+# asset directory
 set(APPLICATION_SOURCE_DIR "${APPLICATION_ROOT_DIR}/application")
-set(APPLICATION_SHADER_SOURCE_DIR "${APPLICATION_ROOT_DIR}/shaders")
+set(APPLICATION_ASSET_DIR "${APPLICATION_ROOT_DIR}/assets")
+
+# Asset directories
+set(APPLICATION_SHADER_SOURCE_DIR "${APPLICATION_ASSET_DIR}/shaders")
+
+# ----- within gemstone ----- #
 
 # The source directories within the gemstone root directory
 set(GEMSTONE_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/gemstone")
 set(UTIL_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/util")
 set(VENDOR_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/vendor")
 
-# The source directories within the util directory
-set(LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
-
-# The source directories within the vendor directory
+# The source directories within the gemstone/vendor directory
 set(GLAD_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glad")
 set(GLFW_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glfw")
 set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
+
+# The source directories within the gemstone/util directory
+set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
+
+# Within gemstone/gemstone
+set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
 
 #====================================================================
 # Third party vendor libraries
@@ -110,12 +124,25 @@ list(APPEND VENDOR_LIBS spdlog)
 # Juniper utility libraries
 #====================================================================
 add_library(
-    GEM_Logger
+    UTIL_Logger
     SHARED
-    ${LOGGER_SOURCE_DIR}/Logger.hpp
-    ${LOGGER_SOURCE_DIR}/Logger.cpp
+    ${UTIL_LOGGER_SOURCE_DIR}/Logger.hpp
+    ${UTIL_LOGGER_SOURCE_DIR}/Logger.cpp
 )
-list(APPEND UTIL_LIBS GEM_Logger)
+list(APPEND UTIL_LIBS UTIL_Logger)
+
+#====================================================================
+# Gemstone libraries
+#====================================================================
+add_library(
+    GEM_Shader
+    SHARED
+    ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.hpp
+    ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.cpp
+    ${GEMSTONE_SHADER_SOURCE_DIR}/ShaderProgram.hpp
+    ${GEMSTONE_SHADER_SOURCE_DIR}/ShaderProgram.cpp
+)
+list(APPEND GEMSTONE_LIBS GEM_Shader)
 
 #====================================================================
 # Create the target
@@ -144,10 +171,19 @@ target_include_directories(
 #====================================================================
 # Link libraries
 #====================================================================
+# Link util and vendor libs to gemstone
+target_link_libraries(
+    ${GEMSTONE_LIBS}
+    PRIVATE ${VENDOR_LIBS}
+    PRIVATE ${UTIL_LIBS}
+)
+
+# Link everything to the application
 target_link_libraries(
     ${APPLICATION_NAME}
     PRIVATE ${VENDOR_LIBS}
     PRIVATE ${UTIL_LIBS}
+    PRIVATE ${GEMSTONE_LIBS}
 )
 
 #====================================================================

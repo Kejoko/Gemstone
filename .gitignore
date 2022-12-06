@@ -16,5 +16,4 @@ release_build/
 App
 
 # Converted shaders
-application/shaders/literals/
-gemstone/shaders/literals/
+application/assets/shaders/literals/

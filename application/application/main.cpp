@@ -12,11 +12,12 @@
 #include "util/platform.hpp"
 #include "util/logger/Logger.hpp"
 #include "gemstone/core.hpp"
+#include "gemstone/shader/ShaderProgram.hpp"
 #include "application/core.hpp"
 #include "application/shaders.hpp"
 
 /**
- * @brief A function that gets called every time the window is resized
+ * @brief A function that gets called every tim e the window is resized
  * 
  * @param p_glfwWindow A pointer to the glfw window
  * @param updatedWindowWidthPixels The updated width of the window in pixels
@@ -105,11 +106,12 @@ int main(int argc, char* argv[]) {
 
     GEM::Logger::info("Managing shaders");
 
-    std::vector<uint32_t> shaderPrograms;
+    std::vector<std::shared_ptr<GEM::ShaderProgram>> shaderPrograms;
     try {
-        shaderPrograms = GEM::createShaderPrograms();
+        shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
+        shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
     } catch (const std::exception& ex) {
-        GEM::Logger::critical("Caught exception when trying to create shader programs: " + std::string(ex.what()));
+        GEM::Logger::critical("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
         return 1;
     }
 
@@ -227,7 +229,7 @@ int main(int argc, char* argv[]) {
 
         // Rectangle
 
-        glUseProgram(shaderPrograms[0]);
+        shaderPrograms[0]->use();
         
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
@@ -245,12 +247,12 @@ int main(int argc, char* argv[]) {
         // We don't need to use the shader program to find the uniform but we do need
         // to use the shader program to assign it, because it assigns to the current shader program
         const std::string uniformName = "ourColor";
-        int vertexColorLocation = glGetUniformLocation(shaderPrograms[1], uniformName.c_str());
+        int vertexColorLocation = glGetUniformLocation(shaderPrograms[1]->getID(), uniformName.c_str());
         if (vertexColorLocation == -1) {
             GEM::Logger::critical("Could not find location of uniform: " + uniformName);
             break;
         }
-        glUseProgram(shaderPrograms[1]);
+        shaderPrograms[1]->use();
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         
         glDrawElements(
@@ -270,7 +272,6 @@ int main(int argc, char* argv[]) {
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
-    glDeleteProgram(shaderPrograms[0]);
 
     // Clear all previously allocated glfw resources
     GEM::Logger::info("Terminating GLFW");
