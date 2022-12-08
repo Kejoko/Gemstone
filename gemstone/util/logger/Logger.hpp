@@ -6,6 +6,8 @@
 #include "spdlog/async.h"
 #include "spdlog/spdlog.h"
 
+#include "util/macros.hpp"
+
 namespace GEM {
     class Logger;
 }
@@ -25,84 +27,125 @@ namespace GEM {
  * while stdout is what changes based on build mode
  */
 class GEM::Logger {
-public: // public classes
-    class Scoper {
-    public: // public static
-        static uint32_t getIndentationCount() { return GEM::Logger::Scoper::indentationCount; }
-
-    private: // private static
-        static uint32_t indentationCount;
-
-    public: // public members
-        Scoper() {
-            // Log an opening curly brace to the correct logger at the correct level
-            GEM::Logger::trace("{");
-
-            // Increment the indentation count so the logger knows how much to indent before printing
-            GEM::Logger::Scoper::indentationCount++;
-        }
-
-        ~Scoper() {
-            // Decrement the indentation count so the logger knows how much to indent before printing
-            GEM::Logger::Scoper::indentationCount--;
-
-            // Log a closing curly brace to the correct logger at the correct level
-            GEM::Logger::trace("}");
-        }
+public: // public classes and enums
+    enum class Level {
+        trace,
+        debug,
+        info,
+        warning,
+        error,
+        critical
     };
 
-public: // public static
-    /**
-     * @brief A function allowing us to initialize the logger so we don't need to do a
-     * conditional check for initialization everytime we want to log something
-     * time we want to 
-     */
+    class Scoper {
+    public: // public static functions
+        static uint32_t getIndentationCount() { return GEM::Logger::Scoper::indentationCount; }
+
+    private: // private static variables
+        static uint32_t indentationCount;
+
+    public: // public member functions
+        Scoper(const GEM::Logger::Level level);
+        ~Scoper();
+
+    private: // private member variables
+        const GEM::Logger::Level m_level;
+    };
+
+public: // public static functions
     static void init();
 
     static void trace(const std::string& message);
     static void debug(const std::string& message);
     static void info(const std::string& message);
-    static void warn(const std::string& message);
+    static void warning(const std::string& message);
     static void error(const std::string& message);
     static void critical(const std::string& message);
 
-private: // private static
-    /**
-     * @brief A function allowing us to ensure that we have been initialized prior to attempting
-     * to log anything.
-     * 
-     * @todo Should we be doing this? Should we use c++'s assert instead?
-     */
+    static void log(const GEM::Logger::Level level, const std::string& message);
+
+private: // private static functions
     static void assertInitialized();
 
     static std::string createIndentationString();
 
-    static bool m_initialized;
-    static std::shared_ptr<spdlog::async_logger> mp_logger;
-
 public: // public members
     Logger() = delete;
+
+private: // private static members
+
+    static bool m_initialized;
+    static std::shared_ptr<spdlog::async_logger> mp_logger;
 };
 
-// ----- logging a scope ----- //
+// ----- log a scope change ----- //
 
-// With the correct logger and at the correct logging level:
-// 1. Log an opening curly brace {
-// 2. Increment the indentation count
-// ...
-// 3. Decrement the indentation count
-// 4. Log a closing curly brace }
+#define LOG_SCOPE_CHANGE_TRACE() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::trace)
 
-#define LOG_SCOPE_CHANGE() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)
+#define LOG_SCOPE_CHANGE_DEBUG() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::debug)
 
-// ----- logging a function call ----- //
+#define LOG_SCOPE_CHANGE_INFO() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::info)
 
-// With the correct logger and at the correct logging level:
-// 1. Log the function information
-// 2. Log a scope
+#define LOG_SCOPE_CHANGE_WARNING() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::warning)
 
-#define LOG_FUNCTION_CALL(message) \
-    GEM::Logger::info(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]")); \
-    LOG_SCOPE_CHANGE()
+#define LOG_SCOPE_CHANGE_ERROR() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::error)
+
+#define LOG_SCOPE_CHANGE_CRITICAL() \
+    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::critical)
+
+/**
+ * @brief log a function call *WITHOUT* scope change
+ */
+
+#define LOG_FUNCTION_ENTRY_TRACE(message) \
+    GEM::Logger::trace(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+#define LOG_FUNCTION_ENTRY_DEBUG(message) \
+    GEM::Logger::debug(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+#define LOG_FUNCTION_ENTRY_INFO(message) \
+    GEM::Logger::info(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+#define LOG_FUNCTION_ENTRY_WARNING(message) \
+    GEM::Logger::warning(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+#define LOG_FUNCTION_ENTRY_ERROR(message) \
+    GEM::Logger::error(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+#define LOG_FUNCTION_ENTRY_CRITICAL(message) \
+    GEM::Logger::critical(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+
+/**
+ * @brief log a function call and its scope change
+ */
+
+#define LOG_FUNCTION_CALL_TRACE(message) \
+    LOG_FUNCTION_ENTRY_TRACE(message); \
+    LOG_SCOPE_CHANGE_TRACE()
+    
+#define LOG_FUNCTION_CALL_DEBUG(message) \
+    LOG_FUNCTION_ENTRY_DEBUG(message); \
+    LOG_SCOPE_CHANGE_DEBUG()
+    
+#define LOG_FUNCTION_CALL_INFO(message) \
+    LOG_FUNCTION_ENTRY_INFO(message); \
+    LOG_SCOPE_CHANGE_INFO()
+    
+#define LOG_FUNCTION_CALL_WARNING(message) \
+    LOG_FUNCTION_ENTRY_WARNING(message); \
+    LOG_SCOPE_CHANGE_WARNING()
+    
+#define LOG_FUNCTION_CALL_ERROR(message) \
+    LOG_FUNCTION_ENTRY_ERROR(message); \
+    LOG_SCOPE_CHANGE_ERROR()
+    
+#define LOG_FUNCTION_CALL_CRITICAL(message) \
+    LOG_FUNCTION_ENTRY_CRITICAL(message); \
+    LOG_SCOPE_CHANGE_CRITICAL()
+
     

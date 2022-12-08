@@ -31,7 +31,7 @@ const std::string GEM::ShaderProgram::LOGGER_NAME = "SHADER";
  * @return uint32_t The id of the linked shader program
  */
 uint32_t GEM::ShaderProgram::createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID) {
-    LOG_FUNCTION_CALL("vertex id " + std::to_string(vertexShaderID) + " , fragment id " + std::to_string(fragmentShaderID));
+    LOG_FUNCTION_CALL_INFO("vertex id " + std::to_string(vertexShaderID) + " , fragment id " + std::to_string(fragmentShaderID));
 
     // Create a shader program to link the vertex and fragment shaders and attach the compiled shaders
     uint32_t shaderProgramID = glCreateProgram();
@@ -70,7 +70,7 @@ GEM::ShaderProgram::ShaderProgram(const char* vertexShaderSource, const char* fr
 {}
 
 GEM::ShaderProgram::~ShaderProgram() {
-    GEM::Logger::trace("Deconstructing shader program with id " + std::to_string(m_shaderID));
+    LOG_FUNCTION_CALL_TRACE("id " + std::to_string(m_shaderID));
     glDeleteProgram(m_shaderID);
 }
 

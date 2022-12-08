@@ -34,6 +34,14 @@ std::map<size_t, GEM::CompiledShader::Info> GEM::CompiledShader::fragmentShaderI
 
 /* ------------------------------ private static functions ------------------------------ */
 
+/**
+ * @brief Get a reference to the map we are using to track the desired type of shaders
+ * 
+ * @param shaderType The shader type
+ * @return std::map<size_t, GEM::CompiledShader::Info>& GEM::CompiledShader::vertexShaderIDMap if
+ * shaderType is GL_VERTEX_SHADER, GEM::CompiledShader::fragmentShaderIDMap if shaderType is
+ * GL_FRAGMENT_SHADER
+ */
 std::map<size_t, GEM::CompiledShader::Info>& GEM::CompiledShader::getShaderIDMap(const GLenum shaderType) {
     if (shaderType == GL_VERTEX_SHADER) {
         return GEM::CompiledShader::vertexShaderIDMap;
@@ -68,7 +76,7 @@ std::string GEM::CompiledShader::getShaderTypeString(const GLenum shaderType) {
  * @param shaderType The type of the shader
  */
 void GEM::CompiledShader::addShaderToMap(const size_t shaderSourceHash, const uint32_t shaderID, const GLenum shaderType) {
-    GEM::Logger::trace("Adding " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader id " + std::to_string(shaderID) + " to map for hash " + std::to_string(shaderSourceHash));
+    LOG_FUNCTION_ENTRY_TRACE("hash " + std::to_string(shaderSourceHash) + ", id " + std::to_string(shaderID) + ", type " + GEM::CompiledShader::getShaderTypeString(shaderType));
 
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
 
@@ -84,15 +92,16 @@ void GEM::CompiledShader::addShaderToMap(const size_t shaderSourceHash, const ui
  * @param shaderType The type of shader
  */
 void GEM::CompiledShader::incrementShaderUseCount(const size_t shaderSourceHash, const GLenum shaderType) {
-    GEM::Logger::trace("Incrementing " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader use count for hash " + std::to_string(shaderSourceHash));
+    LOG_FUNCTION_ENTRY_TRACE("hash " + std::to_string(shaderSourceHash) + ", type " + GEM::CompiledShader::getShaderTypeString(shaderType));
 
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
 
     GEM::CompiledShader::Info info = shaderIDMap[shaderSourceHash];
     info.useCount = info.useCount + 1;
     
-    shaderIDMap[shaderSourceHash] = info;
     GEM::Logger::trace("Use count for " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader with hash " + std::to_string(shaderSourceHash) + " is now: " + std::to_string(info.useCount));
+
+    shaderIDMap[shaderSourceHash] = info;
 }
 
 /**
@@ -103,7 +112,7 @@ void GEM::CompiledShader::incrementShaderUseCount(const size_t shaderSourceHash,
  * @param shaderType The type of shader
  */
 void GEM::CompiledShader::decrementShaderUseCount(const size_t shaderSourceHash, const GLenum shaderType) {
-    GEM::Logger::trace("Decrementing " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader use count for hash " + std::to_string(shaderSourceHash));
+    LOG_FUNCTION_ENTRY_TRACE("hash " + std::to_string(shaderSourceHash) + ", type " + GEM::CompiledShader::getShaderTypeString(shaderType));
 
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
     
@@ -135,7 +144,7 @@ void GEM::CompiledShader::decrementShaderUseCount(const size_t shaderSourceHash,
  * @return false The hash does not have an entry in the map corresponding to the shaderType
  */
 bool GEM::CompiledShader::shaderIsCompiled(const size_t shaderSourceHash, const GLenum shaderType) {
-    GEM::Logger::trace("Checking if " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader is compiled for hash " + std::to_string(shaderSourceHash));
+    LOG_FUNCTION_ENTRY_TRACE("hash " + std::to_string(shaderSourceHash) + ", type " + GEM::CompiledShader::getShaderTypeString(shaderType));
 
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
 
@@ -168,7 +177,7 @@ size_t GEM::CompiledShader::getHashFromShaderSource(const char* shaderSource) {
  * @return uint32_t The id of the shader
  */
 uint32_t GEM::CompiledShader::getCompiledShaderID(const size_t shaderSourceHash, const GLenum shaderType) {
-    GEM::Logger::trace("Getting compiled " + GEM::CompiledShader::getShaderTypeString(shaderType) + " shader id for hash " + std::to_string(shaderSourceHash));
+    LOG_FUNCTION_ENTRY_TRACE("hash " + std::to_string(shaderSourceHash) + ", type " + GEM::CompiledShader::getShaderTypeString(shaderType));
 
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
 
@@ -188,7 +197,7 @@ uint32_t GEM::CompiledShader::getCompiledShaderID(const size_t shaderSourceHash,
  * @return uint32_t The compiled shader
  */
 uint32_t GEM::CompiledShader::compileShader(const char* shaderSource, const GLenum shaderType) {
-    LOG_FUNCTION_CALL(getShaderTypeString(shaderType) + " shader");
+    LOG_FUNCTION_CALL_INFO(getShaderTypeString(shaderType) + " shader");
 
     // Before we actually try to compile, check if this shader has already been compiled
     // If it has been compiled before, use that index and increment the counter
@@ -234,7 +243,7 @@ GEM::CompiledShader::CompiledShader(const char* shaderSource, const GLenum shade
 {}
 
 GEM::CompiledShader::~CompiledShader() {
-    GEM::Logger::info("Deconstructing compiled shader with id " + std::to_string(m_id));
+    LOG_FUNCTION_CALL_TRACE("id " + std::to_string(m_id));
     GEM::CompiledShader::decrementShaderUseCount(m_sourceHash, m_type);
 }
 
