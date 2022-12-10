@@ -137,6 +137,7 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 add_library(
     GEM_Shader
     SHARED
+    ${GEMSTONE_SHADER_SOURCE_DIR}/logger.hpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.hpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.cpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/ShaderProgram.hpp

@@ -65,12 +65,12 @@ public: // public classes and enums
     public: // public static functions
         static uint32_t getIndentationCount() { return GEM::util::Logger::Scoper::indentationCount; }
 
-    private: // private static variables
-        static uint32_t indentationCount;
-
     public: // public member functions
         Scoper(const std::string& loggerName, const GEM::util::Logger::Level level);
         ~Scoper();
+
+    private: // private static variables
+        static uint32_t indentationCount;
 
     private: // private member variables
         const std::string m_loggerName;
@@ -151,18 +151,18 @@ public: // public static functions
         }
     }
 
+public: // public member functions
+    Logger() = delete;
+
 private: // private static functions
     static void assertInitialized();
 
     static std::string createIndentationString();
 
-private: // private static members
+private: // private static member variables
     static bool initialized;
     static std::vector<spdlog::sink_ptr> sinkPtrs;
     static std::map<std::string, std::shared_ptr<spdlog::async_logger>> loggerPtrMap;
-
-public: // public members
-    Logger() = delete;
 };
 
 /**
