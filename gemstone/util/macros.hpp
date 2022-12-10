@@ -18,4 +18,20 @@
  */
 #define REQUIRE_SEMICOLON static_assert(true)
 
+/**
+ * @brief A macro to use to get rid of the unused variable/parameter warnings and
+ * errors when prototyping a function
+ * 
+ * @example UNUSED(argv);
+ */
 #define UNUSED(x) (void)(x); REQUIRE_SEMICOLON
+
+/**
+ * @brief A macro to generate a unique variable name given the base name for that
+ * variable.
+ * 
+ * @example See gemstone/util/logger/Logger.hpp LOG_SCOPE_CHANGE()
+ */
+#define CONCAT(a, b) CONCAT_INNER(a, b)
+#define CONCAT_INNER(a, b) a ## b
+#define UNIQUE_NAME(baseName) CONCAT(baseName, __LINE__)
