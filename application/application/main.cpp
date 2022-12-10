@@ -11,10 +11,19 @@
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/logger/Logger.hpp"
+
 #include "gemstone/core.hpp"
+#include "gemstone/shader/logger.hpp"
 #include "gemstone/shader/ShaderProgram.hpp"
+
 #include "application/core.hpp"
 #include "application/shaders.hpp"
+
+/**
+ * @brief The name of the logger for the main application. A general logger
+ */
+#define GENERAL_LOGGER_NAME "GENERAL"
+const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
 /**
  * @brief A function that gets called every tim e the window is resized
@@ -50,16 +59,17 @@ void processInput(GLFWwindow* p_glfwWindow) {
     }
 }
 
-
 int main(int argc, char* argv[]) {
     UNUSED(argc);
     UNUSED(argv);
 
-
     ASSERT_GEM_VERSION();
     ASSERT_APP_VERSION();
 
-    GEM::Logger::init();
+    GEM::util::Logger::registerLoggers({
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::trace}
+    });
 
     const int initialWindowWidthPixels = 800;
     const int initialWindowHeightPixels = 600;
@@ -84,7 +94,7 @@ int main(int argc, char* argv[]) {
     GLFWwindow* p_sharedGlfwWindow = nullptr;
     GLFWwindow* p_glfwWindow = glfwCreateWindow(initialWindowWidthPixels, initialWindowHeightPixels, windowTitle.c_str(), p_monitor, p_sharedGlfwWindow);
     if (p_glfwWindow == nullptr) {
-        GEM::Logger::critical("Failed to create GLFW window");
+        LOG_CRITICAL("Failed to create GLFW window");
         glfwTerminate();
     }
 
@@ -98,26 +108,26 @@ int main(int argc, char* argv[]) {
     // Initialize glad
     // Give glad the function to load the address of the OS specific OpenGL function pointers
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        GEM::Logger::critical("Failed to initialize GLAD");
+        LOG_CRITICAL("Failed to initialize GLAD");
         return -1;
     }
 
     /* ------------------------------------ shader stuff ------------------------------------ */
 
-    GEM::Logger::info("Managing shaders");
+    LOG_INFO("Managing shaders");
 
     std::vector<std::shared_ptr<GEM::ShaderProgram>> shaderPrograms;
     try {
         shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
         shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
     } catch (const std::exception& ex) {
-        GEM::Logger::critical("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
+        LOG_CRITICAL("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
         return 1;
     }
 
     /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
 
-    GEM::Logger::info("Creating VAO, VBO, EBO");
+    LOG_INFO("Creating VAO, VBO, EBO");
 
     // The vertices for each corner of the rectangle
     const float rectangleVertices[] = {
@@ -216,7 +226,7 @@ int main(int argc, char* argv[]) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
     // Create the render loop
-    GEM::Logger::info("Starting render loop");
+    LOG_INFO("Starting render loop");
     while (!glfwWindowShouldClose(p_glfwWindow)) {
         // ----- Get input ----- //
 
@@ -249,7 +259,7 @@ int main(int argc, char* argv[]) {
         const std::string uniformName = "ourColor";
         int vertexColorLocation = glGetUniformLocation(shaderPrograms[1]->getID(), uniformName.c_str());
         if (vertexColorLocation == -1) {
-            GEM::Logger::critical("Could not find location of uniform: " + uniformName);
+            LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
             break;
         }
         shaderPrograms[1]->use();
@@ -268,13 +278,13 @@ int main(int argc, char* argv[]) {
     }
 
     // De allocate all resources once they've outlived their purpose
-    GEM::Logger::info("Deallocating all resources");
+    LOG_INFO("Deallocating all resources");
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
 
     // Clear all previously allocated glfw resources
-    GEM::Logger::info("Terminating GLFW");
+    LOG_INFO("Terminating GLFW");
     glfwTerminate();
 
     return 0;

@@ -16,7 +16,7 @@ namespace GEM {
  * 
  */
 class GEM::CompiledShader {
-public: // public static
+public: // public static variables
     static const std::string LOGGER_NAME;
 
 private: // private static

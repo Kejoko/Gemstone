@@ -1,7 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <map>
 #include <memory>
+#include <vector>
 
 #include "spdlog/async.h"
 #include "spdlog/spdlog.h"
@@ -9,25 +11,31 @@
 #include "util/macros.hpp"
 
 namespace GEM {
+namespace util {
     class Logger;
+}
 }
 
 /**
- * @brief A singleton logger wrapping a spdlog async logger
+ * @brief A singleton-esque logger wrapping a spdlog async logger. This exposes a map
+ * of loggers, each of which has their own logging level associated with it. To use it
+ * be sure to register a logger with the registerLogger function.
  * 
- * @todo Allow for the ability to have different loggers. Perhaps one for each component (ex:
- * one for renderer, one for physics, one for networking, etc...) which we can manually change
- * the levels for each so we don't get all logs from everything. All this will require is
- * mainting a map of strings/indices to shared pointer instead of a single shared pointer
+ * @note If you wish to make use of the nice macros at the bottom of this file, be sure
+ * to define some LOGGER_NAME string to whatever logger you desire to use. The macros
+ * assume that LOGGER_NAME is already defined. If LOGGER_NAME is not defined and you wish
+ * to programatically change the logger being used (perhaps in a function taking a logger
+ * name parameter) you must use the GEM::util::Logger functions directly
  * 
- * @todo Allow us to specify the format of the logs and the log file upon creation in case we
- * want to use a different thing than what we are doing now
+ * @todo Clamp log levels based on debug vs release mode or something?
  * 
- * @todo ALlow us to set stdout levels vs file levels differently. Currently file is always at warn
- * while stdout is what changes based on build mode
+ * @todo ALlow us to set stdout levels vs file levels differently?
  */
-class GEM::Logger {
+class GEM::util::Logger {
 public: // public classes and enums
+    /**
+     * @brief An enum class representing each of the different logging levels
+     */
     enum class Level {
         trace,
         debug,
@@ -37,115 +45,227 @@ public: // public classes and enums
         critical
     };
 
+    /**
+     * @brief A simple struct used for registering loggers. This pairs a logger's
+     * name with its desired logging level. This is essentially just a pair with
+     * named elements
+     */
+    struct Info {
+        const std::string loggerName;
+        const GEM::util::Logger::Level level;
+    };
+
+    /**
+     * @brief A class to manage the "scope" (indentation) of the logging statements. Constructing an
+     * instance of one of these will log an opening curly brace and increment the indentation count
+     * for all logging statements until the Scoper instance falls out of scope, where then the
+     * indendation count is decremented and a closing curly brace is logged
+     */
     class Scoper {
     public: // public static functions
-        static uint32_t getIndentationCount() { return GEM::Logger::Scoper::indentationCount; }
+        static uint32_t getIndentationCount() { return GEM::util::Logger::Scoper::indentationCount; }
 
     private: // private static variables
         static uint32_t indentationCount;
 
     public: // public member functions
-        Scoper(const GEM::Logger::Level level);
+        Scoper(const std::string& loggerName, const GEM::util::Logger::Level level);
         ~Scoper();
 
     private: // private member variables
-        const GEM::Logger::Level m_level;
+        const std::string m_loggerName;
+        const GEM::util::Logger::Level m_level;
     };
 
 public: // public static functions
     static void init();
+    static void registerLogger(const std::string& loggerName, const GEM::util::Logger::Level level);
+    static void registerLoggers(const std::vector<const GEM::util::Logger::Info>& loggerInfos);
 
-    static void trace(const std::string& message);
-    static void debug(const std::string& message);
-    static void info(const std::string& message);
-    static void warning(const std::string& message);
-    static void error(const std::string& message);
-    static void critical(const std::string& message);
+    template<typename... Args>
+    static void trace(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->trace(GEM::util::Logger::createIndentationString() + format, args...);
+    }
 
-    static void log(const GEM::Logger::Level level, const std::string& message);
+    template<typename... Args>
+    static void debug(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->debug(GEM::util::Logger::createIndentationString() + format, args...);
+    }
+
+    template<typename... Args>
+    static void info(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->info(GEM::util::Logger::createIndentationString() + format, args...);
+    }
+
+    template<typename... Args>
+    static void warning(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->warn(GEM::util::Logger::createIndentationString() + format, args...);
+    }
+
+    template<typename... Args>
+    static void error(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->error(GEM::util::Logger::createIndentationString() + format, args...);
+    }
+
+    template<typename... Args>
+    static void critical(const std::string& loggerName, const std::string& format, Args&&... args) {
+        assertInitialized();
+        GEM::util::Logger::loggerPtrMap[loggerName]->critical(GEM::util::Logger::createIndentationString() + format, args...);
+    }
+
+    /**
+     * @brief Log a message with the correct logger at the correct level.
+     * 
+     * @tparam Args The types of the variadic arguments we are using
+     * @param loggerName The name of the logger to use
+     * @param level The logging level to log the message at
+     * @param format The formatting string
+     * @param args All of the variadic arguments to log
+     */
+    template<typename... Args>
+    static void log(const std::string& loggerName, const GEM::util::Logger::Level level, const std::string& format, Args&&... args) {
+        switch (level) {
+            case GEM::util::Logger::Level::trace:
+                GEM::util::Logger::trace(loggerName, format, args...);
+                break;
+            case GEM::util::Logger::Level::debug:
+                GEM::util::Logger::debug(loggerName, format, args...);
+                break;
+            case GEM::util::Logger::Level::info:
+                GEM::util::Logger::info(loggerName, format, args...);
+                break;
+            case GEM::util::Logger::Level::warning:
+                GEM::util::Logger::warning(loggerName, format, args...);
+                break;
+            case GEM::util::Logger::Level::error:
+                GEM::util::Logger::error(loggerName, format, args...);
+                break;
+            case GEM::util::Logger::Level::critical:
+                GEM::util::Logger::critical(loggerName, format, args...);
+                break;
+        }
+    }
 
 private: // private static functions
     static void assertInitialized();
 
     static std::string createIndentationString();
 
+private: // private static members
+    static bool initialized;
+    static std::vector<spdlog::sink_ptr> sinkPtrs;
+    static std::map<std::string, std::shared_ptr<spdlog::async_logger>> loggerPtrMap;
+
 public: // public members
     Logger() = delete;
-
-private: // private static members
-
-    static bool m_initialized;
-    static std::shared_ptr<spdlog::async_logger> mp_logger;
 };
 
-// ----- log a scope change ----- //
+/**
+ * @brief Log something
+ * 
+ * @note To use this LOGGER_NAME must be defined and the first argument of the variadic
+ * arguments must be a formatting string
+ */
+
+#define LOG_TRACE(...) \
+    GEM::util::Logger::trace(LOGGER_NAME, __VA_ARGS__)
+
+#define LOG_DEBUG(...) \
+    GEM::util::Logger::debug(LOGGER_NAME, __VA_ARGS__)
+
+#define LOG_INFO(...) \
+    GEM::util::Logger::info(LOGGER_NAME, __VA_ARGS__)
+
+#define LOG_WARNING(...) \
+    GEM::util::Logger::warning(LOGGER_NAME, __VA_ARGS__)
+    
+#define LOG_ERROR(...) \
+    GEM::util::Logger::error(LOGGER_NAME, __VA_ARGS__)
+
+#define LOG_CRITICAL(...) \
+    GEM::util::Logger::critical(LOGGER_NAME, __VA_ARGS__)
+
+/**
+ * @brief Log a scope change
+ * 
+ * @note To use this LOGGER_NAME must be defined
+ */
 
 #define LOG_SCOPE_CHANGE_TRACE() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::trace)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::trace)
 
 #define LOG_SCOPE_CHANGE_DEBUG() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::debug)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::debug)
 
 #define LOG_SCOPE_CHANGE_INFO() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::info)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::info)
 
 #define LOG_SCOPE_CHANGE_WARNING() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::warning)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::warning)
 
 #define LOG_SCOPE_CHANGE_ERROR() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::error)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::error)
 
 #define LOG_SCOPE_CHANGE_CRITICAL() \
-    const GEM::Logger::Scoper UNIQUE_NAME(scoper)(GEM::Logger::Level::critical)
+    const GEM::util::Logger::Scoper UNIQUE_NAME(scoper)(LOGGER_NAME, GEM::util::Logger::Level::critical)
 
 /**
  * @brief log a function call *WITHOUT* scope change
+ * 
+ * @note To use this LOGGER_NAME must be defined
  */
 
-#define LOG_FUNCTION_ENTRY_TRACE(message) \
-    GEM::Logger::trace(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_TRACE(format, ...) \
+    GEM::util::Logger::trace(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
-#define LOG_FUNCTION_ENTRY_DEBUG(message) \
-    GEM::Logger::debug(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_DEBUG(format, ...) \
+    GEM::util::Logger::debug(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
-#define LOG_FUNCTION_ENTRY_INFO(message) \
-    GEM::Logger::info(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_INFO(format, ...) \
+    GEM::util::Logger::info(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
-#define LOG_FUNCTION_ENTRY_WARNING(message) \
-    GEM::Logger::warning(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_WARNING(format, ...) \
+    GEM::util::Logger::warning(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
-#define LOG_FUNCTION_ENTRY_ERROR(message) \
-    GEM::Logger::error(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_ERROR(format, ...) \
+    GEM::util::Logger::error(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
-#define LOG_FUNCTION_ENTRY_CRITICAL(message) \
-    GEM::Logger::critical(__PRETTY_FUNCTION__ + std::string(" [ ") + message + std::string(" ]"))
+#define LOG_FUNCTION_ENTRY_CRITICAL(format, ...) \
+    GEM::util::Logger::critical(LOGGER_NAME, __PRETTY_FUNCTION__ + std::string(" [ ") + format + std::string(" ]"), __VA_ARGS__)
 
 /**
  * @brief log a function call and its scope change
+ * 
+ * @note To use this LOGGER_NAME must be defined
  */
 
-#define LOG_FUNCTION_CALL_TRACE(message) \
-    LOG_FUNCTION_ENTRY_TRACE(message); \
+#define LOG_FUNCTION_CALL_TRACE(format, ...) \
+    LOG_FUNCTION_ENTRY_TRACE(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_TRACE()
     
-#define LOG_FUNCTION_CALL_DEBUG(message) \
-    LOG_FUNCTION_ENTRY_DEBUG(message); \
+#define LOG_FUNCTION_CALL_DEBUG(format, ...) \
+    LOG_FUNCTION_ENTRY_DEBUG(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_DEBUG()
     
-#define LOG_FUNCTION_CALL_INFO(message) \
-    LOG_FUNCTION_ENTRY_INFO(message); \
+#define LOG_FUNCTION_CALL_INFO(format, ...) \
+    LOG_FUNCTION_ENTRY_INFO(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_INFO()
     
-#define LOG_FUNCTION_CALL_WARNING(message) \
-    LOG_FUNCTION_ENTRY_WARNING(message); \
+#define LOG_FUNCTION_CALL_WARNING(format, ...) \
+    LOG_FUNCTION_ENTRY_WARNING(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_WARNING()
     
-#define LOG_FUNCTION_CALL_ERROR(message) \
-    LOG_FUNCTION_ENTRY_ERROR(message); \
+#define LOG_FUNCTION_CALL_ERROR(format, ...) \
+    LOG_FUNCTION_ENTRY_ERROR(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_ERROR()
     
-#define LOG_FUNCTION_CALL_CRITICAL(message) \
-    LOG_FUNCTION_ENTRY_CRITICAL(message); \
+#define LOG_FUNCTION_CALL_CRITICAL(format, ...) \
+    LOG_FUNCTION_ENTRY_CRITICAL(format, __VA_ARGS__); \
     LOG_SCOPE_CHANGE_CRITICAL()
 
     
