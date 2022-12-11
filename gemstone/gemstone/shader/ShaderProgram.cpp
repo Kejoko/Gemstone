@@ -69,19 +69,23 @@ uint32_t GEM::ShaderProgram::createShaderProgram(const uint32_t vertexShaderID, 
 GEM::ShaderProgram::ShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource) :
     m_vertexShader(vertexShaderSource, GL_VERTEX_SHADER),
     m_fragmentShader(fragmentShaderSource, GL_FRAGMENT_SHADER),
-    m_shaderID(GEM::ShaderProgram::createShaderProgram(m_vertexShader.getID(), m_fragmentShader.getID()))
+    m_id(GEM::ShaderProgram::createShaderProgram(m_vertexShader.getID(), m_fragmentShader.getID()))
 {}
 
+/**
+ * @brief Destroy the GEM::ShaderProgram::ShaderProgram object and use glDeleteProgram to delete this shader
+ * program
+ */
 GEM::ShaderProgram::~ShaderProgram() {
-    LOG_FUNCTION_CALL_TRACE("id {}", m_shaderID);
-    glDeleteProgram(m_shaderID);
+    LOG_FUNCTION_CALL_TRACE("id {}", m_id);
+    glDeleteProgram(m_id);
 }
 
 /**
  * @brief Set this shader as the active shader using glUseProgram
  */
 void GEM::ShaderProgram::use() const {
-    glUseProgram(m_shaderID);
+    glUseProgram(m_id);
 }
 
 /* ------------------------------ private member functions ------------------------------ */

@@ -16,11 +16,8 @@ namespace GEM {
  * then calling use()
  */
 class GEM::ShaderProgram {
-public: // public static members
+public: // public static member variables
     static const std::string LOGGER_NAME;
-
-private: // private static functions
-    static uint32_t createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID);
     
 public: // public member functions
     ShaderProgram(const char* vertexShaderSource, const char* fragmentShaderSource);
@@ -28,10 +25,13 @@ public: // public member functions
 
     void use() const;
 
-    uint32_t getID() const { return m_shaderID; }
+    uint32_t getID() const { return m_id; }
+
+private: // private static functions
+    static uint32_t createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID);
 
 private: // private member variables
     const CompiledShader m_vertexShader;
     const CompiledShader m_fragmentShader;
-    const uint32_t m_shaderID;
+    const uint32_t m_id;
 };

@@ -19,12 +19,21 @@ class GEM::CompiledShader {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
-private: // private static
+public: // public member functions
+    CompiledShader(const char* shaderSource, const GLenum shaderType);
+    ~CompiledShader();
+    
+    size_t getSourceHash() const { return m_sourceHash; }
+    GLenum getType() const { return m_type; }
+    uint32_t getID() const { return m_id; }
+
+private: // private static enums and classes
     struct Info {
         uint32_t id;
         int useCount;
     };
 
+private: // private static functions
     static std::map<size_t, GEM::CompiledShader::Info> vertexShaderIDMap;
     static std::map<size_t, GEM::CompiledShader::Info> fragmentShaderIDMap;
 
@@ -41,15 +50,7 @@ private: // private static
     static uint32_t getCompiledShaderID(const size_t shaderSourceHash, const GLenum shaderType);
     static uint32_t compileShader(const char* shaderSource, const GLenum shaderType);
 
-public: // public members
-    CompiledShader(const char* shaderSource, const GLenum shaderType);
-    ~CompiledShader();
-    
-    size_t getSourceHash() const { return m_sourceHash; }
-    GLenum getType() const { return m_type; }
-    uint32_t getID() const { return m_id; }
-
-private: // private members
+private: // private member variables
     const size_t m_sourceHash;
     const GLenum m_type;
     const uint32_t m_id;

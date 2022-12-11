@@ -21,6 +21,8 @@ project(
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 #====================================================================
 # C++ 17 Support and compiler flags
 #====================================================================
@@ -28,26 +30,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
-
-#======================================================================
-# A function to convert files to be included as raw string literals
-#======================================================================
-function(make_file_includable_raw_string input_file)
-    # Get the directory and name of the iput file so we can use the "literals" subdirectory
-    get_filename_component(input_file_directory ${input_file} DIRECTORY)
-    get_filename_component(input_file_name ${input_file} NAME)
-    set(output_file ${input_file_directory}/literals/${input_file_name})
-    message(STATUS "Making ${input_file} an includable raw string file at ${output_file}")
-    
-    # Read in the contents of the file
-    file(READ ${input_file} input_contents)
-
-    # Wrap the contents of a file in R"( ... )" with proper newlines
-    set(literal_wrapped_contents "R\"(\n${input_contents})\"")
-    
-    # Write the raw string literal wrapped contents to the new output file
-    file(WRITE ${output_file} "${literal_wrapped_contents}")
-endfunction()
 
 #======================================================================
 # Subdirectories containing source code
@@ -89,39 +71,11 @@ set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
 
 #====================================================================
 # Third party vendor libraries
-#
-# @todo We should do these all in .cmake modules to not pollute this file
 #====================================================================
-set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-
-# OpenGL
-find_package(OpenGL REQUIRED)
-
-# Glad
-add_library(
-    glad
-    SHARED
-    ${GLAD_SOURCE_DIR}/include/glad/glad.h
-    ${GLAD_SOURCE_DIR}/src/glad.c
-)
-list(APPEND VENDOR_INCLUDE_DIRS ${GLAD_SOURCE_DIR}/include)
-list(APPEND VENDOR_LIBS glad)
-
-# GLFW
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(${GLFW_SOURCE_DIR})
-list(APPEND VENDOR_INCLUDE_DIRS ${GLFW_SOURCE_DIR}/include)
-list(APPEND VENDOR_LIBS glfw)
-
-# SpdLog
-add_subdirectory(${SPDLOG_SOURCE_DIR})
-list(APPEND VENDOR_INCLUDE_DIRS ${SPDLOG_SOURCE_DIR}/include)
-list(APPEND VENDOR_LIBS spdlog)
+include(VendorLibraries)
 
 #====================================================================
-# Juniper utility libraries
+# Utility libraries
 #====================================================================
 add_library(
     UTIL_Logger
@@ -137,6 +91,7 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 add_library(
     GEM_Shader
     SHARED
+    ${GEMSTONE_SHADER_SOURCE_DIR}/logger.hpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.hpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/CompiledShader.cpp
     ${GEMSTONE_SHADER_SOURCE_DIR}/ShaderProgram.hpp
@@ -190,9 +145,10 @@ target_link_libraries(
 # Convert the glsl shaders to raw string literal files so we can
 # nicely include them in C++ strings
 #====================================================================
-make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/vertex.vert)
-make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/fragment.frag)
-make_file_includable_raw_string(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
+include(CreateRawStringFile)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/vertex.vert)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment.frag)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
 
 #====================================================================
 # Add preprocessor directives
