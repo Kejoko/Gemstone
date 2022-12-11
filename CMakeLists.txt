@@ -75,7 +75,7 @@ set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
 include(VendorLibraries)
 
 #====================================================================
-# Juniper utility libraries
+# Utility libraries
 #====================================================================
 add_library(
     UTIL_Logger

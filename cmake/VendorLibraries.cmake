@@ -1,5 +1,6 @@
 #====================================================================
-# Third party vendor libraries
+# Third party vendor libraries. This defines VENDOR_LIBS for us to
+# link against when creating libraries and targets
 #
 # @note: This file is intended to be included after the following
 #        variables are defined:
