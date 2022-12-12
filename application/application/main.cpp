@@ -256,14 +256,8 @@ int main(int argc, char* argv[]) {
 
         // We don't need to use the shader program to find the uniform but we do need
         // to use the shader program to assign it, because it assigns to the current shader program
-        const std::string uniformName = "ourColor";
-        int vertexColorLocation = glGetUniformLocation(shaderPrograms[1]->getID(), uniformName.c_str());
-        if (vertexColorLocation == -1) {
-            LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
-            break;
-        }
         shaderPrograms[1]->use();
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        shaderPrograms[1]->setUniformVec4("ourColor", {0.0f, greenValue, 0.0f, 1.0f});
         
         glDrawElements(
             GL_TRIANGLES,                   // The type of primitive
