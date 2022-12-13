@@ -62,6 +62,7 @@ set(VENDOR_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/vendor")
 set(GLAD_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glad")
 set(GLFW_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glfw")
 set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
+set(STB_SOURCE_DIR "${VENDOR_SOURCE_DIR}/stb")
 
 # The source directories within the gemstone/util directory
 set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")

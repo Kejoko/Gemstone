@@ -8,6 +8,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <stb/stb_image.h>
+
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/logger/Logger.hpp"
@@ -129,21 +131,43 @@ int main(int argc, char* argv[]) {
 
     LOG_INFO("Creating VAO, VBO, EBO");
 
+    // // The vertices for each corner of the rectangle
+    // const float rectangleVertices[] = {
+    //     // Positions            colors
+        
+    //     // Middle rectangle
+    //      0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   // top right (red)
+    //      0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   // bottom right (blue)
+    //     -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom left (green)
+    //     -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   // top left (yellow)
+
+    //     // Right triangle Point
+    //      0.9f,  0.0f, 0.0f,     1.0f, 1.0f, 1.0f,   // white
+
+    //     // Top Triangle point
+    //      0.0f,  0.9f, 0.0f,     0.0f, 0.0f, 0.0f    // black
+    // };
+
+    // // The indices we are using to reference the rectangle's vertices for the two triangles we need to draw
+    // const uint32_t rectangleIndices[] = {
+    //     // Middle rectangle
+    //     0, 1, 3, // first triangle
+    //     1, 2, 3, // second triangle
+
+    //     // Right triangle
+    //     0, 4, 1,
+
+    //     // Top triangle
+    //     3, 5, 0
+    // };
+
     // The vertices for each corner of the rectangle
     const float rectangleVertices[] = {
-        // Positions            colors
-        
-        // Middle rectangle
-         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   // top right (red)
-         0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   // bottom right (blue)
-        -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   // bottom left (green)
-        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   // top left (yellow)
-
-        // Right triangle Point
-         0.9f,  0.0f, 0.0f,     1.0f, 1.0f, 1.0f,   // white
-
-        // Top Triangle point
-         0.0f,  0.9f, 0.0f,     0.0f, 0.0f, 0.0f    // black
+        // Positions            colors              texture coords
+         0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
     };
 
     // The indices we are using to reference the rectangle's vertices for the two triangles we need to draw
@@ -151,12 +175,6 @@ int main(int argc, char* argv[]) {
         // Middle rectangle
         0, 1, 3, // first triangle
         1, 2, 3, // second triangle
-
-        // Right triangle
-        0, 4, 1,
-
-        // Top triangle
-        3, 5, 0
     };
 
     // Create a vertex array object to store all of our vertex attribute's informations
@@ -197,7 +215,7 @@ int main(int argc, char* argv[]) {
         3,                          // The size of the vertex attribute (vec3 has 3 values)
         GL_FLOAT,                   // Data type (vec<N> in GLSL consists of floating point values)
         GL_FALSE,                   // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
-        6 * sizeof(float),          // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
+        8 * sizeof(float),          // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
         static_cast<void*>(0)       // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
     );
     glEnableVertexAttribArray(p_vertexPositionAttribute);
@@ -209,16 +227,84 @@ int main(int argc, char* argv[]) {
         3,
         GL_FLOAT,
         GL_FALSE,
-        6 * sizeof(float),          // Stride of length 6 because 3 for position + 3 for color
-        (void*)(3 * sizeof(float))  // Offset 3 floats into the array because the first 3 vlaues are position data
+        8 * sizeof(float),          // Stride length of 8 becasue 3 position + 3 color + 2 texture
+        (void*)(3 * sizeof(float))  // Offset 3 floats into the array because the first 3 values are position data
     );
     glEnableVertexAttribArray(p_vertexColorAttribute);
+
+    // Configure the texture vertex attribute like the color and positions
+    const int p_vertexTextureAttribute = 2;
+    glVertexAttribPointer(
+        p_vertexTextureAttribute,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(float),          // Stride length of 8 becasue 3 position + 3 color + 2 texture
+        (void*)(6 * sizeof(float))  // Offset 6 floats into the array because 3 position and 3 color preceeding this
+    );
+    glEnableVertexAttribArray(p_vertexTextureAttribute);
 
     // The call to glVertexAttribPointer registered the VBO as te vertex attribute's bound VBO, so we can safely unbind afterwards
     // We must not unbind the EBO because it is stored in the VAO
     // We can unbind the VAO so other VAO calls don't accidentally modify this VAO
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    /* ------------------------------------ textures ------------------------------------ */
+
+    LOG_INFO("Loading textures");
+
+    // Set the texture wrapping method
+    // Don't forget to set the border color with glTexParameterfv if we use GL_CLAMP_TO_BORDER for wrapping
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    // Set the texture filtering method (nearest or linear interpolation) for both magnifying (scaling up the
+    // texture) and minifying (scaling down the texture) operations
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // Create and use the mipmaps. This isn't importatnt for the mag filter because it only applies when upscaling
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Load the texture
+    // For the issue with loading pngs:
+    // https://stackoverflow.com/questions/23150123/loading-png-with-stb-image-for-opengl-texture-gives-wrong-colors
+    LOG_TRACE("Actually loading the texture");
+    int textureWidth;
+    int textureHeight;
+    int textureChannelCount;
+    uint8_t* p_textureData = stbi_load("../application/assets/textures/wooden_container.jpg", &textureWidth, &textureHeight, &textureChannelCount, 0);
+    if (!p_textureData) {
+        LOG_CRITICAL("Failed to load texture");
+        return -1;
+    }
+
+    // Create the texture in open gl
+    uint32_t texture;
+    glGenTextures(1, &texture);
+
+    // Bind the newly created texture so commands will configure it
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Start generateing the texture using the loaded data
+    LOG_TRACE("Generate the opengl texture using the loaded data");
+    glTexImage2D(
+        GL_TEXTURE_2D,      // The texture target (we are bound to 2d due to the glBindTexture call)
+        0,                  // The mipmap level for which we want to create a texture for
+        GL_RGB,             // What kind of format we want to store the texture
+        textureWidth,       // Set the width of the resulting texture
+        textureHeight,      // Set the height of the resulting texture
+        0,                  // Should always be 0 -- legacy stuff
+        GL_RGB,             // Format of the source image
+        GL_UNSIGNED_BYTE,   // Data type of the source image
+        p_textureData       // The actual image data
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // Free the image memory now that we have generated the texture
+    stbi_image_free(p_textureData);
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
@@ -235,12 +321,13 @@ int main(int argc, char* argv[]) {
         // ----- Rendering ----- //
 
         glClear(GL_COLOR_BUFFER_BIT);
+        glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(vertexArrayObject);
 
         // Rectangle
 
         shaderPrograms[0]->use();
-        
+
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
             6,                  // The number of elements to be rendered
@@ -248,23 +335,23 @@ int main(int argc, char* argv[]) {
             0                   // The offset into the EBO
         );
 
-        // Outside triangles
+        // // Outside triangles
 
-        // Determine the color we want to use
-        float timeValue = glfwGetTime();
-        float greenValue = (std::sin(timeValue) / 2.0f) + 0.5f;
+        // // Determine the color we want to use
+        // float timeValue = glfwGetTime();
+        // float greenValue = (std::sin(timeValue) / 2.0f) + 0.5f;
 
-        // We don't need to use the shader program to find the uniform but we do need
-        // to use the shader program to assign it, because it assigns to the current shader program
-        shaderPrograms[1]->use();
-        shaderPrograms[1]->setUniformVec4("ourColor", {0.0f, greenValue, 0.0f, 1.0f});
+        // // We don't need to use the shader program to find the uniform but we do need
+        // // to use the shader program to assign it, because it assigns to the current shader program
+        // shaderPrograms[1]->use();
+        // shaderPrograms[1]->setUniformVec4("ourColor", {0.0f, greenValue, 0.0f, 1.0f});
         
-        glDrawElements(
-            GL_TRIANGLES,                   // The type of primitive
-            6,                              // The number of elements to be rendered
-            GL_UNSIGNED_INT,                // The type of the values in the indices
-            (void*)(6 * sizeof(uint32_t))   // The offset into the EBO
-        );
+        // glDrawElements(
+        //     GL_TRIANGLES,                   // The type of primitive
+        //     6,                              // The number of elements to be rendered
+        //     GL_UNSIGNED_INT,                // The type of the values in the indices
+        //     (void*)(6 * sizeof(uint32_t))   // The offset into the EBO
+        // );
 
         // Check and call events and swap buffers
         glfwSwapBuffers(p_glfwWindow);
