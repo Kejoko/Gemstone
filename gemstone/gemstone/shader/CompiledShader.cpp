@@ -209,6 +209,8 @@ uint32_t GEM::CompiledShader::compileShader(const char* shaderSource, const GLen
 
         GEM::CompiledShader::incrementShaderUseCount(shaderSourceHash, shaderType);
 
+        LOG_DEBUG("Successfully found compiled shader program with id {}", shaderID);
+
         return shaderID;
     }
 
@@ -233,6 +235,8 @@ uint32_t GEM::CompiledShader::compileShader(const char* shaderSource, const GLen
     }
 
     GEM::CompiledShader::addShaderToMap(shaderSourceHash, shaderID, shaderType);
+
+    LOG_DEBUG("Successfully compiled shader program with id {}", shaderID);
 
     return shaderID;
 }

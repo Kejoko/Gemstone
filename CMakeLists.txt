@@ -69,6 +69,7 @@ set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
 
 # Within gemstone/gemstone
 set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
+set(GEMSTONE_TEXTURE_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/texture")
 
 #====================================================================
 # Third party vendor libraries
@@ -100,6 +101,15 @@ add_library(
 )
 list(APPEND GEMSTONE_LIBS GEM_Shader)
 
+add_library(
+    GEM_Texture
+    SHARED
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/logger.hpp
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/Texture.hpp
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/Texture.cpp
+)
+list(APPEND GEMSTONE_LIBS GEM_Texture)
+
 #====================================================================
 # Create the target
 #====================================================================
@@ -127,12 +137,15 @@ target_include_directories(
 #====================================================================
 # Link libraries
 #====================================================================
-# Link util and vendor libs to gemstone
-target_link_libraries(
-    ${GEMSTONE_LIBS}
-    PRIVATE ${VENDOR_LIBS}
-    PRIVATE ${UTIL_LIBS}
-)
+# Link util and vendor libs to each gemstone lib
+foreach(GEMSTONE_LIB IN LISTS GEMSTONE_LIBS)
+    target_link_libraries(
+        ${GEMSTONE_LIB}
+        PRIVATE ${VENDOR_LIBS}
+        PRIVATE ${UTIL_LIBS}
+    )
+endforeach()
+
 
 # Link everything to the application
 target_link_libraries(

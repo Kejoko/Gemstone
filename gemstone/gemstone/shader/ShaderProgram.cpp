@@ -13,7 +13,6 @@
 
 /**
  * @brief The name of the logger the Shader class uses
- * 
  */
 const std::string GEM::ShaderProgram::LOGGER_NAME = SHADER_LOGGER_NAME;
 
@@ -53,7 +52,7 @@ uint32_t GEM::ShaderProgram::createShaderProgram(const uint32_t vertexShaderID, 
         throw std::invalid_argument(errorMessage);
     }
 
-    LOG_TRACE("Successfully linked shader program with id {}", shaderProgramID);
+    LOG_DEBUG("Successfully linked shader program with id {}", shaderProgramID);
 
     return shaderProgramID;
 }
@@ -246,6 +245,17 @@ void GEM::ShaderProgram::setUniformVec4(const std::string& uniformName, const st
         return;
     }
     glUniform4f(uniformLocation, values[0], values[1], values[2], values[3]);
+}
+
+/**
+ * @brief Set the value of a Sampler2D uniform representing a texture within the glsl shader
+ * 
+ * @param name The name of the uniform to set
+ * @param value(s) The texture we are going to set it to (we use the texture's index)
+ */
+
+void GEM::ShaderProgram::setUniformTextureSampler(const std::string& uniformName, const GEM::Texture& texture) {
+    setUniformInt(uniformName, texture.getIndex());
 }
 
 /* ------------------------------ private member functions ------------------------------ */

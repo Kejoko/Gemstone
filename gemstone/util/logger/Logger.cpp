@@ -131,8 +131,8 @@ void GEM::util::Logger::registerLogger(const std::string& loggerName, const GEM:
  * 
  * @param loggerInfos The information (name and max level) pertaining to the logger
  */
-void GEM::util::Logger::registerLoggers(const std::vector<const GEM::util::Logger::Info>& loggerInfos) {
-    for (const GEM::util::Logger::Info& loggerInfo : loggerInfos) {
+void GEM::util::Logger::registerLoggers(const std::vector<const GEM::util::Logger::RegistrationInfo>& loggerInfos) {
+    for (const GEM::util::Logger::RegistrationInfo& loggerInfo : loggerInfos) {
         GEM::util::Logger::registerLogger(loggerInfo.loggerName, loggerInfo.level);
     }
 }
