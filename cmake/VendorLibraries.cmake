@@ -31,6 +31,11 @@ add_subdirectory(${GLFW_SOURCE_DIR})
 list(APPEND VENDOR_INCLUDE_DIRS ${GLFW_SOURCE_DIR}/include)
 list(APPEND VENDOR_LIBS glfw)
 
+# GLM
+add_subdirectory(${GLM_SOURCE_DIR})
+list(APPEND VENDOR_INCLUDE_DIRS ${GLM_SOURCE_DIR})
+list(APPEND VENDOR_LIBS glm)
+
 # SpdLog
 add_subdirectory(${SPDLOG_SOURCE_DIR})
 list(APPEND VENDOR_INCLUDE_DIRS ${SPDLOG_SOURCE_DIR}/include)

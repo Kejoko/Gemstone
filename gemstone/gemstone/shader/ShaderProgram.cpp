@@ -4,6 +4,9 @@
 
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
@@ -248,10 +251,44 @@ void GEM::ShaderProgram::setUniformVec4(const std::string& uniformName, const st
 }
 
 /**
+ * @brief Set the value of a matrix within the glsl shader
+ * 
+ * @param name The name of the uniform to set
+ * @param matrix The matrix we are going to set it to
+ */
+
+void GEM::ShaderProgram::setUniformMat2(const std::string& uniformName, const glm::mat2& matrix) {
+    const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
+    if (uniformLocation == -1) {
+        LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
+        return;
+    }
+    glUniformMatrix2fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void GEM::ShaderProgram::setUniformMat3(const std::string& uniformName, const glm::mat3& matrix) {
+    const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
+    if (uniformLocation == -1) {
+        LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
+        return;
+    }
+    glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void GEM::ShaderProgram::setUniformMat4(const std::string& uniformName, const glm::mat4& matrix) {
+    const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
+    if (uniformLocation == -1) {
+        LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
+        return;
+    }
+    glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+/**
  * @brief Set the value of a Sampler2D uniform representing a texture within the glsl shader
  * 
  * @param name The name of the uniform to set
- * @param value(s) The texture we are going to set it to (we use the texture's index)
+ * @param texture The texture we are going to set it to (we use the texture's index)
  */
 
 void GEM::ShaderProgram::setUniformTextureSampler(const std::string& uniformName, const GEM::Texture& texture) {

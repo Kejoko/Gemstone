@@ -8,6 +8,9 @@
 
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <stb/stb_image.h>
 
 #include "util/macros.hpp"
@@ -73,13 +76,11 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::trace}
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
-
-    LOG_INFO("Root directory: {}", PROJECT_ROOT_DIR);
 
     const int initialWindowWidthPixels = 800;
     const int initialWindowHeightPixels = 600;
@@ -271,6 +272,11 @@ int main(int argc, char* argv[]) {
     shaderPrograms[0]->setUniformTextureSampler("ourTexture", texture);
     shaderPrograms[0]->setUniformTextureSampler("ourTexture2", texture2);
 
+    /* ------------------------------------ textures ------------------------------------ */
+
+    LOG_INFO("Doing matrix transformation stuff");
+
+
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
     // Determine what color we want to clear the screen to
@@ -295,6 +301,12 @@ int main(int argc, char* argv[]) {
         // Rectangle
 
         shaderPrograms[0]->use();
+
+        glm::mat4 transformationMatrix(1.0f);
+        // transformationMatrix = glm::translate(transformationMatrix, glm::vec3(0.5f, -0.5f, 0.0f));
+        transformationMatrix = glm::rotate(transformationMatrix, static_cast<float>(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
+        // transformationMatrix = glm::scale(transformationMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+        shaderPrograms[0]->setUniformMat4("transformationMatrix", transformationMatrix);
 
         glDrawElements(
             GL_TRIANGLES,       // The type of primitive
