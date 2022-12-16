@@ -21,3 +21,11 @@
 #define MAC_VERSION 9
 
 #endif
+
+/**
+ * @brief 
+ * 
+ */
+#ifndef PROJECT_ROOT_DIR
+#define PROJECT_ROOT_DIR "<project root directory undefined>"
+#endif

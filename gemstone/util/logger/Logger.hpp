@@ -50,7 +50,7 @@ public: // public classes and enums
      * name with its desired logging level. This is essentially just a pair with
      * named elements
      */
-    struct Info {
+    struct RegistrationInfo {
         const std::string loggerName;
         const GEM::util::Logger::Level level;
     };
@@ -80,7 +80,7 @@ public: // public classes and enums
 public: // public static functions
     static void init();
     static void registerLogger(const std::string& loggerName, const GEM::util::Logger::Level level);
-    static void registerLoggers(const std::vector<const GEM::util::Logger::Info>& loggerInfos);
+    static void registerLoggers(const std::vector<const GEM::util::Logger::RegistrationInfo>& loggerInfos);
 
     template<typename... Args>
     static void trace(const std::string& loggerName, const std::string& format, Args&&... args) {

@@ -9,6 +9,7 @@
 #include "util/macros.hpp"
 
 #include "gemstone/shader/CompiledShader.hpp"
+#include "gemstone/texture/Texture.hpp"
 
 namespace GEM {
     class ShaderProgram;
@@ -20,7 +21,7 @@ namespace GEM {
  * then calling use()
  */
 class GEM::ShaderProgram {
-public: // public static member variables
+public: // public static variables
     static const std::string LOGGER_NAME;
     
 public: // public member functions
@@ -65,6 +66,8 @@ public: // public member functions
     void setUniformVec2(const std::string& uniformName, const std::array<float, 2>& values);
     void setUniformVec3(const std::string& uniformName, const std::array<float, 3>& values);
     void setUniformVec4(const std::string& uniformName, const std::array<float, 4>& values);
+
+    void setUniformTextureSampler(const std::string& uniformName, const GEM::Texture& texture);
 
 private: // private static functions
     static uint32_t createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID);

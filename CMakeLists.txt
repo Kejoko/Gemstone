@@ -62,12 +62,15 @@ set(VENDOR_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/vendor")
 set(GLAD_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glad")
 set(GLFW_SOURCE_DIR "${VENDOR_SOURCE_DIR}/glfw")
 set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
+set(STB_SOURCE_DIR "${VENDOR_SOURCE_DIR}/stb")
 
 # The source directories within the gemstone/util directory
+set(UTIL_IO_SOURCE_DIR "${UTIL_SOURCE_DIR}/io")
 set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
 
 # Within gemstone/gemstone
 set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
+set(GEMSTONE_TEXTURE_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/texture")
 
 #====================================================================
 # Third party vendor libraries
@@ -77,6 +80,15 @@ include(VendorLibraries)
 #====================================================================
 # Utility libraries
 #====================================================================
+add_library(
+    UTIL_IO
+    SHARED
+    ${UTIL_IO_SOURCE_DIR}/logger.hpp
+    ${UTIL_IO_SOURCE_DIR}/FileSystem.hpp
+    ${UTIL_IO_SOURCE_DIR}/FileSystem.cpp
+)
+list(APPEND UTIL_LIBS UTIL_IO)
+
 add_library(
     UTIL_Logger
     SHARED
@@ -98,6 +110,15 @@ add_library(
     ${GEMSTONE_SHADER_SOURCE_DIR}/ShaderProgram.cpp
 )
 list(APPEND GEMSTONE_LIBS GEM_Shader)
+
+add_library(
+    GEM_Texture
+    SHARED
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/logger.hpp
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/Texture.hpp
+    ${GEMSTONE_TEXTURE_SOURCE_DIR}/Texture.cpp
+)
+list(APPEND GEMSTONE_LIBS GEM_Texture)
 
 #====================================================================
 # Create the target
@@ -126,12 +147,15 @@ target_include_directories(
 #====================================================================
 # Link libraries
 #====================================================================
-# Link util and vendor libs to gemstone
-target_link_libraries(
-    ${GEMSTONE_LIBS}
-    PRIVATE ${VENDOR_LIBS}
-    PRIVATE ${UTIL_LIBS}
-)
+# Link util and vendor libs to each gemstone lib
+foreach(GEMSTONE_LIB IN LISTS GEMSTONE_LIBS)
+    target_link_libraries(
+        ${GEMSTONE_LIB}
+        PRIVATE ${VENDOR_LIBS}
+        PRIVATE ${UTIL_LIBS}
+    )
+endforeach()
+
 
 # Link everything to the application
 target_link_libraries(
@@ -158,6 +182,8 @@ create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
 #        case is where we want to debug Application while Gemstone is in release version. This
 #        will require us to have two different release mode macros (EX: GEM_DEBUG , APP_DEBUG) 
 add_compile_definitions(DEBUG)
+
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_compile_definitions(
     GEMSTONE_VERSION

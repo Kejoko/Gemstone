@@ -35,3 +35,13 @@ list(APPEND VENDOR_LIBS glfw)
 add_subdirectory(${SPDLOG_SOURCE_DIR})
 list(APPEND VENDOR_INCLUDE_DIRS ${SPDLOG_SOURCE_DIR}/include)
 list(APPEND VENDOR_LIBS spdlog)
+
+# STB image
+add_library(
+    stb
+    SHARED
+    ${STB_SOURCE_DIR}/include/stb/stb_image.h
+    ${STB_SOURCE_DIR}/src/stb_image.cpp
+)
+list(APPEND VENDOR_INCLUDE_DIRS ${STB_SOURCE_DIR}/include)
+list(APPEND VENDOR_LIBS stb)
