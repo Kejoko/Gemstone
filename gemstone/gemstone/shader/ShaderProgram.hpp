@@ -6,6 +6,8 @@
 
 #include <glad/glad.h>
 
+#include <glm/glm.hpp>
+
 #include "util/macros.hpp"
 
 #include "gemstone/shader/CompiledShader.hpp"
@@ -66,6 +68,10 @@ public: // public member functions
     void setUniformVec2(const std::string& uniformName, const std::array<float, 2>& values);
     void setUniformVec3(const std::string& uniformName, const std::array<float, 3>& values);
     void setUniformVec4(const std::string& uniformName, const std::array<float, 4>& values);
+
+    void setUniformMat2(const std::string& uniformName, const glm::mat2& matrix);
+    void setUniformMat3(const std::string& uniformName, const glm::mat3& matrix);
+    void setUniformMat4(const std::string& uniformName, const glm::mat4& matrix);
 
     void setUniformTextureSampler(const std::string& uniformName, const GEM::Texture& texture);
 
