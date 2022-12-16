@@ -12,6 +12,8 @@
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
+#include "util/io/logger.hpp"
+#include "util/io/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/core.hpp"
@@ -72,9 +74,12 @@ int main(int argc, char* argv[]) {
 
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::trace}
     });
+
+    LOG_INFO("Root directory: {}", PROJECT_ROOT_DIR);
 
     const int initialWindowWidthPixels = 800;
     const int initialWindowHeightPixels = 600;
@@ -257,8 +262,8 @@ int main(int argc, char* argv[]) {
 
     LOG_INFO("Loading textures");
 
-    GEM::Texture texture("../application/assets/textures/wooden_container.jpg", 0);
-    GEM::Texture texture2("../application/assets/textures/awesomeface.png", 1);
+    GEM::Texture texture(GEM::util::FileSystem::getFullPath("application/assets/textures/wooden_container.jpg"), 0);
+    GEM::Texture texture2(GEM::util::FileSystem::getFullPath("application/assets/textures/awesome_face.png"), 1);
 
     // Set the uniforms in the shader to the correct textures
     // match the value we set it to as the same value as whichever active texture it is

@@ -49,6 +49,8 @@ GLenum GEM::Texture::getInputFormat(const std::string& filename) {
 /**
  * @brief Create an opengl texture and get its id
  * 
+ * @note This function will throw if the texture file cannot be loaded
+ * 
  * @param filename The filename from which to load the texture
  * @return uint32_t The id of the newly created texture
  */
@@ -83,8 +85,9 @@ uint32_t GEM::Texture::createTexture(const std::string& filename) {
     stbi_set_flip_vertically_on_load(true);
     uint8_t* p_textureData = stbi_load(filename.c_str(), &textureWidth, &textureHeight, &textureChannelCount, 0);
     if (!p_textureData) {
-        LOG_CRITICAL("Failed to glload texture 1");
-        return -1;
+        const std::string errorMessage = "Failed to stbi_load texture at " + filename;
+        LOG_CRITICAL(errorMessage);
+        throw std::invalid_argument(errorMessage);
     }
 
     glTexImage2D(

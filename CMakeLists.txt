@@ -65,6 +65,7 @@ set(SPDLOG_SOURCE_DIR "${VENDOR_SOURCE_DIR}/spdlog")
 set(STB_SOURCE_DIR "${VENDOR_SOURCE_DIR}/stb")
 
 # The source directories within the gemstone/util directory
+set(UTIL_IO_SOURCE_DIR "${UTIL_SOURCE_DIR}/io")
 set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
 
 # Within gemstone/gemstone
@@ -79,6 +80,15 @@ include(VendorLibraries)
 #====================================================================
 # Utility libraries
 #====================================================================
+add_library(
+    UTIL_IO
+    SHARED
+    ${UTIL_IO_SOURCE_DIR}/logger.hpp
+    ${UTIL_IO_SOURCE_DIR}/FileSystem.hpp
+    ${UTIL_IO_SOURCE_DIR}/FileSystem.cpp
+)
+list(APPEND UTIL_LIBS UTIL_IO)
+
 add_library(
     UTIL_Logger
     SHARED
@@ -172,6 +182,8 @@ create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
 #        case is where we want to debug Application while Gemstone is in release version. This
 #        will require us to have two different release mode macros (EX: GEM_DEBUG , APP_DEBUG) 
 add_compile_definitions(DEBUG)
+
+add_compile_definitions(PROJECT_ROOT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_compile_definitions(
     GEMSTONE_VERSION
