@@ -254,6 +254,11 @@ int main(int argc, char* argv[]) {
 
     LOG_INFO("Loading textures");
 
+    // Create the texture in open gl
+    uint32_t texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     // Set the texture wrapping method
     // Don't forget to set the border color with glTexParameterfv if we use GL_CLAMP_TO_BORDER for wrapping
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -271,25 +276,18 @@ int main(int argc, char* argv[]) {
     // Load the texture
     // For the issue with loading pngs:
     // https://stackoverflow.com/questions/23150123/loading-png-with-stb-image-for-opengl-texture-gives-wrong-colors
-    LOG_TRACE("Actually loading the texture");
+    LOG_TRACE("Actually loading texture 1");
     int textureWidth;
     int textureHeight;
     int textureChannelCount;
+    stbi_set_flip_vertically_on_load(true);
     uint8_t* p_textureData = stbi_load("../application/assets/textures/wooden_container.jpg", &textureWidth, &textureHeight, &textureChannelCount, 0);
     if (!p_textureData) {
-        LOG_CRITICAL("Failed to load texture");
+        LOG_CRITICAL("Failed to glload texture 1");
         return -1;
     }
 
-    // Create the texture in open gl
-    uint32_t texture;
-    glGenTextures(1, &texture);
-
-    // Bind the newly created texture so commands will configure it
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // Start generateing the texture using the loaded data
-    LOG_TRACE("Generate the opengl texture using the loaded data");
+    LOG_TRACE("Generate the opengl texture 1 using the loaded data");
     glTexImage2D(
         GL_TEXTURE_2D,      // The texture target (we are bound to 2d due to the glBindTexture call)
         0,                  // The mipmap level for which we want to create a texture for
@@ -306,6 +304,53 @@ int main(int argc, char* argv[]) {
     // Free the image memory now that we have generated the texture
     stbi_image_free(p_textureData);
 
+    uint32_t texture2;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    LOG_TRACE("Actually loading texture 2");
+    int texture2Width;
+    int texture2Height;
+    int texture2ChannelCount;
+    stbi_set_flip_vertically_on_load(true);
+    uint8_t* p_texture2Data = stbi_load("../application/assets/textures/awesomeface.png", &texture2Width, &texture2Height, &texture2ChannelCount, 0);
+    if (!p_texture2Data) {
+        LOG_CRITICAL("Failed to glload texture 2");
+        return -1;
+    }
+    
+    LOG_TRACE("Generate the opengl texture 2 using the loaded data");
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGB,
+        texture2Width,
+        texture2Height,
+        0,
+        GL_RGBA,            // RGBA instead of RGB because pngs have alpha (transparency)
+        GL_UNSIGNED_BYTE,
+        p_texture2Data
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    stbi_image_free(p_texture2Data);
+
+    // Set the uniforms in the shader to the correct textures
+    // match the value we set it to as the same value as whichever active texture it is
+    shaderPrograms[0]->use();
+    shaderPrograms[0]->setUniformInt("ourTexture", 0);  
+    shaderPrograms[0]->setUniformInt("ourTexture2", 1);
+
+
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
     // Determine what color we want to clear the screen to
@@ -321,7 +366,12 @@ int main(int argc, char* argv[]) {
         // ----- Rendering ----- //
 
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(vertexArrayObject);
 
         // Rectangle
