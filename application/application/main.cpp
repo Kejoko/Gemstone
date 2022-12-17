@@ -20,6 +20,8 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/core.hpp"
+#include "gemstone/mesh/logger.hpp"
+#include "gemstone/mesh/Mesh.hpp"
 #include "gemstone/shader/logger.hpp"
 #include "gemstone/shader/ShaderProgram.hpp"
 #include "gemstone/texture/logger.hpp"
@@ -78,6 +80,7 @@ int main(int argc, char* argv[]) {
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
@@ -87,6 +90,8 @@ int main(int argc, char* argv[]) {
     const std::string windowTitle = "Application Name or someething, idrk ...";
 
     /* ------------------------------------ initialization ------------------------------------ */
+
+    LOG_INFO("Configureing GLFW");
 
     // Initialize glfw
     glfwInit();
@@ -127,7 +132,7 @@ int main(int argc, char* argv[]) {
 
     /* ------------------------------------ shader stuff ------------------------------------ */
 
-    LOG_INFO("Managing shaders");
+    LOG_INFO("Creating shaders");
 
     std::vector<std::shared_ptr<GEM::ShaderProgram>> shaderPrograms;
     try {
@@ -140,141 +145,9 @@ int main(int argc, char* argv[]) {
 
     /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
 
-    LOG_INFO("Creating VAO, VBO, EBO");
+    LOG_INFO("Creating meshes");
 
-    // // The vertices for each corner of the rectangle
-    // const float rectangleVertices[] = {
-    //     // Positions            colors              texture coords
-    //      0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-    //      0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // bottom right
-    //     -0.5f, -0.5f, 0.0f,     0.0f, 1.0f, 0.0f,   0.0f, 0.0f, // bottom left
-    //     -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
-    // };
-
-    // // The indices we are using to reference the rectangle's vertices for the two triangles we need to draw
-    // const uint32_t rectangleIndices[] = {
-    //     // Middle rectangle
-    //     0, 1, 3, // first triangle
-    //     1, 2, 3, // second triangle
-    // };
-
-    // // Create a vertex array object to store all of our vertex attribute's informations
-    // // When you have multiple objects you want to draw you first generate and configure
-    // // all of the VAOs (and consequently the required VBO and attribute pointers) to be
-    // // stored for later use
-    // // The moment we want to draw one of our objects we bind the corresponding VAO,
-    // // draw it, then unbind the VAO
-    // uint32_t vertexArrayObject;
-    // glGenVertexArrays(1, &vertexArrayObject);
-    // glBindVertexArray(vertexArrayObject);
-
-    // // Create the vertex buffer object and bind it so any call on GL_ARRAY_BUFFER target
-    // // will be used to configure the vertex buffer object
-    // uint32_t vertexBufferObject;
-    // glGenBuffers(1, &vertexBufferObject);
-    // glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-
-    // // Copy the vertices into the currently bound vertex buffer
-    // // Give: type of buffer to copy, size of data in bytes, the actual data, and how
-    // // we want the graphics card to manage the given data
-    // // Using GL_STATIC_DRAW because data does not change and is drawn alot
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(rectangleVertices), rectangleVertices, GL_STATIC_DRAW);
-
-    // // Create the element buffer object (EBO)
-    // uint32_t elementBufferObject;
-    // glGenBuffers(1, &elementBufferObject);
-
-    // // Similar to the VBO, bind the EBO and copy the indices into the buffer
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rectangleIndices), rectangleIndices, GL_STATIC_DRAW);
-
-    // // Tell OpenGL how it should interpret the vertex data
-    // // First two parameters should be configured to match the information in our vertex shader, it seems
-    // const int p_vertexPositionAttribute = 0;
-    // glVertexAttribPointer(
-    //     p_vertexPositionAttribute,  // The vertex attribute we want to configure (0 because we used 'location = 0' in our vertex shader, we want to pass this to our vertex shader)
-    //     3,                          // The size of the vertex attribute (vec3 has 3 values)
-    //     GL_FLOAT,                   // Data type (vec<N> in GLSL consists of floating point values)
-    //     GL_FALSE,                   // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
-    //     8 * sizeof(float),          // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
-    //     static_cast<void*>(0)       // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
-    // );
-    // glEnableVertexAttribArray(p_vertexPositionAttribute);
-
-    // // Configure the color vertex attribute the same way we did the positions
-    // const int p_vertexColorAttribute = 1;
-    // glVertexAttribPointer(
-    //     p_vertexColorAttribute,
-    //     3,
-    //     GL_FLOAT,
-    //     GL_FALSE,
-    //     8 * sizeof(float),          // Stride length of 8 becasue 3 position + 3 color + 2 texture
-    //     (void*)(3 * sizeof(float))  // Offset 3 floats into the array because the first 3 values are position data
-    // );
-    // glEnableVertexAttribArray(p_vertexColorAttribute);
-
-    // // Configure the texture vertex attribute like the color and positions
-    // const int p_vertexTextureAttribute = 2;
-    // glVertexAttribPointer(
-    //     p_vertexTextureAttribute,
-    //     2,
-    //     GL_FLOAT,
-    //     GL_FALSE,
-    //     8 * sizeof(float),          // Stride length of 8 becasue 3 position + 3 color + 2 texture
-    //     (void*)(6 * sizeof(float))  // Offset 6 floats into the array because 3 position and 3 color preceeding this
-    // );
-    // glEnableVertexAttribArray(p_vertexTextureAttribute);
-
-    // // The call to glVertexAttribPointer registered the VBO as te vertex attribute's bound VBO, so we can safely unbind afterwards
-    // // We must not unbind the EBO because it is stored in the VAO
-    // // We can unbind the VAO so other VAO calls don't accidentally modify this VAO
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
-    // glBindVertexArray(0);
-
-    const float vertices[] = {
-        // position             // color            // texture coord
-        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f
-    };
+    GEM::Mesh mesh;
 
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -289,56 +162,9 @@ int main(int argc, char* argv[]) {
         glm::vec3(-1.3f,  1.0f, -1.5)
     };
 
-    uint32_t vertexArrayObject;
-    glGenVertexArrays(1, &vertexArrayObject);
-
-    uint32_t vertexBufferObject;
-    glGenBuffers(1, &vertexBufferObject);
-    
-    glBindVertexArray(vertexArrayObject);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // Configure the position vertex attribute
-    const int p_vertexPositionAttribute = 0;
-    glVertexAttribPointer(
-        p_vertexPositionAttribute,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(float),
-        static_cast<void*>(0)
-    );
-    glEnableVertexAttribArray(p_vertexPositionAttribute);
-
-    // Configure the texture vertex attribute like the position's attribute
-    const int p_vertexColorAttribute = 1;
-    glVertexAttribPointer(
-        p_vertexColorAttribute,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(float),
-        (void*)(3 * sizeof(float))
-    );
-    glEnableVertexAttribArray(p_vertexColorAttribute);
-
-    // Configure the texture vertex attribute like the position's attribute
-    const int p_vertexTextureAttribute = 2;
-    glVertexAttribPointer(
-        p_vertexTextureAttribute,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(float),
-        (void*)(6 * sizeof(float))
-    );
-    glEnableVertexAttribArray(p_vertexTextureAttribute);
-
     /* ------------------------------------ textures ------------------------------------ */
 
-    LOG_INFO("Loading textures");
+    LOG_INFO("Creating textures");
 
     GEM::Texture texture(GEM::util::FileSystem::getFullPath("application/assets/textures/wes.png"), 0);
     GEM::Texture texture2(GEM::util::FileSystem::getFullPath("application/assets/textures/texture_coords.png"), 1);
@@ -369,43 +195,44 @@ int main(int argc, char* argv[]) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Activate and bind textures
         texture.activate();
         texture2.activate();
 
-        glBindVertexArray(vertexArrayObject);
-
-        // Rectangle
-
+        // Set the active shader program
         shaderPrograms[0]->use();
         
+        // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
         glm::mat4 viewMatrix = glm::mat4(1.0f);
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
-
         glm::mat4 projectionMatrix = glm::mat4(1.0f);
+        viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
         projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
         shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
 
+        // Render the mesh many times, each time with a different position and rotation
         for (uint32_t i = 0; i < cubePositions.size(); ++i) {
+            // Create the matrix for moving the mesh in world space
             glm::mat4 modelMatrix = glm::mat4(1.0f);
 
+            // Move in world space
             modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 
-            modelMatrix = glm::rotate(modelMatrix, static_cast<float>(glfwGetTime()) * glm::radians(45.0f) * (i+1), glm::normalize(glm::vec3(0.5f, 1.0f, i * 3 * 0.0f)));
+            // Rotate an amount based on time over an axis changing over time
+            modelMatrix = glm::rotate(
+                modelMatrix,
+                static_cast<float>(glfwGetTime()) * glm::radians(45.0f) * (i+1),
+                glm::normalize(glm::vec3(
+                    0.5f,
+                    static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
+                    i
+                ))
+            );
         
             shaderPrograms[0]->setUniformMat4("modelMatrix", modelMatrix);
         
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            mesh.draw();
         }
-
-        // glDrawElements(
-        //     GL_TRIANGLES,       // The type of primitive
-        //     6,                  // The number of elements to be rendered
-        //     GL_UNSIGNED_INT,    // The type of the values in the indices
-        //     0                   // The offset into the EBO
-        // );
-
 
         // Check and call events and swap buffers
         glfwSwapBuffers(p_glfwWindow);
@@ -414,9 +241,6 @@ int main(int argc, char* argv[]) {
 
     // De allocate all resources once they've outlived their purpose
     LOG_INFO("Deallocating all resources");
-    glDeleteVertexArrays(1, &vertexArrayObject);
-    glDeleteBuffers(1, &vertexBufferObject);
-    // glDeleteBuffers(1, &elementBufferObject);
 
     // Clear all previously allocated glfw resources
     LOG_INFO("Terminating GLFW");
