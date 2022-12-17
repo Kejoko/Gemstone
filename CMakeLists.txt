@@ -70,6 +70,7 @@ set(UTIL_IO_SOURCE_DIR "${UTIL_SOURCE_DIR}/io")
 set(UTIL_LOGGER_SOURCE_DIR "${UTIL_SOURCE_DIR}/logger")
 
 # Within gemstone/gemstone
+set(GEMSTONE_MESH_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/mesh")
 set(GEMSTONE_SHADER_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/shader")
 set(GEMSTONE_TEXTURE_SOURCE_DIR "${GEMSTONE_SOURCE_DIR}/texture")
 
@@ -101,6 +102,15 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 #====================================================================
 # Gemstone libraries
 #====================================================================
+add_library(
+    GEM_Mesh
+    SHARED
+    ${GEMSTONE_MESH_SOURCE_DIR}/logger.hpp
+    ${GEMSTONE_MESH_SOURCE_DIR}/Mesh.hpp
+    ${GEMSTONE_MESH_SOURCE_DIR}/Mesh.cpp
+)
+list(APPEND GEMSTONE_LIBS GEM_Mesh)
+
 add_library(
     GEM_Shader
     SHARED
