@@ -10,11 +10,13 @@ out vec4 vertexColor;
 out vec2 textureCoord;
 
 // Input transformation matrix
-uniform mat4 transformationMatrix;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
 
 void main() {
     // Giving all of aPosition to the constructor saves us from manually writing x, y, and z
-    gl_Position = transformationMatrix * vec4(i_position, 1.0f);
+    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(i_position, 1.0f);
 
     // Set the output
     vertexColor = vec4(i_color, 1.0);
