@@ -78,9 +78,9 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
@@ -175,9 +175,15 @@ int main(int argc, char* argv[]) {
     shaderPrograms[0]->setUniformTextureSampler("ourTexture", texture);
     shaderPrograms[0]->setUniformTextureSampler("ourTexture2", texture2);
 
-    /* ------------------------------------ textures ------------------------------------ */
+    /* ------------------------------------ camera ------------------------------------ */
 
-    LOG_INFO("Doing matrix transformation stuff");
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraTargetPoint = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraBackVector = glm::normalize(cameraPosition - cameraTargetPoint);
+    glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraRightVector = glm::normalize(glm::cross(worldUpVector, cameraBackVector));
+    glm::vec3 cameraUpVector = glm::normalize(glm::cross(cameraBackVector, cameraRightVector));
+    UNUSED(cameraUpVector);
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
@@ -203,11 +209,17 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->use();
         
         // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
-        glm::mat4 viewMatrix = glm::mat4(1.0f);
-        glm::mat4 projectionMatrix = glm::mat4(1.0f);
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
-        projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        
+        const float radius = 10.0f;
+        float cameraX = sin(glfwGetTime()) * radius;
+        float cameraZ = cos(glfwGetTime()) * radius;
+        cameraPosition = glm::vec3(cameraX, 0.0f, cameraZ);
+        glm::mat4 viewMatrix;
+        viewMatrix = glm::lookAt(cameraPosition, cameraTargetPoint, worldUpVector);
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
+        
+        glm::mat4 projectionMatrix = glm::mat4(1.0f);
+        projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
 
         // Render the mesh many times, each time with a different position and rotation
@@ -219,9 +231,10 @@ int main(int argc, char* argv[]) {
             modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 
             // Rotate an amount based on time over an axis changing over time
+            float sign = (i % 2 == 0) ? -1 : 1;
             modelMatrix = glm::rotate(
                 modelMatrix,
-                static_cast<float>(glfwGetTime()) * glm::radians(45.0f) * (i+1),
+                static_cast<float>(glfwGetTime()) * glm::radians(sign * 45.0f) * (i+1),
                 glm::normalize(glm::vec3(
                     0.5f,
                     static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
