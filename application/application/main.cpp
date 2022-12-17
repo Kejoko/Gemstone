@@ -340,7 +340,7 @@ int main(int argc, char* argv[]) {
 
     LOG_INFO("Loading textures");
 
-    GEM::Texture texture(GEM::util::FileSystem::getFullPath("application/assets/textures/sam.png"), 0);
+    GEM::Texture texture(GEM::util::FileSystem::getFullPath("application/assets/textures/wes.png"), 0);
     GEM::Texture texture2(GEM::util::FileSystem::getFullPath("application/assets/textures/texture_coords.png"), 1);
 
     // Set the uniforms in the shader to the correct textures
