@@ -64,8 +64,8 @@ void processInput(GLFWwindow* p_glfwWindow) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    // End it all! ... if the user presses the escape key ...
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    // End it all! ... if the user presses the quit key ...
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
     }
 }
@@ -132,7 +132,7 @@ void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouse
     xPosOffset *= sensitivity;
     yPosOffset *= sensitivity;
 
-    yaw += xPosOffset;
+    yaw = glm::mod(yaw + xPosOffset, 360.0f);
     pitch -= yPosOffset;
 
     // Clamp pitch to not look more than straight up or straight down
@@ -140,6 +140,19 @@ void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouse
         pitch = 89.5f;
     } else if (pitch < -89.5f) {
         pitch = -89.5f;
+    }
+}
+
+float fovDegrees = 60.0f;
+void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yScrollOffset) {
+    UNUSED(p_glfwWindow);
+    UNUSED(xScrollOffset);
+
+    fovDegrees -= (float)yScrollOffset;
+    if (fovDegrees < 5.0f) {
+        fovDegrees = 5.0f;
+    } else if (fovDegrees > 85.0f) {
+        fovDegrees = 85.0f;
     }
 }
 
@@ -201,11 +214,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // Mouse movement
+    // Mouse movement and scrolling (camera movement and perspective change)
     glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(p_glfwWindow, mouseInputCallback);
     lastMouseXPos = initialWindowWidthPixels / 2;
     lastMouseYPos = initialWindowHeightPixels / 2;
+    glfwSetScrollCallback(p_glfwWindow, mouseZoomCallback);
 
     // For 3d depth buffering
     glEnable(GL_DEPTH_TEST);
@@ -310,7 +324,7 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
         
         glm::mat4 projectionMatrix = glm::mat4(1.0f);
-        projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        projectionMatrix = glm::perspective(glm::radians(fovDegrees), 800.0f / 600.0f, 0.1f, 100.0f);
         shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
 
         // Render the mesh many times, each time with a different position and rotation
