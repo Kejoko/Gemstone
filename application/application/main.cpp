@@ -109,6 +109,40 @@ glm::vec3 processCameraPosition(
     return updatedCameraPosition;
 }
 
+float pitch = 0.0f;
+float yaw = -90.0f;
+float lastMouseXPos = 0;
+float lastMouseYPos = 0;
+bool mousePositionHasUpdated = false;
+void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouseYPos) {
+    UNUSED(p_glfwWindow);
+
+    if (!mousePositionHasUpdated) {
+        lastMouseXPos = mouseXPos;
+        lastMouseYPos = mouseYPos;
+        mousePositionHasUpdated = true;
+    }
+
+    float xPosOffset = mouseXPos - lastMouseXPos;
+    float yPosOffset = mouseYPos - lastMouseYPos;
+    lastMouseXPos = mouseXPos;
+    lastMouseYPos = mouseYPos;
+
+    const float sensitivity = 0.1f;
+    xPosOffset *= sensitivity;
+    yPosOffset *= sensitivity;
+
+    yaw += xPosOffset;
+    pitch -= yPosOffset;
+
+    // Clamp pitch to not look more than straight up or straight down
+    if (pitch > 89.5f) {
+        pitch = 89.5f;
+    } else if (pitch < -89.5f) {
+        pitch = -89.5f;
+    }
+}
+
 int main(int argc, char* argv[]) {
     UNUSED(argc);
     UNUSED(argv);
@@ -167,6 +201,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // Mouse movement
+    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(p_glfwWindow, mouseInputCallback);
+    lastMouseXPos = initialWindowWidthPixels / 2;
+    lastMouseYPos = initialWindowHeightPixels / 2;
+
+    // For 3d depth buffering
     glEnable(GL_DEPTH_TEST);
 
     /* ------------------------------------ shader stuff ------------------------------------ */
@@ -256,8 +297,15 @@ int main(int argc, char* argv[]) {
         
         // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
         
-        glm::mat4 viewMatrix;
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraLookVector = glm::normalize(direction);
+
         cameraPosition = processCameraPosition(p_glfwWindow, deltaTime, cameraPosition, cameraLookVector, cameraUpVector, worldUpVector);
+
+        glm::mat4 viewMatrix;
         viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraLookVector, cameraUpVector);
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
         
