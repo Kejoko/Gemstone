@@ -64,9 +64,95 @@ void processInput(GLFWwindow* p_glfwWindow) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    // End it all! ... if the user presses the escape key ...
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    // End it all! ... if the user presses the quit key ...
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
+    }
+}
+
+glm::vec3 processCameraPosition(
+    GLFWwindow* p_glfwWindow,
+    const float deltaTime,
+    const glm::vec3& currentCameraPosition,
+    const glm::vec3& currentCameraLookVector,
+    const glm::vec3& currentCameraUpVector,
+    const glm::vec3& worldUpVector
+) {
+    const float cameraSpeed = 2.5f * deltaTime;
+    glm::vec3 currentCameraRightVector = glm::normalize(glm::cross(currentCameraLookVector, currentCameraUpVector));
+    glm::vec3 updatedCameraPosition = currentCameraPosition;
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_W) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * currentCameraLookVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_S) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * currentCameraLookVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_A) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * currentCameraRightVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_D) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * currentCameraRightVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * worldUpVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * worldUpVector;
+    }
+
+    return updatedCameraPosition;
+}
+
+float pitch = 0.0f;
+float yaw = -90.0f;
+float lastMouseXPos = 0;
+float lastMouseYPos = 0;
+bool mousePositionHasUpdated = false;
+void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouseYPos) {
+    UNUSED(p_glfwWindow);
+
+    if (!mousePositionHasUpdated) {
+        lastMouseXPos = mouseXPos;
+        lastMouseYPos = mouseYPos;
+        mousePositionHasUpdated = true;
+    }
+
+    float xPosOffset = mouseXPos - lastMouseXPos;
+    float yPosOffset = mouseYPos - lastMouseYPos;
+    lastMouseXPos = mouseXPos;
+    lastMouseYPos = mouseYPos;
+
+    const float sensitivity = 0.1f;
+    xPosOffset *= sensitivity;
+    yPosOffset *= sensitivity;
+
+    yaw = glm::mod(yaw + xPosOffset, 360.0f);
+    pitch -= yPosOffset;
+
+    // Clamp pitch to not look more than straight up or straight down
+    if (pitch > 89.5f) {
+        pitch = 89.5f;
+    } else if (pitch < -89.5f) {
+        pitch = -89.5f;
+    }
+}
+
+float fovDegrees = 60.0f;
+void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yScrollOffset) {
+    UNUSED(p_glfwWindow);
+    UNUSED(xScrollOffset);
+
+    fovDegrees -= (float)yScrollOffset;
+    if (fovDegrees < 5.0f) {
+        fovDegrees = 5.0f;
+    } else if (fovDegrees > 85.0f) {
+        fovDegrees = 85.0f;
     }
 }
 
@@ -78,9 +164,9 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
@@ -128,6 +214,14 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // Mouse movement and scrolling (camera movement and perspective change)
+    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(p_glfwWindow, mouseInputCallback);
+    lastMouseXPos = initialWindowWidthPixels / 2;
+    lastMouseYPos = initialWindowHeightPixels / 2;
+    glfwSetScrollCallback(p_glfwWindow, mouseZoomCallback);
+
+    // For 3d depth buffering
     glEnable(GL_DEPTH_TEST);
 
     /* ------------------------------------ shader stuff ------------------------------------ */
@@ -175,11 +269,19 @@ int main(int argc, char* argv[]) {
     shaderPrograms[0]->setUniformTextureSampler("ourTexture", texture);
     shaderPrograms[0]->setUniformTextureSampler("ourTexture2", texture2);
 
-    /* ------------------------------------ textures ------------------------------------ */
+    /* ------------------------------------ camera ------------------------------------ */
 
-    LOG_INFO("Doing matrix transformation stuff");
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
+
+    // For frame rate
+    float deltaTime = 0.0f;
+    float lastFrameStartTime = 0.0f;
+    float currentFrameStartTime = glfwGetTime();
 
     // Determine what color we want to clear the screen to
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -187,6 +289,11 @@ int main(int argc, char* argv[]) {
     // Create the render loop
     LOG_INFO("Starting render loop");
     while (!glfwWindowShouldClose(p_glfwWindow)) {
+        // ----- Update frame rating stuff ----- //
+        currentFrameStartTime = glfwGetTime();
+        deltaTime = currentFrameStartTime - lastFrameStartTime;
+        lastFrameStartTime = currentFrameStartTime;
+
         // ----- Get input ----- //
 
         processInput(p_glfwWindow);
@@ -203,11 +310,21 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->use();
         
         // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
-        glm::mat4 viewMatrix = glm::mat4(1.0f);
-        glm::mat4 projectionMatrix = glm::mat4(1.0f);
-        viewMatrix = glm::translate(viewMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
-        projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        direction.y = sin(glm::radians(pitch));
+        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraLookVector = glm::normalize(direction);
+
+        cameraPosition = processCameraPosition(p_glfwWindow, deltaTime, cameraPosition, cameraLookVector, cameraUpVector, worldUpVector);
+
+        glm::mat4 viewMatrix;
+        viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraLookVector, cameraUpVector);
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
+        
+        glm::mat4 projectionMatrix = glm::mat4(1.0f);
+        projectionMatrix = glm::perspective(glm::radians(fovDegrees), 800.0f / 600.0f, 0.1f, 100.0f);
         shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
 
         // Render the mesh many times, each time with a different position and rotation
@@ -219,9 +336,10 @@ int main(int argc, char* argv[]) {
             modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
 
             // Rotate an amount based on time over an axis changing over time
+            float sign = (i % 2 == 0) ? -1 : 1;
             modelMatrix = glm::rotate(
                 modelMatrix,
-                static_cast<float>(glfwGetTime()) * glm::radians(45.0f) * (i+1),
+                static_cast<float>(glfwGetTime()) * glm::radians(sign * 45.0f) * (i+1),
                 glm::normalize(glm::vec3(
                     0.5f,
                     static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
