@@ -70,6 +70,45 @@ void processInput(GLFWwindow* p_glfwWindow) {
     }
 }
 
+glm::vec3 processCameraPosition(
+    GLFWwindow* p_glfwWindow,
+    const float deltaTime,
+    const glm::vec3& currentCameraPosition,
+    const glm::vec3& currentCameraLookVector,
+    const glm::vec3& currentCameraUpVector,
+    const glm::vec3& worldUpVector
+) {
+    const float cameraSpeed = 2.5f * deltaTime;
+    glm::vec3 currentCameraRightVector = glm::normalize(glm::cross(currentCameraLookVector, currentCameraUpVector));
+    glm::vec3 updatedCameraPosition = currentCameraPosition;
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_W) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * currentCameraLookVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_S) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * currentCameraLookVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_A) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * currentCameraRightVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_D) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * currentCameraRightVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        updatedCameraPosition += cameraSpeed * worldUpVector;
+    }
+
+    if (glfwGetKey(p_glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        updatedCameraPosition -= cameraSpeed * worldUpVector;
+    }
+
+    return updatedCameraPosition;
+}
+
 int main(int argc, char* argv[]) {
     UNUSED(argc);
     UNUSED(argv);
@@ -178,14 +217,16 @@ int main(int argc, char* argv[]) {
     /* ------------------------------------ camera ------------------------------------ */
 
     glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraTargetPoint = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraBackVector = glm::normalize(cameraPosition - cameraTargetPoint);
+    glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 cameraRightVector = glm::normalize(glm::cross(worldUpVector, cameraBackVector));
-    glm::vec3 cameraUpVector = glm::normalize(glm::cross(cameraBackVector, cameraRightVector));
-    UNUSED(cameraUpVector);
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
+
+    // For frame rate
+    float deltaTime = 0.0f;
+    float lastFrameStartTime = 0.0f;
+    float currentFrameStartTime = glfwGetTime();
 
     // Determine what color we want to clear the screen to
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -193,6 +234,11 @@ int main(int argc, char* argv[]) {
     // Create the render loop
     LOG_INFO("Starting render loop");
     while (!glfwWindowShouldClose(p_glfwWindow)) {
+        // ----- Update frame rating stuff ----- //
+        currentFrameStartTime = glfwGetTime();
+        deltaTime = currentFrameStartTime - lastFrameStartTime;
+        lastFrameStartTime = currentFrameStartTime;
+
         // ----- Get input ----- //
 
         processInput(p_glfwWindow);
@@ -210,12 +256,9 @@ int main(int argc, char* argv[]) {
         
         // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
         
-        const float radius = 10.0f;
-        float cameraX = sin(glfwGetTime()) * radius;
-        float cameraZ = cos(glfwGetTime()) * radius;
-        cameraPosition = glm::vec3(cameraX, 0.0f, cameraZ);
         glm::mat4 viewMatrix;
-        viewMatrix = glm::lookAt(cameraPosition, cameraTargetPoint, worldUpVector);
+        cameraPosition = processCameraPosition(p_glfwWindow, deltaTime, cameraPosition, cameraLookVector, cameraUpVector, worldUpVector);
+        viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraLookVector, cameraUpVector);
         shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
         
         glm::mat4 projectionMatrix = glm::mat4(1.0f);
