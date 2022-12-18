@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <stb/stb_image.h>
+// #include <stb/stb_image.h>
 
 #include "util/macros.hpp"
 #include "util/platform.hpp"
@@ -20,8 +20,12 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/core.hpp"
+#include "gemstone/application/logger.hpp"
+#include "gemstone/application/Application.hpp"
 #include "gemstone/mesh/logger.hpp"
 #include "gemstone/mesh/Mesh.hpp"
+#include "gemstone/scene/logger.hpp"
+#include "gemstone/scene/Scene.hpp"
 #include "gemstone/shader/logger.hpp"
 #include "gemstone/shader/ShaderProgram.hpp"
 #include "gemstone/texture/logger.hpp"
@@ -165,6 +169,7 @@ int main(int argc, char* argv[]) {
 
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {APPLICATION_LOGGER_NAME, GEM::util::Logger::Level::info},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
         {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},

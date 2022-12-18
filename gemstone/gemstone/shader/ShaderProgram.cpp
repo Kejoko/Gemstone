@@ -10,6 +10,7 @@
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
+#include "gemstone/texture/Texture.hpp"
 #include "gemstone/shader/logger.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
