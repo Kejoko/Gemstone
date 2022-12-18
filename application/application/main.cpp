@@ -11,8 +11,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// #include <stb/stb_image.h>
-
 #include "util/macros.hpp"
 #include "util/platform.hpp"
 #include "util/io/logger.hpp"
