@@ -35,7 +35,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 #====================================================================
 # Third party vendor libraries
 #====================================================================
-add_subdirectory("${PROJECT_SOURCE_DIR}/gemstone/vendor")
+set(VENDOR_ROOT_DIR "${PROJECT_SOURCE_DIR}/vendor")
+add_subdirectory("${VENDOR_ROOT_DIR}")
 list(APPEND VENDOR_LIBS glad)
 list(APPEND VENDOR_LIBS glfw)
 list(APPEND VENDOR_LIBS glm)
