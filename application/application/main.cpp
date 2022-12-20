@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "util/macros.hpp"
@@ -18,12 +19,10 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/core.hpp"
-#include "gemstone/application/logger.hpp"
-#include "gemstone/application/Application.hpp"
+#include "gemstone/camera/logger.hpp"
+#include "gemstone/camera/Camera.hpp"
 #include "gemstone/mesh/logger.hpp"
 #include "gemstone/mesh/Mesh.hpp"
-#include "gemstone/scene/logger.hpp"
-#include "gemstone/scene/Scene.hpp"
 #include "gemstone/shader/logger.hpp"
 #include "gemstone/shader/ShaderProgram.hpp"
 #include "gemstone/texture/logger.hpp"
@@ -167,9 +166,9 @@ int main(int argc, char* argv[]) {
 
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {APPLICATION_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
@@ -243,20 +242,18 @@ int main(int argc, char* argv[]) {
     /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
 
     LOG_INFO("Creating meshes");
-
-    GEM::Mesh mesh;
-
-    std::vector<glm::vec3> cubePositions = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5)
+    
+    std::vector<std::shared_ptr<GEM::Mesh>> meshPtrs = {
+        std::make_shared<GEM::Mesh>(glm::vec3( 0.0f,  0.0f,  0.0f)),
+        std::make_shared<GEM::Mesh>(glm::vec3( 2.0f,  5.0f, -15.0f)),
+        std::make_shared<GEM::Mesh>(glm::vec3(-1.5f, -2.2f, -2.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3(-3.8f, -2.0f, -12.3f)),
+        std::make_shared<GEM::Mesh>(glm::vec3( 2.4f, -0.4f, -3.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3(-1.7f,  3.0f, -7.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3( 1.3f, -2.0f, -2.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3( 1.5f,  2.0f, -2.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3( 1.5f,  0.2f, -1.5f)),
+        std::make_shared<GEM::Mesh>(glm::vec3(-1.3f,  1.0f, -1.5))
     };
 
     /* ------------------------------------ textures ------------------------------------ */
@@ -331,28 +328,48 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
 
         // Render the mesh many times, each time with a different position and rotation
-        for (uint32_t i = 0; i < cubePositions.size(); ++i) {
+        for (uint32_t i = 0; i < meshPtrs.size(); ++i) {
             // Create the matrix for moving the mesh in world space
             glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-            // Move in world space
-            modelMatrix = glm::translate(modelMatrix, cubePositions[i]);
+            // // Move in world space to the origin for rotation
+            // modelMatrix = glm::translate(modelMatrix, -1.0f * meshPtrs[i]->getWorldPosition());
 
-            // Rotate an amount based on time over an axis changing over time
-            float sign = (i % 2 == 0) ? -1 : 1;
-            modelMatrix = glm::rotate(
-                modelMatrix,
-                static_cast<float>(glfwGetTime()) * glm::radians(sign * 45.0f) * (i+1),
-                glm::normalize(glm::vec3(
-                    0.5f,
-                    static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
-                    i
-                ))
-            );
+            // // Rotate an amount based on time over an axis changing over time
+            // float sign = (i % 2 == 0) ? -1 : 1;
+            // modelMatrix = glm::rotate(
+            //     modelMatrix,
+            //     static_cast<float>(glfwGetTime()) * glm::radians(sign * 45.0f) * (i+1),
+            //     glm::normalize(
+            //         glm::vec3(
+            //             // 0.5f,
+            //             // static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
+            //             // i
+            //             0.0f,
+            //             0.0f,
+            //             1.0f
+            //         )
+            //     )
+            // );
+
+            // // Subtract the translation part of the model matrix to put it back to the
+            // // point it was at prior to spinning it
+            // glm::vec4 currentTranslationColumn = glm::column(modelMatrix, 3);
+            // modelMatrix = glm::translate(
+            //     modelMatrix,
+            //     -1.0f * glm::vec3(
+            //         currentTranslationColumn.x,
+            //         currentTranslationColumn.y,
+            //         currentTranslationColumn.z
+            //     )
+            // );
+
+            // // Move in world space to its original position
+            // modelMatrix = glm::translate(modelMatrix, meshPtrs[i]->getWorldPosition());
         
             shaderPrograms[0]->setUniformMat4("modelMatrix", modelMatrix);
         
-            mesh.draw();
+            meshPtrs[i]->draw();
         }
 
         // Check and call events and swap buffers

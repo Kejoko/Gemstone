@@ -78,6 +78,18 @@ std::vector<float> GEM::Mesh::loadVertices() {
     };
 }
 
+std::vector<float> GEM::Mesh::loadVertices(const glm::vec3& worldPosition) {
+    std::vector<float> vertices = GEM::Mesh::loadVertices();
+
+    for (size_t i = 0; i < vertices.size(); i += 8) {
+        vertices[i+0] += worldPosition.x;
+        vertices[i+1] += worldPosition.y;
+        vertices[i+2] += worldPosition.z;
+    }
+
+    return vertices;
+}
+
 /**
  * @brief Create a vertex array object to store all of our vertex attribute's informations
  * 
@@ -185,7 +197,23 @@ GEM::Mesh::Mesh() :
     m_vertices(GEM::Mesh::loadVertices()),
     m_vertexArrayObjectID(GEM::Mesh::createVertexArrayObject()),
     m_vertexBufferObjectID(GEM::Mesh::createVertexBufferObject(m_vertices)),
-    m_elementBufferObjectID(GEM::Mesh::createElementBufferObject(m_vertices))
+    m_elementBufferObjectID(GEM::Mesh::createElementBufferObject(m_vertices)),
+    m_worldPosition(0.0f, 0.0f, 0.0f)
+{
+    GEM::Mesh::configureVertexAttributePointers();
+
+    // Unbind our VAO, VBO, and EBO so the next objects loaded in can handle it
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GEM::Mesh::Mesh(const glm::vec3& worldPosition) :
+    m_vertices(GEM::Mesh::loadVertices(worldPosition)),
+    m_vertexArrayObjectID(GEM::Mesh::createVertexArrayObject()),
+    m_vertexBufferObjectID(GEM::Mesh::createVertexBufferObject(m_vertices)),
+    m_elementBufferObjectID(GEM::Mesh::createElementBufferObject(m_vertices)),
+    m_worldPosition(worldPosition)
 {
     GEM::Mesh::configureVertexAttributePointers();
 

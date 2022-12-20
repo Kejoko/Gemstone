@@ -1,18 +1,16 @@
 #====================================================================
-# The scene library
+# The camera library
 #====================================================================
 add_library(
-    GEM_Scene
+    GEM_Camera
     SHARED
     logger.hpp
-    Scene.hpp
-    Scene.cpp
+    Camera.hpp
+    Camera.cpp
 )
 
 target_link_libraries(
-    GEM_Scene
+    GEM_Camera
     PUBLIC
     UTIL_Logger
-    GEM_Camera
-    GEM_Mesh
 )

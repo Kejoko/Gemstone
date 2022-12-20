@@ -20,7 +20,7 @@ target_link_libraries(
     ${APPLICATION_NAME}
     PRIVATE glad glfw glm
     PRIVATE UTIL_IO UTIL_Logger
-    PRIVATE GEM_Application GEM_Mesh GEM_Scene GEM_Shader GEM_Texture
+    PRIVATE GEM_Camera GEM_Mesh GEM_Shader GEM_Texture
 )
 
 # pre compile definitions for the target
