@@ -13,6 +13,5 @@ target_link_libraries(
     GEM_Scene
     PUBLIC
     UTIL_Logger
-    GEM_Camera
     GEM_Mesh
 )

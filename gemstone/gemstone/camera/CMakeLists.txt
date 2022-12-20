@@ -12,5 +12,6 @@ add_library(
 target_link_libraries(
     GEM_Camera
     PUBLIC
+    glm
     UTIL_Logger
 )

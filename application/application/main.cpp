@@ -37,6 +37,21 @@
 #define GENERAL_LOGGER_NAME "GENERAL"
 const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+GEM::Camera camera(
+    cameraPosition,
+    cameraLookVector,
+    worldUpVector,
+    0.0f,
+    -90.0f,
+    0.0f,
+    60.0f,
+    {}
+);
+
 /**
  * @brief A function that gets called every tim e the window is resized
  * 
@@ -46,6 +61,8 @@ const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
  */
 void framebufferSizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPixels, int updatedWindowHeightPixels) {
     UNUSED(p_glfwWindow);
+    GEM::Camera::windowWidthPixels = updatedWindowWidthPixels;
+    GEM::Camera::windowHeightPixels = updatedWindowHeightPixels;
     glViewport(0, 0, updatedWindowWidthPixels, updatedWindowHeightPixels);
 }
 
@@ -69,45 +86,13 @@ void processInput(GLFWwindow* p_glfwWindow) {
     if (glfwGetKey(p_glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
     }
-}
 
-glm::vec3 processCameraPosition(
-    GLFWwindow* p_glfwWindow,
-    const float deltaTime,
-    const glm::vec3& currentCameraPosition,
-    const glm::vec3& currentCameraLookVector,
-    const glm::vec3& currentCameraUpVector,
-    const glm::vec3& worldUpVector
-) {
-    const float cameraSpeed = 2.5f * deltaTime;
-    glm::vec3 currentCameraRightVector = glm::normalize(glm::cross(currentCameraLookVector, currentCameraUpVector));
-    glm::vec3 updatedCameraPosition = currentCameraPosition;
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_W) == GLFW_PRESS) {
-        updatedCameraPosition += cameraSpeed * currentCameraLookVector;
-    }
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_S) == GLFW_PRESS) {
-        updatedCameraPosition -= cameraSpeed * currentCameraLookVector;
-    }
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_A) == GLFW_PRESS) {
-        updatedCameraPosition -= cameraSpeed * currentCameraRightVector;
-    }
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_D) == GLFW_PRESS) {
-        updatedCameraPosition += cameraSpeed * currentCameraRightVector;
-    }
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_SPACE) == GLFW_PRESS) {
-        updatedCameraPosition += cameraSpeed * worldUpVector;
-    }
-
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-        updatedCameraPosition -= cameraSpeed * worldUpVector;
-    }
-
-    return updatedCameraPosition;
+    GEM::Camera::forwardsPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_W);
+    GEM::Camera::backwardsPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_S);
+    GEM::Camera::leftPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_A);
+    GEM::Camera::rightPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_D);
+    GEM::Camera::risePressed = glfwGetKey(p_glfwWindow, GLFW_KEY_SPACE);
+    GEM::Camera::lowerPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_LEFT_SHIFT);
 }
 
 float pitch = 0.0f;
@@ -126,22 +111,11 @@ void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouse
 
     float xPosOffset = mouseXPos - lastMouseXPos;
     float yPosOffset = mouseYPos - lastMouseYPos;
+
     lastMouseXPos = mouseXPos;
     lastMouseYPos = mouseYPos;
 
-    const float sensitivity = 0.1f;
-    xPosOffset *= sensitivity;
-    yPosOffset *= sensitivity;
-
-    yaw = glm::mod(yaw + xPosOffset, 360.0f);
-    pitch -= yPosOffset;
-
-    // Clamp pitch to not look more than straight up or straight down
-    if (pitch > 89.5f) {
-        pitch = 89.5f;
-    } else if (pitch < -89.5f) {
-        pitch = -89.5f;
-    }
+    camera.updateOrientation(xPosOffset, yPosOffset);
 }
 
 float fovDegrees = 60.0f;
@@ -149,12 +123,7 @@ void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yS
     UNUSED(p_glfwWindow);
     UNUSED(xScrollOffset);
 
-    fovDegrees -= (float)yScrollOffset;
-    if (fovDegrees < 5.0f) {
-        fovDegrees = 5.0f;
-    } else if (fovDegrees > 85.0f) {
-        fovDegrees = 85.0f;
-    }
+    camera.updateFieldOfView(yScrollOffset);
 }
 
 int main(int argc, char* argv[]) {
@@ -165,10 +134,10 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
@@ -176,6 +145,8 @@ int main(int argc, char* argv[]) {
     const int initialWindowWidthPixels = 800;
     const int initialWindowHeightPixels = 600;
     const std::string windowTitle = "Application Name or someething, idrk ...";
+    GEM::Camera::windowWidthPixels = initialWindowWidthPixels;
+    GEM::Camera::windowHeightPixels = initialWindowHeightPixels;
 
     /* ------------------------------------ initialization ------------------------------------ */
 
@@ -242,7 +213,7 @@ int main(int argc, char* argv[]) {
     /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
 
     LOG_INFO("Creating meshes");
-    
+
     std::vector<std::shared_ptr<GEM::Mesh>> meshPtrs = {
         std::make_shared<GEM::Mesh>(glm::vec3( 0.0f,  0.0f,  0.0f)),
         std::make_shared<GEM::Mesh>(glm::vec3( 2.0f,  5.0f, -15.0f)),
@@ -269,13 +240,6 @@ int main(int argc, char* argv[]) {
     shaderPrograms[0]->setUniformTextureSampler("ourTexture", texture);
     shaderPrograms[0]->setUniformTextureSampler("ourTexture2", texture2);
 
-    /* ------------------------------------ camera ------------------------------------ */
-
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
     // For frame rate
@@ -292,6 +256,7 @@ int main(int argc, char* argv[]) {
         // ----- Update frame rating stuff ----- //
         currentFrameStartTime = glfwGetTime();
         deltaTime = currentFrameStartTime - lastFrameStartTime;
+        GEM::Camera::deltaTime = deltaTime;
         lastFrameStartTime = currentFrameStartTime;
 
         // ----- Get input ----- //
@@ -308,24 +273,11 @@ int main(int argc, char* argv[]) {
 
         // Set the active shader program
         shaderPrograms[0]->use();
-        
-        // Create the transformation matrices for getting object space -> world space -> view space -> clip space -> screen space
-        
-        glm::vec3 direction;
-        direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-        direction.y = sin(glm::radians(pitch));
-        direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-        cameraLookVector = glm::normalize(direction);
 
-        cameraPosition = processCameraPosition(p_glfwWindow, deltaTime, cameraPosition, cameraLookVector, cameraUpVector, worldUpVector);
-
-        glm::mat4 viewMatrix;
-        viewMatrix = glm::lookAt(cameraPosition, cameraPosition + cameraLookVector, cameraUpVector);
-        shaderPrograms[0]->setUniformMat4("viewMatrix", viewMatrix);
-        
-        glm::mat4 projectionMatrix = glm::mat4(1.0f);
-        projectionMatrix = glm::perspective(glm::radians(fovDegrees), 800.0f / 600.0f, 0.1f, 100.0f);
-        shaderPrograms[0]->setUniformMat4("projectionMatrix", projectionMatrix);
+        // Update the camera's orientation, position, and zoom
+        camera.update();
+        shaderPrograms[0]->setUniformMat4("viewMatrix", camera.getViewMatrix());
+        shaderPrograms[0]->setUniformMat4("projectionMatrix", camera.getProjectionMatrix());
 
         // Render the mesh many times, each time with a different position and rotation
         for (uint32_t i = 0; i < meshPtrs.size(); ++i) {

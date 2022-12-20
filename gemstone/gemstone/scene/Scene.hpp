@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "gemstone/camera/Camera.hpp"
 #include "gemstone/mesh/Mesh.hpp"
 
 namespace GEM {
@@ -26,5 +25,4 @@ private: // private member variables
     const std::string m_name;
     
     std::vector<GEM::Mesh> m_meshes;
-    GEM::Camera m_camera;
 };

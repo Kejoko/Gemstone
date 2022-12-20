@@ -32,13 +32,11 @@ uint32_t GEM::Scene::sceneCount = 0;
 GEM::Scene::Scene(const std::string& name, const std::vector<GEM::Mesh>& meshes) :
     m_id(++GEM::Scene::sceneCount),
     m_name(name),
-    m_meshes(meshes),
-    m_camera()
+    m_meshes(meshes)
 {
     UNUSED(m_id);
     UNUSED(m_name);
     UNUSED(m_meshes);
-    UNUSED(m_camera);
 }
 
 GEM::Scene::~Scene() {}
