@@ -59,6 +59,7 @@ public: // public member functions
     Camera(const Camera& other) = default;
 
     void update();
+    void updateOrientation();
     void updateOrientation(const float mouseXPosOffset, const float mouseYPosOffset);
     void updateFieldOfView(const float mouseYScrollOffset);
     void updatePosition();

@@ -101,7 +101,7 @@ GEM::Camera::~Camera() {
 void GEM::Camera::update() {
     // Get input from input manager
 
-    updateOrientation(0.0f, 0.0f);
+    updateOrientation();
     updateFieldOfView(0.0f);
     updatePosition();
 }
@@ -128,6 +128,32 @@ void GEM::Camera::updateOrientation(const float mouseXPosOffset, const float mou
     
     m_yaw = glm::mod(m_yaw + calibratedMouseXPosOffset, 360.0f);
     m_pitch -= calibratedMouseYPosOffset;
+
+    if (m_pitch > 89.5f) {
+        m_pitch = 89.5f;
+    } else if (m_pitch < -89.5f) {
+        m_pitch = -89.5f;
+    }
+
+    // Update look vector based on pitch, yaw, roll
+    glm::vec3 updatedLookVector;
+    updatedLookVector.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    updatedLookVector.y = sin(glm::radians(m_pitch));
+    updatedLookVector.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_lookVector = glm::normalize(updatedLookVector);
+
+    // Update right and up vectors 
+    m_rightVector = glm::normalize(glm::cross(m_lookVector, m_worldUpVector));
+    m_upVector = glm::normalize(glm::cross(m_rightVector, m_lookVector));
+}
+
+void GEM::Camera::updateOrientation() {
+    // Update pitch, yaw, roll based on mouse input
+    float calibratedMouseXPosOffset = mp_inputManager->getMouseXPosOffset() * m_settings.mouseSensitivity;
+    float calibratedMouseYPosOffset = mp_inputManager->getMouseYPosOffset() * m_settings.mouseSensitivity;
+    
+    m_yaw = glm::mod(m_yaw - calibratedMouseXPosOffset, 360.0f);
+    m_pitch += calibratedMouseYPosOffset;
 
     if (m_pitch > 89.5f) {
         m_pitch = 89.5f;

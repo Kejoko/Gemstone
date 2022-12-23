@@ -83,29 +83,6 @@ void processInput(GLFWwindow* p_glfwWindow) {
     }
 }
 
-float pitch = 0.0f;
-float yaw = -90.0f;
-float lastMouseXPos = 0;
-float lastMouseYPos = 0;
-bool mousePositionHasUpdated = false;
-void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouseYPos) {
-    UNUSED(p_glfwWindow);
-
-    if (!mousePositionHasUpdated) {
-        lastMouseXPos = mouseXPos;
-        lastMouseYPos = mouseYPos;
-        mousePositionHasUpdated = true;
-    }
-
-    float xPosOffset = mouseXPos - lastMouseXPos;
-    float yPosOffset = mouseYPos - lastMouseYPos;
-
-    lastMouseXPos = mouseXPos;
-    lastMouseYPos = mouseYPos;
-
-    p_globalCamera->updateOrientation(xPosOffset, yPosOffset);
-}
-
 float fovDegrees = 60.0f;
 void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yScrollOffset) {
     UNUSED(p_glfwWindow);
@@ -175,6 +152,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // Make sure that the cursor is disabled when we have the context active
+    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // Create the input manager so we can get input from our player
     std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
 
@@ -193,10 +173,6 @@ int main(int argc, char* argv[]) {
     p_globalCamera = std::make_shared<GEM::Camera>(std::move(camera));
 
     // Mouse movement and scrolling (camera movement and perspective change)
-    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(p_glfwWindow, mouseInputCallback);
-    lastMouseXPos = initialWindowWidthPixels / 2;
-    lastMouseYPos = initialWindowHeightPixels / 2;
     glfwSetScrollCallback(p_glfwWindow, mouseZoomCallback);
 
     // For 3d depth buffering
@@ -332,7 +308,7 @@ int main(int argc, char* argv[]) {
 
         // Check and call events and swap buffers
         glfwSwapBuffers(p_glfwWindow);
-        glfwPollEvents();
+        // glfwPollEvents();
     }
 
     // De allocate all resources once they've outlived their purpose
