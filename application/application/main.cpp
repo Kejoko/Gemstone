@@ -1,6 +1,7 @@
 #include <cmath>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -21,6 +22,7 @@
 #include "gemstone/core.hpp"
 #include "gemstone/camera/logger.hpp"
 #include "gemstone/camera/Camera.hpp"
+#include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/mesh/logger.hpp"
 #include "gemstone/mesh/Mesh.hpp"
 #include "gemstone/shader/logger.hpp"
@@ -41,16 +43,7 @@ glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
 
-GEM::Camera camera(
-    cameraPosition,
-    cameraLookVector,
-    worldUpVector,
-    0.0f,
-    -90.0f,
-    0.0f,
-    60.0f,
-    {}
-);
+std::shared_ptr<GEM::Camera> p_globalCamera;
 
 /**
  * @brief A function that gets called every tim e the window is resized
@@ -72,27 +65,22 @@ void framebufferSizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPix
  * @param p_glfwWindow A pointer to the glfw window
  */
 void processInput(GLFWwindow* p_glfwWindow) {
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+
     // Put us into wireframe mode if we hit the '1' key
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_1) == GLFW_PRESS) {
+    if (p_inputManager->getPolygonWireframePressed()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
     // Put us into fill mode if we hit the '2' key
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_2) == GLFW_PRESS) {
+    if (p_inputManager->getPolygonFillPressed()) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
     // End it all! ... if the user presses the quit key ...
-    if (glfwGetKey(p_glfwWindow, GLFW_KEY_Q) == GLFW_PRESS) {
+    if (p_inputManager->getQuitPressed()) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
     }
-
-    GEM::Camera::forwardsPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_W);
-    GEM::Camera::backwardsPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_S);
-    GEM::Camera::leftPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_A);
-    GEM::Camera::rightPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_D);
-    GEM::Camera::risePressed = glfwGetKey(p_glfwWindow, GLFW_KEY_SPACE);
-    GEM::Camera::lowerPressed = glfwGetKey(p_glfwWindow, GLFW_KEY_LEFT_SHIFT);
 }
 
 float pitch = 0.0f;
@@ -115,7 +103,7 @@ void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouse
     lastMouseXPos = mouseXPos;
     lastMouseYPos = mouseYPos;
 
-    camera.updateOrientation(xPosOffset, yPosOffset);
+    p_globalCamera->updateOrientation(xPosOffset, yPosOffset);
 }
 
 float fovDegrees = 60.0f;
@@ -123,7 +111,7 @@ void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yS
     UNUSED(p_glfwWindow);
     UNUSED(xScrollOffset);
 
-    camera.updateFieldOfView(yScrollOffset);
+    p_globalCamera->updateFieldOfView(yScrollOffset);
 }
 
 int main(int argc, char* argv[]) {
@@ -186,6 +174,23 @@ int main(int argc, char* argv[]) {
         LOG_CRITICAL("Failed to initialize GLAD");
         return -1;
     }
+
+    // Create the input manager so we can get input from our player
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+
+    // Create the camera we are going to be using
+    GEM::Camera camera(
+        p_inputManager,
+        cameraPosition,
+        cameraLookVector,
+        worldUpVector,
+        0.0f,
+        -90.0f,
+        0.0f,
+        60.0f,
+        {}
+    );
+    p_globalCamera = std::make_shared<GEM::Camera>(std::move(camera));
 
     // Mouse movement and scrolling (camera movement and perspective change)
     glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -262,6 +267,7 @@ int main(int argc, char* argv[]) {
         // ----- Get input ----- //
 
         processInput(p_glfwWindow);
+        p_inputManager->collectInput();
 
         // ----- Rendering ----- //
 
@@ -275,9 +281,9 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->use();
 
         // Update the camera's orientation, position, and zoom
-        camera.update();
-        shaderPrograms[0]->setUniformMat4("viewMatrix", camera.getViewMatrix());
-        shaderPrograms[0]->setUniformMat4("projectionMatrix", camera.getProjectionMatrix());
+        p_globalCamera->update();
+        shaderPrograms[0]->setUniformMat4("viewMatrix", p_globalCamera->getViewMatrix());
+        shaderPrograms[0]->setUniformMat4("projectionMatrix", p_globalCamera->getProjectionMatrix());
 
         // Render the mesh many times, each time with a different position and rotation
         for (uint32_t i = 0; i < meshPtrs.size(); ++i) {

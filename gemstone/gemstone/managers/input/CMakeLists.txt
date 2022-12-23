@@ -1,18 +1,15 @@
 #====================================================================
-# The camera library
+# The input manager library
 #====================================================================
 add_library(
-    GEM_Camera
+    GEM_Managers_InputManager
     SHARED
-    logger.hpp
-    Camera.hpp
-    Camera.cpp
+    InputManager.hpp
+    InputManager.cpp
 )
 
 target_link_libraries(
-    GEM_Camera
-    PUBLIC
-    glm
-    UTIL_Logger
     GEM_Managers_InputManager
+    PUBLIC
+    glfw
 )

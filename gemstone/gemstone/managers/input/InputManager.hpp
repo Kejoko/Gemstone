@@ -1,0 +1,73 @@
+#pragma once
+
+#include <map>
+#include <memory>
+
+#include <GLFW/glfw3.h>
+
+namespace GEM {
+    class InputManager;
+}
+
+/**
+ * @brief A singleton based input manager class. Each glfw window should have one
+ * of these for managing inputs. There is a map of glfw window pointers to
+ * instances of input managers so if we try to create an instance for which one
+ * is already created we can just access the already created one.
+ */
+class GEM::InputManager {
+public: // public static functions
+    static std::shared_ptr<InputManager> getPtr(GLFWwindow* const p_glfwWindow);
+
+public: // public member functions
+    // Delete copy constructor and assignment operator so we aren't accidentally
+    // duplicating instances
+    InputManager(const InputManager& other) = delete;
+    void operator=(const InputManager& other) = delete;
+
+    // Want to be able to move into pointers and whatnot
+    InputManager(InputManager&& other) = default;
+
+    void collectInput();
+
+    bool getPausePressed() { return m_pausePressed; }
+    bool getQuitPressed() { return m_quitPressed; }
+
+    bool getForwardsPressed() { return m_forwardsPressed; }
+    bool getBackwardsPressed() { return m_backwardsPressed; }
+    bool getLeftPressed() { return m_leftPressed; }
+    bool getRightPressed() { return m_rightPressed; }
+    bool getJumpPressed() { return m_jumpPressed; }
+    bool getCrouchPressed() { return m_crouchPressed; }
+
+    bool getPolygonWireframePressed() { return m_polygonWireframePressed; }
+    bool getPolygonFillPressed() { return m_polygonFillPressed; }
+
+private: // private static variables
+    // The mapping of glfw windows to input managers
+    static std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> glfwWindowPtrMap;
+
+private: // private member functions
+    // Only want to be able to create instances within getPtr function
+    InputManager(GLFWwindow* const p_glfwWindow);
+ 
+private: // private member variables
+    GLFWwindow* const mp_glfwWindow;
+
+    // Game state
+    bool m_pausePressed;
+    bool m_quitPressed;
+
+    // Player movement
+    bool m_forwardsPressed;
+    bool m_backwardsPressed;
+    bool m_leftPressed;
+    bool m_rightPressed;
+    bool m_jumpPressed;
+    bool m_crouchPressed;
+
+    // Debugging
+    bool m_polygonWireframePressed;
+    bool m_polygonFillPressed;
+
+};

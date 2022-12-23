@@ -10,6 +10,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/camera/logger.hpp"
+#include "gemstone/managers/input/InputManager.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -28,13 +29,6 @@ float GEM::Camera::deltaTime = 0;
 int GEM::Camera::windowWidthPixels = 0;
 int GEM::Camera::windowHeightPixels = 0;
 
-bool GEM::Camera::forwardsPressed = false;
-bool GEM::Camera::backwardsPressed = false;
-bool GEM::Camera::leftPressed = false;
-bool GEM::Camera::rightPressed = false;
-bool GEM::Camera::risePressed = false;
-bool GEM::Camera::lowerPressed = false;
-
 /* ------------------------------ private static variables ------------------------------ */
 
 /* ------------------------------ public static functions ------------------------------ */
@@ -44,6 +38,7 @@ bool GEM::Camera::lowerPressed = false;
 /* ------------------------------ public member functions ------------------------------ */
 
 GEM::Camera::Camera() : GEM::Camera::Camera(
+    nullptr,
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 0.0f, -1.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
@@ -55,6 +50,7 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
 ) {}
 
 GEM::Camera::Camera(
+    std::shared_ptr<GEM::InputManager> p_inputManager,
     const glm::vec3 initialWorldPosition,
     const glm::vec3 initialLookVector,
     const glm::vec3 worldUpVector,
@@ -65,6 +61,7 @@ GEM::Camera::Camera(
     const GEM::Camera::Settings& settings
 ) :
     m_id(++GEM::Camera::cameraCount),
+    mp_inputManager(p_inputManager),
     m_worldPosition(initialWorldPosition),
     m_lookVector(initialLookVector),    // updated in the updateOrientation call
     m_upVector(),                       // updated in the updateOrientation call
@@ -165,27 +162,27 @@ void GEM::Camera::updateFieldOfView(const float mouseYScrollOffset) {
 void GEM::Camera::updatePosition() {
     float calibratedMovementSpeed = m_settings.movementSpeed * GEM::Camera::deltaTime;
 
-    if (GEM::Camera::forwardsPressed) {
+    if (mp_inputManager->getForwardsPressed()) {
         m_worldPosition += calibratedMovementSpeed * m_lookVector;
     }
 
-    if (GEM::Camera::backwardsPressed) {
+    if (mp_inputManager->getBackwardsPressed()) {
         m_worldPosition -= calibratedMovementSpeed * m_lookVector;
     }
 
-    if (GEM::Camera::leftPressed) {
+    if (mp_inputManager->getLeftPressed()) {
         m_worldPosition -= calibratedMovementSpeed * m_rightVector;
     }
 
-    if (GEM::Camera::rightPressed) {
+    if (mp_inputManager->getRightPressed()) {
         m_worldPosition += calibratedMovementSpeed * m_rightVector;
     }
 
-    if (GEM::Camera::risePressed) {
+    if (mp_inputManager->getJumpPressed()) {
         m_worldPosition += calibratedMovementSpeed * m_worldUpVector;
     }
 
-    if (GEM::Camera::lowerPressed) {
+    if (mp_inputManager->getCrouchPressed()) {
         m_worldPosition -= calibratedMovementSpeed * m_worldUpVector;
     }
 }

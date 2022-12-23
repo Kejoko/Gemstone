@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include "gemstone/managers/input/InputManager.hpp"
+
 namespace GEM {
     class Camera;
 }
@@ -28,27 +30,22 @@ public: // classes and enums
             nearClippingPlane(0.1f),
             farClippingPlane(100.0f)
         {}
+
+        Settings(const Settings& other) = default;
     };
 
 public: // public static variables
     static const std::string LOGGER_NAME;
 
-    // To be retrieved from the application
+    // To be retrieved from the application's context
     static float deltaTime;
     static int windowWidthPixels;
     static int windowHeightPixels;
 
-    // All of these things are to go into the input manager
-    static bool forwardsPressed;
-    static bool backwardsPressed;
-    static bool leftPressed;
-    static bool rightPressed;
-    static bool risePressed;
-    static bool lowerPressed;
-
 public: // public member functions
     Camera();
     Camera(
+        std::shared_ptr<GEM::InputManager> p_inputManager,
         const glm::vec3 initialWorldPosition,
         const glm::vec3 initialLookVector,
         const glm::vec3 worldUpVector,
@@ -59,6 +56,7 @@ public: // public member functions
         const GEM::Camera::Settings& settings
     );
     ~Camera();
+    Camera(const Camera& other) = default;
 
     void update();
     void updateOrientation(const float mouseXPosOffset, const float mouseYPosOffset);
@@ -73,6 +71,9 @@ private: // private static variables
 
 private: // private member variables
     const uint32_t m_id;
+
+    // This should also go within the application's context probably
+    std::shared_ptr<GEM::InputManager> mp_inputManager;
 
     // Orientation vectors
     glm::vec3 m_worldPosition;
