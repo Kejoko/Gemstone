@@ -39,12 +39,6 @@
 #define GENERAL_LOGGER_NAME "GENERAL"
 const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
-glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-
-std::shared_ptr<GEM::Camera> p_globalCamera;
-
 /**
  * @brief A function that gets called every tim e the window is resized
  * 
@@ -83,14 +77,6 @@ void processInput(GLFWwindow* p_glfwWindow) {
     }
 }
 
-float fovDegrees = 60.0f;
-void mouseZoomCallback(GLFWwindow* p_glfwWindow, double xScrollOffset, double yScrollOffset) {
-    UNUSED(p_glfwWindow);
-    UNUSED(xScrollOffset);
-
-    p_globalCamera->updateFieldOfView(yScrollOffset);
-}
-
 int main(int argc, char* argv[]) {
     UNUSED(argc);
     UNUSED(argv);
@@ -100,7 +86,7 @@ int main(int argc, char* argv[]) {
 
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
         {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
@@ -159,6 +145,9 @@ int main(int argc, char* argv[]) {
     std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
 
     // Create the camera we are going to be using
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
     GEM::Camera camera(
         p_inputManager,
         cameraPosition,
@@ -170,10 +159,6 @@ int main(int argc, char* argv[]) {
         60.0f,
         {}
     );
-    p_globalCamera = std::make_shared<GEM::Camera>(std::move(camera));
-
-    // Mouse movement and scrolling (camera movement and perspective change)
-    glfwSetScrollCallback(p_glfwWindow, mouseZoomCallback);
 
     // For 3d depth buffering
     glEnable(GL_DEPTH_TEST);
@@ -257,9 +242,9 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->use();
 
         // Update the camera's orientation, position, and zoom
-        p_globalCamera->update();
-        shaderPrograms[0]->setUniformMat4("viewMatrix", p_globalCamera->getViewMatrix());
-        shaderPrograms[0]->setUniformMat4("projectionMatrix", p_globalCamera->getProjectionMatrix());
+        camera.update();
+        shaderPrograms[0]->setUniformMat4("viewMatrix", camera.getViewMatrix());
+        shaderPrograms[0]->setUniformMat4("projectionMatrix", camera.getProjectionMatrix());
 
         // Render the mesh many times, each time with a different position and rotation
         for (uint32_t i = 0; i < meshPtrs.size(); ++i) {

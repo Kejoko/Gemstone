@@ -60,8 +60,7 @@ public: // public member functions
 
     void update();
     void updateOrientation();
-    void updateOrientation(const float mouseXPosOffset, const float mouseYPosOffset);
-    void updateFieldOfView(const float mouseYScrollOffset);
+    void updateFieldOfView();
     void updatePosition();
     
     glm::mat4 getViewMatrix();

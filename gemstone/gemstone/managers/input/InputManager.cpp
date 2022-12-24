@@ -17,6 +17,10 @@
  */
 std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> GEM::InputManager::inputManagerMap;
 
+/**
+ * @brief A map allowing the callback helper class to keep track of where each of the cursors was before
+ * their most recent movement
+ */
 std::map<GLFWwindow* const, GEM::InputManager::CallbackHelper::CursorPosition> GEM::InputManager::CallbackHelper::lastCursorPositionMap;
 
 /* ------------------------------ public static functions ------------------------------ */
@@ -51,11 +55,20 @@ std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p
 
     // Set the mouse input and scrolling callback helpers for this context
     glfwSetCursorPosCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::cursorPositionInputCallback);
+    glfwSetScrollCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::scrollInputCallback);
 
     // Use the newly created one
     return GEM::InputManager::inputManagerMap[p_glfwWindow];
 }
 
+/**
+ * @brief The callback function opengl will be using whenever it polls a cursor movement event. This updates the necessary values in
+ * the input manager responsible for the context
+ * 
+ * @param p_glfwWindow The context
+ * @param currCursorXPos The current x position of the cursor
+ * @param currCursorYPos The current y position of the cursor
+ */
 void GEM::InputManager::CallbackHelper::cursorPositionInputCallback(GLFWwindow* p_glfwWindow, double currCursorXPos, double currCursorYPos) {
     // Get the instance corresponding to this glfw window pointer
     std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
@@ -82,6 +95,23 @@ void GEM::InputManager::CallbackHelper::cursorPositionInputCallback(GLFWwindow* 
     };
 }
 
+/**
+ * @brief The callback function opengl will be using whenever it polls a scrolling event. This updates the necessary values in
+ * the input manager responsible for the context
+ * 
+ * @param p_glfwWindow The context this callback is coming from
+ * @param scrollXOffset The amount of scroll in the x direction
+ * @param scrollYOffset The amount of scroll in the y direction
+ */
+void GEM::InputManager::CallbackHelper::scrollInputCallback(GLFWwindow* p_glfwWindow, double scrollXOffset, double scrollYOffset) {
+    // Get the instance corresponding to this glfw window pointer
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+
+    // Update the offsets in the input manager
+    p_inputManager->m_scrollXOffset = scrollXOffset;
+    p_inputManager->m_scrollYOffset = scrollYOffset;
+}
+
 /* ------------------------------ private static functions ------------------------------ */
 
 /* ------------------------------ public member functions ------------------------------ */
@@ -94,8 +124,8 @@ void GEM::InputManager::collectInput() {
     // Reset the offsets to 0 before we collect mouse input, in case there is no mouse input this frame
     m_cursorXPosOffset = 0.0f;
     m_cursorYPosOffset = 0.0f;
-    m_mouseXScrollOffset = 0.0f;
-    m_mouseYScrollOffset = 0.0f;
+    m_scrollXOffset = 0.0f;
+    m_scrollYOffset = 0.0f;
 
     glfwPollEvents();
 
@@ -132,8 +162,8 @@ GEM::InputManager::InputManager(GLFWwindow* const p_glfwWindow) :
     m_crouchPressed(false),
     m_cursorXPosOffset(0.0f),
     m_cursorYPosOffset(0.0f),
-    m_mouseXScrollOffset(0.0f),
-    m_mouseYScrollOffset(0.0f),
+    m_scrollXOffset(0.0f),
+    m_scrollYOffset(0.0f),
     m_polygonWireframePressed(false),
     m_polygonFillPressed(false)
 {}

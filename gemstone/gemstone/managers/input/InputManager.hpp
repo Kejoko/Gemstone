@@ -47,6 +47,8 @@ public: // public member functions
 
     float getCursorXPosOffset() { return m_cursorXPosOffset; }
     float getCursorYPosOffset() { return m_cursorYPosOffset; }
+    float getScrollXOffset() { return m_scrollXOffset; }
+    float getScrollYOffset() { return m_scrollYOffset; }
 
     bool getPolygonWireframePressed() { return m_polygonWireframePressed; }
     bool getPolygonFillPressed() { return m_polygonFillPressed; }
@@ -66,6 +68,7 @@ private: // private classes and enums
 
     public: // public static functions
         static void cursorPositionInputCallback(GLFWwindow* p_glfwWindow, double currCursorXPos, double currCursorYPos);
+        static void scrollInputCallback(GLFWwindow* p_glfwWindow, double scrollXOffset, double scrollYOffset);
 
     public: // public member functions
         CallbackHelper() = delete;
@@ -102,8 +105,8 @@ private: // private member variables
     // Mouse cursor and scroll information
     float m_cursorXPosOffset;
     float m_cursorYPosOffset;
-    float m_mouseXScrollOffset;
-    float m_mouseYScrollOffset;
+    float m_scrollXOffset;
+    float m_scrollYOffset;
 
     // Debugging
     bool m_polygonWireframePressed;
