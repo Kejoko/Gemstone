@@ -17,7 +17,7 @@
  */
 std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> GEM::InputManager::inputManagerMap;
 
-std::map<GLFWwindow* const, GEM::InputManager::MouseInputCallbackHelper::Position> GEM::InputManager::MouseInputCallbackHelper::lastPositionMap;
+std::map<GLFWwindow* const, GEM::InputManager::CallbackHelper::CursorPosition> GEM::InputManager::CallbackHelper::lastCursorPositionMap;
 
 /* ------------------------------ public static functions ------------------------------ */
 
@@ -50,10 +50,36 @@ std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p
     }
 
     // Set the mouse input and scrolling callback helpers for this context
-    glfwSetCursorPosCallback(p_glfwWindow, GEM::InputManager::MouseInputCallbackHelper::mouseInputCallback);
+    glfwSetCursorPosCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::cursorPositionInputCallback);
 
     // Use the newly created one
     return GEM::InputManager::inputManagerMap[p_glfwWindow];
+}
+
+void GEM::InputManager::CallbackHelper::cursorPositionInputCallback(GLFWwindow* p_glfwWindow, double currCursorXPos, double currCursorYPos) {
+    // Get the instance corresponding to this glfw window pointer
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+
+    // Get the last positions stored in the map
+    if (GEM::InputManager::CallbackHelper::lastCursorPositionMap.count(p_glfwWindow) == 0) {
+        // This is the first time the mouse has moved so there isn't a previous position stored
+        // This means the offset is 0 and we must initialize the last position as the current position
+        GEM::InputManager::CallbackHelper::lastCursorPositionMap.insert({
+            p_glfwWindow,
+            { static_cast<float>(currCursorXPos), static_cast<float>(currCursorYPos) }
+        });
+    }
+
+    // Calculate the offset using the last position
+    GEM::InputManager::CallbackHelper::CursorPosition lastPosition = GEM::InputManager::CallbackHelper::lastCursorPositionMap[p_glfwWindow];
+    p_inputManager->m_cursorXPosOffset = lastPosition.xPos - currCursorXPos;
+    p_inputManager->m_cursorYPosOffset = lastPosition.yPos - currCursorYPos;
+
+    // Update the last positions in the map to be the current position
+    GEM::InputManager::CallbackHelper::lastCursorPositionMap[p_glfwWindow] = {
+        static_cast<float>(currCursorXPos),
+        static_cast<float>(currCursorYPos)
+    };
 }
 
 /* ------------------------------ private static functions ------------------------------ */
@@ -66,14 +92,13 @@ std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p
  */
 void GEM::InputManager::collectInput() {
     // Reset the offsets to 0 before we collect mouse input, in case there is no mouse input this frame
-    m_mouseXPosOffset = 0.0f;
-    m_mouseYPosOffset = 0.0f;
+    m_cursorXPosOffset = 0.0f;
+    m_cursorYPosOffset = 0.0f;
     m_mouseXScrollOffset = 0.0f;
     m_mouseYScrollOffset = 0.0f;
 
     glfwPollEvents();
 
-    std::cout << "collecting input\n";
     m_pausePressed = glfwGetKey(mp_glfwWindow, GLFW_KEY_ESCAPE);
     m_quitPressed = glfwGetKey(mp_glfwWindow, GLFW_KEY_Q);
 
@@ -105,8 +130,8 @@ GEM::InputManager::InputManager(GLFWwindow* const p_glfwWindow) :
     m_rightPressed(false),
     m_jumpPressed(false),
     m_crouchPressed(false),
-    m_mouseXPosOffset(0.0f),
-    m_mouseYPosOffset(0.0f),
+    m_cursorXPosOffset(0.0f),
+    m_cursorYPosOffset(0.0f),
     m_mouseXScrollOffset(0.0f),
     m_mouseYScrollOffset(0.0f),
     m_polygonWireframePressed(false),

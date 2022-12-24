@@ -45,8 +45,8 @@ public: // public member functions
     bool getJumpPressed() { return m_jumpPressed; }
     bool getCrouchPressed() { return m_crouchPressed; }
 
-    float getMouseXPosOffset() { return m_mouseXPosOffset; }
-    float getMouseYPosOffset() { return m_mouseYPosOffset; }
+    float getCursorXPosOffset() { return m_cursorXPosOffset; }
+    float getCursorYPosOffset() { return m_cursorYPosOffset; }
 
     bool getPolygonWireframePressed() { return m_polygonWireframePressed; }
     bool getPolygonFillPressed() { return m_polygonFillPressed; }
@@ -57,51 +57,24 @@ private: // private classes and enums
      * us to modify instance level member variables within the InputManager from a static
      * callback.
      */
-    class MouseInputCallbackHelper {
+    class CallbackHelper {
     public: // public classes and enums
-        struct Position {
+        struct CursorPosition {
             float xPos;
             float yPos;
         };
 
     public: // public static functions
-        static void mouseInputCallback(GLFWwindow* p_glfwWindow, double mouseXPos, double mouseYPos) {
-            // Get the instance corresponding to this glfw window pointer
-            std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
-
-            // Get the last positions stored in the map
-            if (GEM::InputManager::MouseInputCallbackHelper::lastPositionMap.count(p_glfwWindow) == 0) {
-                std::cout << "inserting initial last position into map\n";
-                // This is the first time the mouse has moved so there isn't a previous position stored
-                // This means the offset is 0 and we must initialize the last position as the current position
-                GEM::InputManager::MouseInputCallbackHelper::lastPositionMap.insert({
-                    p_glfwWindow,
-                    { static_cast<float>(mouseXPos), static_cast<float>(mouseYPos) }
-                });
-            }
-
-            // Calculate the offset using the last position
-            GEM::InputManager::MouseInputCallbackHelper::Position lastPosition = GEM::InputManager::MouseInputCallbackHelper::lastPositionMap[p_glfwWindow];
-            p_inputManager->m_mouseXPosOffset = lastPosition.xPos - mouseXPos;
-            p_inputManager->m_mouseYPosOffset = lastPosition.yPos - mouseYPos;
-
-            std::cout << "offest: x ( " << p_inputManager->m_mouseXPosOffset << " ) , y ( " << p_inputManager->m_mouseYPosOffset << " )\n";
-
-            // Update the last positions in the map to be the current position
-            GEM::InputManager::MouseInputCallbackHelper::lastPositionMap[p_glfwWindow] = {
-                static_cast<float>(mouseXPos),
-                static_cast<float>(mouseYPos)
-            };
-        }
+        static void cursorPositionInputCallback(GLFWwindow* p_glfwWindow, double currCursorXPos, double currCursorYPos);
 
     public: // public member functions
-        MouseInputCallbackHelper() = delete;
+        CallbackHelper() = delete;
 
     private: // private static variables
-        static std::map<GLFWwindow* const, GEM::InputManager::MouseInputCallbackHelper::Position> lastPositionMap;
+        static std::map<GLFWwindow* const, GEM::InputManager::CallbackHelper::CursorPosition> lastCursorPositionMap;
     };
 
-    friend class MouseInputCallbackHelper;
+    friend class CallbackHelper;
 
 private: // private static variables
     // The mapping of glfw windows to input managers
@@ -126,9 +99,9 @@ private: // private member variables
     bool m_jumpPressed;
     bool m_crouchPressed;
 
-    // Player orientation (mouse and scroll)
-    float m_mouseXPosOffset;
-    float m_mouseYPosOffset;
+    // Mouse cursor and scroll information
+    float m_cursorXPosOffset;
+    float m_cursorYPosOffset;
     float m_mouseXScrollOffset;
     float m_mouseYScrollOffset;
 

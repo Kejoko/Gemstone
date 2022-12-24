@@ -149,8 +149,8 @@ void GEM::Camera::updateOrientation(const float mouseXPosOffset, const float mou
 
 void GEM::Camera::updateOrientation() {
     // Update pitch, yaw, roll based on mouse input
-    float calibratedMouseXPosOffset = mp_inputManager->getMouseXPosOffset() * m_settings.mouseSensitivity;
-    float calibratedMouseYPosOffset = mp_inputManager->getMouseYPosOffset() * m_settings.mouseSensitivity;
+    float calibratedMouseXPosOffset = mp_inputManager->getCursorXPosOffset() * m_settings.mouseSensitivity;
+    float calibratedMouseYPosOffset = mp_inputManager->getCursorYPosOffset() * m_settings.mouseSensitivity;
     
     m_yaw = glm::mod(m_yaw - calibratedMouseXPosOffset, 360.0f);
     m_pitch += calibratedMouseYPosOffset;
