@@ -43,20 +43,6 @@
 const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
 /**
- * @brief A function that gets called every tim e the window is resized
- * 
- * @param p_glfwWindow A pointer to the glfw window
- * @param updatedWindowWidthPixels The updated width of the window in pixels
- * @param updatedWindowHeightPixels The updated height of the window in pixels
- */
-void framebufferSizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPixels, int updatedWindowHeightPixels) {
-    UNUSED(p_glfwWindow);
-    GEM::Camera::windowWidthPixels = updatedWindowWidthPixels;
-    GEM::Camera::windowHeightPixels = updatedWindowHeightPixels;
-    glViewport(0, 0, updatedWindowWidthPixels, updatedWindowHeightPixels);
-}
-
-/**
  * @brief Get user input
  * 
  * @param p_glfwWindow A pointer to the glfw window
@@ -109,15 +95,14 @@ int main(int argc, char* argv[]) {
 
     std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::createPtr(p_context->getGLFWWindowPtr().get());
 
-    // Create the camera we are going to be using
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cameraInitialPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraInitialLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
     GEM::Camera camera(
-        p_inputManager,
         p_context,
-        cameraPosition,
-        cameraLookVector,
+        p_inputManager,
+        cameraInitialPosition,
+        cameraInitialLookVector,
         worldUpVector,
         0.0f,
         -90.0f,
@@ -257,16 +242,10 @@ int main(int argc, char* argv[]) {
         }
 
         // Check and call events and swap buffers
-        // glfwSwapBuffers(p_glfwWindow);
         glfwSwapBuffers(p_context->getGLFWWindowPtr().get());
-        // glfwPollEvents();
     }
 
     GEM::InputManager::clean();
     GEM::Context::clean();
-
-    // LOG_TRACE("Terminating GLFW");
-    // glfwTerminate();
-
     return 0;
 }

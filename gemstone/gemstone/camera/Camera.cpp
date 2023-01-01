@@ -26,11 +26,9 @@ const std::string GEM::Camera::LOGGER_NAME = CAMERA_LOGGER_NAME;
 uint32_t GEM::Camera::cameraCount = 0;
 
 /**
- * @todo get these from the application's context
+ * @todo get these from the application somehow
  */
 float GEM::Camera::deltaTime = 0;
-int GEM::Camera::windowWidthPixels = 0;
-int GEM::Camera::windowHeightPixels = 0;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -59,8 +57,8 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
 /**
  * @brief Construct a new GEM::Camera::Camera object from the given parameters
  * 
- * @param p_inputManager A pointer to the input manager responsible for capturing input for this context
  * @param p_context The context for which this camera will be used in. The glfw window and whatnot
+ * @param p_inputManager A pointer to the input manager responsible for capturing input for this context
  * @param initialWorldPosition The initial position in the world of the camera
  * @param initialLookVector The initial look vector of the camera
  * @param worldUpVector The vecteor pointing straight up in world coordinates (usually 0, 1, 0)
@@ -71,8 +69,8 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
  * @param settings The settings for the camera (clipping planes, fov min/max, movement speeds)
  */
 GEM::Camera::Camera(
-    std::shared_ptr<GEM::InputManager> p_inputManager,
     std::shared_ptr<GEM::Context> p_context,
+    std::shared_ptr<GEM::InputManager> p_inputManager,
     const glm::vec3 initialWorldPosition,
     const glm::vec3 initialLookVector,
     const glm::vec3 worldUpVector,
@@ -83,8 +81,8 @@ GEM::Camera::Camera(
     const GEM::Camera::Settings& settings
 ) :
     m_id(++GEM::Camera::cameraCount),
-    mp_inputManager(p_inputManager),
     mp_context(p_context),
+    mp_inputManager(p_inputManager),
     m_worldPosition(initialWorldPosition),
     m_lookVector(initialLookVector),    // updated in the updateOrientation call
     m_upVector(),                       // updated in the updateOrientation call
@@ -117,20 +115,36 @@ GEM::Camera::Camera(
     updateOrientation();
 }
 
+/**
+ * @brief Destroy the GEM::Camera::Camera object
+ */
 GEM::Camera::~Camera() {
-    LOG_FUNCTION_CALL_TRACE("id {}", m_id);
+    LOG_FUNCTION_CALL_TRACE("this ptr {}, id {}", static_cast<void*>(this), m_id);
 }
 
+/**
+ * @brief Update the orientation, the field of view, and the position of the camera
+ */
 void GEM::Camera::update() {
     updateOrientation();
     updateFieldOfView();
     updatePosition();
 }
 
+/**
+ * @brief Get the view matrix of the camera to represent where it is looking in world space and where from
+ * 
+ * @return glm::mat4 The view matrix of the camera
+ */
 glm::mat4 GEM::Camera::getViewMatrix() {
     return glm::lookAt(m_worldPosition, m_worldPosition + m_lookVector, m_upVector);
 }
 
+/**
+ * @brief Get the projection matrix of the camera using its view frustum dimension
+ * 
+ * @return glm::mat4 The projection matrix for the camera
+ */
 glm::mat4 GEM::Camera::getProjectionMatrix() {
     return glm::perspective(
         glm::radians(m_fovDegrees), 

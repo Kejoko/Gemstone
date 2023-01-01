@@ -77,6 +77,7 @@ std::shared_ptr<GEM::Context> GEM::Context::createPtr(const std::string& name, i
     GEM::Context::contextPtrCallbackMap.insert({p_context->getGLFWWindowPtr().get(), p_context});
 
     // Give the shared pointer to the caller
+    LOG_DEBUG("Context ptr {}", static_cast<void*>(p_context.get()));
     return p_context;
 }
 

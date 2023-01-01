@@ -77,7 +77,9 @@ std::shared_ptr<GEM::InputManager> GEM::InputManager::createPtr(GLFWwindow* cons
     glfwSetScrollCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::scrollInputCallback);
 
     // Use the newly created one
-    return GEM::InputManager::inputManagerPtrCallbackMap[p_glfwWindow];
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::inputManagerPtrCallbackMap[p_glfwWindow];
+    LOG_DEBUG("Input manager ptr {}", static_cast<void*>(p_inputManager.get()));
+    return p_inputManager;
 }
 
 /**
