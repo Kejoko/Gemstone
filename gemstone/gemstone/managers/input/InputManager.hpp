@@ -16,13 +16,18 @@ namespace GEM {
  * @brief A singleton based input manager class. Each glfw window should have one
  * of these for managing inputs. There is a map of glfw window pointers to
  * instances of input managers so if we try to create an instance for which one
- * is already created we can just access the already created one.
+ * is already created we can just access the already created one. To create the
+ * InputManager pointer use createPtr and to subsequently get the InputManager
+ * pointer use getPtr. At the end of the program's runtime you should call clean().
  */
 class GEM::InputManager {
-public: // public classes and enums
+public: // public static variables
+    static const std::string LOGGER_NAME;
 
 public: // public static functions
+    static std::shared_ptr<InputManager> createPtr(GLFWwindow* const p_glfwWindow);
     static std::shared_ptr<InputManager> getPtr(GLFWwindow* const p_glfwWindow);
+    static void clean();
 
 public: // public member functions
     // Delete copy constructor and assignment operator so we aren't accidentally
@@ -32,6 +37,8 @@ public: // public member functions
 
     // Want to be able to move into pointers and whatnot
     InputManager(InputManager&& other) = default;
+
+    ~InputManager();
 
     void collectInput();
 
@@ -81,7 +88,7 @@ private: // private classes and enums
 
 private: // private static variables
     // The mapping of glfw windows to input managers
-    static std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> inputManagerMap;
+    static std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> inputManagerPtrCallbackMap;
 
 private: // private member functions
     // Only want to be able to create instances within getPtr function

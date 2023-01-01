@@ -1,5 +1,3 @@
-#include "gemstone/scene/Scene.hpp"
-
 #include <string>
 #include <vector>
 
@@ -7,6 +5,7 @@
 
 #include "gemstone/mesh/Mesh.hpp"
 #include "gemstone/scene/logger.hpp"
+#include "gemstone/scene/Scene.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

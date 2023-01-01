@@ -1,21 +1,30 @@
-#include "gemstone/managers/input/InputManager.hpp"
-
 #include <functional>
 #include <map>
 #include <memory>
+#include <sstream>
+#include <string>
 
 #include <GLFW/glfw3.h>
 
 #include "util/macros.hpp"
+#include "util/logger/Logger.hpp"
+
+#include "gemstone/managers/input/logger.hpp"
+#include "gemstone/managers/input/InputManager.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
+
+/**
+ * @brief The name of the logger the input manager class uses
+ */
+const std::string GEM::InputManager::LOGGER_NAME = INPUT_MANAGER_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
 /**
  * @brief The map of window contexts to input managers
  */
-std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> GEM::InputManager::inputManagerMap;
+std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> GEM::InputManager::inputManagerPtrCallbackMap;
 
 /**
  * @brief A map allowing the callback helper class to keep track of where each of the cursors was before
@@ -26,19 +35,24 @@ std::map<GLFWwindow* const, GEM::InputManager::CallbackHelper::CursorPosition> G
 /* ------------------------------ public static functions ------------------------------ */
 
 /**
- * @brief Get a shared pointer to an instance of an input manager given the context.
- * If an input manager already exists for this context, then use that one. If not, create
- * a new one and add it to the map.
+ * @brief Create a new InputManager. This adds the newly ceated InputManager pointer to the
+ * map for the callback to use
  * 
- * @param p_glfwWindow The pointer to the glfw window for which the input manager is
- * going to be responsible
- * @return std::shared_ptr<GEM::InputManager> The shared pointer to the input manager
+ * @note This will throw if there is already a InputManager created for this glfw window
+ * 
+ * @param p_glfwWindow The glfw window pointer to craete the InputManager for
+ * @return std::shared_ptr<GEM::InputManager> The shared pointer to the InputManager
  */
-std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p_glfwWindow) {
-    // Check if an instance has been created for this window
-    if (GEM::InputManager::inputManagerMap.count(p_glfwWindow)) {
-        // There is an instance for this window, great, let's use it
-        return GEM::InputManager::inputManagerMap[p_glfwWindow];
+std::shared_ptr<GEM::InputManager> GEM::InputManager::createPtr(GLFWwindow* const p_glfwWindow) {
+    LOG_FUNCTION_CALL_INFO("GLFW Window ptr {}", static_cast<void*>(p_glfwWindow));
+
+    // Check if an instance has been created for this window so 
+    if (GEM::InputManager::inputManagerPtrCallbackMap.count(p_glfwWindow) > 0) {
+        // There already exists an InputManager for this window so we can't create one for it, uh oh D: :((((
+        std::stringstream ss;
+        ss << "InputManager with window [" << p_glfwWindow << "] already exists. Not creating new one";
+        LOG_CRITICAL(ss.str());
+        throw std::runtime_error(ss.str());
     }
 
     // There is no instance for this window yet
@@ -47,18 +61,54 @@ std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p
         GEM::InputManager inputManager(p_glfwWindow);
 
         // Input it for fuure use
-        GEM::InputManager::inputManagerMap.insert({
+        GEM::InputManager::inputManagerPtrCallbackMap.insert({
             p_glfwWindow,
             std::make_shared<GEM::InputManager>(std::move(inputManager))
         });
     }
+
+    LOG_TRACE("Updating input mode and input callbacks");
+
+    // Make sure that the cursor is disabled when we have the context active
+    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Set the mouse input and scrolling callback helpers for this context
     glfwSetCursorPosCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::cursorPositionInputCallback);
     glfwSetScrollCallback(p_glfwWindow, GEM::InputManager::CallbackHelper::scrollInputCallback);
 
     // Use the newly created one
-    return GEM::InputManager::inputManagerMap[p_glfwWindow];
+    return GEM::InputManager::inputManagerPtrCallbackMap[p_glfwWindow];
+}
+
+/**
+ * @brief Get the pointer to the already careated input manager associated with the GLFW Window pointer
+ * 
+ * @note If there is not InputManager associated with the GLFW Window pointer this will throw
+ * 
+ * @param p_glfwWindow The GLFW Window pointer for which we would like to find the associated
+ * and already created input manager
+ * @return std::shared_ptr<GEM::InputManager> The shared pointer to the already created InputManager
+ */
+std::shared_ptr<GEM::InputManager> GEM::InputManager::getPtr(GLFWwindow* const p_glfwWindow) {
+    // Check if an instance has been created for this window
+    if (GEM::InputManager::inputManagerPtrCallbackMap.count(p_glfwWindow) <= 0) {
+        // No instance for this window, uh oh
+        std::stringstream ss;
+        ss << "InputManager with window [" << p_glfwWindow << "] does not exist";
+        LOG_CRITICAL(ss.str());
+        throw std::runtime_error(ss.str());
+    }
+
+    // Use the newly created one
+    return GEM::InputManager::inputManagerPtrCallbackMap[p_glfwWindow];
+}
+
+/**
+ * @brief Clear the maps of the input manager pointers
+ */
+void GEM::InputManager::clean() {
+    LOG_TRACE("Clearing InputManager maps");
+    GEM::InputManager::inputManagerPtrCallbackMap.clear();
 }
 
 /**
@@ -117,6 +167,13 @@ void GEM::InputManager::CallbackHelper::scrollInputCallback(GLFWwindow* p_glfwWi
 /* ------------------------------ public member functions ------------------------------ */
 
 /**
+ * @brief Destroy the GEM::InputManager::InputManager object
+ */
+GEM::InputManager::~InputManager() {
+    LOG_FUNCTION_CALL_TRACE("this ptr {}", static_cast<void*>(this));
+}
+
+/**
  * @brief Update the input states. Collect the key pressed and other input information from
  * the user so other components may use it
  */
@@ -166,4 +223,6 @@ GEM::InputManager::InputManager(GLFWwindow* const p_glfwWindow) :
     m_scrollYOffset(0.0f),
     m_polygonWireframePressed(false),
     m_polygonFillPressed(false)
-{}
+{
+    LOG_FUNCTION_CALL_INFO("GLFW Window ptr {}", static_cast<void*>(p_glfwWindow));
+}

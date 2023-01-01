@@ -1,5 +1,3 @@
-#include "gemstone/shader/ShaderProgram.hpp"
-
 #include <string>
 
 #include <glad/glad.h>
@@ -12,6 +10,8 @@
 
 #include "gemstone/texture/Texture.hpp"
 #include "gemstone/shader/logger.hpp"
+#include "gemstone/shader/CompiledShader.hpp"
+#include "gemstone/shader/ShaderProgram.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

@@ -1,9 +1,8 @@
-#include "util/io/FileSystem.hpp"
-
 #include <string>
 
 #include "util/platform.hpp"
 #include "util/io/logger.hpp"
+#include "util/io/FileSystem.hpp"
 #include "util/logger/Logger.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */

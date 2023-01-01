@@ -15,4 +15,5 @@ target_link_libraries(
     glm
     UTIL_Logger
     GEM_Managers_InputManager
+    GEM_Renderer_Context
 )

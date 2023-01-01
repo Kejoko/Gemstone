@@ -1,5 +1,3 @@
-#include "gemstone/shader/CompiledShader.hpp"
-
 #include <functional> // std::hash
 #include <map>
 #include <utility> // std::pair
@@ -11,6 +9,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/shader/logger.hpp"
+#include "gemstone/shader/CompiledShader.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

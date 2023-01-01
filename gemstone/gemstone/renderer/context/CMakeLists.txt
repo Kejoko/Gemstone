@@ -1,17 +1,18 @@
 #====================================================================
-# The input manager library
+# The window context library
 #====================================================================
 add_library(
-    GEM_Managers_InputManager
+    GEM_Renderer_Context
     SHARED
     logger.hpp
-    InputManager.hpp
-    InputManager.cpp
+    Context.hpp
+    Context.cpp
 )
 
 target_link_libraries(
-    GEM_Managers_InputManager
+    GEM_Renderer_Context
     PUBLIC
+    glad
     glfw
     UTIL_Logger
 )

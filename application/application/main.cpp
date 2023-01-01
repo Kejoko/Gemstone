@@ -22,9 +22,12 @@
 #include "gemstone/core.hpp"
 #include "gemstone/camera/logger.hpp"
 #include "gemstone/camera/Camera.hpp"
+#include "gemstone/managers/input/logger.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/mesh/logger.hpp"
 #include "gemstone/mesh/Mesh.hpp"
+#include "gemstone/renderer/context/logger.hpp"
+#include "gemstone/renderer/context/Context.hpp"
 #include "gemstone/shader/logger.hpp"
 #include "gemstone/shader/ShaderProgram.hpp"
 #include "gemstone/texture/logger.hpp"
@@ -71,6 +74,11 @@ void processInput(GLFWwindow* p_glfwWindow) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
+    // Bring the cursor back if we hit the escape key
+    if (p_inputManager->getPausePressed()) {
+        glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
     // End it all! ... if the user presses the quit key ...
     if (p_inputManager->getQuitPressed()) {
         glfwSetWindowShouldClose(p_glfwWindow, true);
@@ -86,63 +94,20 @@ int main(int argc, char* argv[]) {
 
     GEM::util::Logger::registerLoggers({
         {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::trace}
     });
-
-    const int initialWindowWidthPixels = 800;
-    const int initialWindowHeightPixels = 600;
-    const std::string windowTitle = "Application Name or someething, idrk ...";
-    GEM::Camera::windowWidthPixels = initialWindowWidthPixels;
-    GEM::Camera::windowHeightPixels = initialWindowHeightPixels;
 
     /* ------------------------------------ initialization ------------------------------------ */
 
-    LOG_INFO("Configureing GLFW");
+    std::shared_ptr<GEM::Context> p_context = GEM::Context::createPtr("Game boiiii", 800, 600);
 
-    // Initialize glfw
-    glfwInit();
-
-    // Configure glfw
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GEM_GLFW_MAJOR_VERSION);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GEM_GLFW_MINOR_VERSION);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // Doens't actually fix the red/black flickering effect
-#ifdef ON_MAC
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // For mac os
-#endif
-
-    // Create the window
-    GLFWmonitor* p_monitor = nullptr;
-    GLFWwindow* p_sharedGlfwWindow = nullptr;
-    GLFWwindow* p_glfwWindow = glfwCreateWindow(initialWindowWidthPixels, initialWindowHeightPixels, windowTitle.c_str(), p_monitor, p_sharedGlfwWindow);
-    if (p_glfwWindow == nullptr) {
-        LOG_CRITICAL("Failed to create GLFW window");
-        glfwTerminate();
-    }
-
-    // Make the context the current context
-    glfwMakeContextCurrent(p_glfwWindow);
-
-    // Tell opengl to use the framebuffer size callback when the window is resized
-    // This will be called once upon start up so we don't need to call glViewport right away
-    glfwSetFramebufferSizeCallback(p_glfwWindow, framebufferSizeCallback);
-
-    // Initialize glad
-    // Give glad the function to load the address of the OS specific OpenGL function pointers
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        LOG_CRITICAL("Failed to initialize GLAD");
-        return -1;
-    }
-
-    // Make sure that the cursor is disabled when we have the context active
-    glfwSetInputMode(p_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-    // Create the input manager so we can get input from our player
-    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::createPtr(p_context->getGLFWWindowPtr().get());
 
     // Create the camera we are going to be using
     glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -150,6 +115,7 @@ int main(int argc, char* argv[]) {
     glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
     GEM::Camera camera(
         p_inputManager,
+        p_context,
         cameraPosition,
         cameraLookVector,
         worldUpVector,
@@ -159,9 +125,6 @@ int main(int argc, char* argv[]) {
         60.0f,
         {}
     );
-
-    // For 3d depth buffering
-    glEnable(GL_DEPTH_TEST);
 
     /* ------------------------------------ shader stuff ------------------------------------ */
 
@@ -218,7 +181,8 @@ int main(int argc, char* argv[]) {
 
     // Create the render loop
     LOG_INFO("Starting render loop");
-    while (!glfwWindowShouldClose(p_glfwWindow)) {
+    // while (!glfwWindowShouldClose(p_glfwWindow)) {
+    while (!glfwWindowShouldClose(p_context->getGLFWWindowPtr().get())) {
         // ----- Update frame rating stuff ----- //
         currentFrameStartTime = glfwGetTime();
         deltaTime = currentFrameStartTime - lastFrameStartTime;
@@ -227,7 +191,8 @@ int main(int argc, char* argv[]) {
 
         // ----- Get input ----- //
 
-        processInput(p_glfwWindow);
+        // processInput(p_glfwWindow);
+        processInput(p_context->getGLFWWindowPtr().get());
         p_inputManager->collectInput();
 
         // ----- Rendering ----- //
@@ -292,16 +257,16 @@ int main(int argc, char* argv[]) {
         }
 
         // Check and call events and swap buffers
-        glfwSwapBuffers(p_glfwWindow);
+        // glfwSwapBuffers(p_glfwWindow);
+        glfwSwapBuffers(p_context->getGLFWWindowPtr().get());
         // glfwPollEvents();
     }
 
-    // De allocate all resources once they've outlived their purpose
-    LOG_INFO("Deallocating all resources");
+    GEM::InputManager::clean();
+    GEM::Context::clean();
 
-    // Clear all previously allocated glfw resources
-    LOG_INFO("Terminating GLFW");
-    glfwTerminate();
+    // LOG_TRACE("Terminating GLFW");
+    // glfwTerminate();
 
     return 0;
 }

@@ -161,6 +161,7 @@ private: // private static functions
 
 private: // private static member variables
     static bool initialized;
+    static std::shared_ptr<spdlog::details::thread_pool> threadPool;
     static std::vector<spdlog::sink_ptr> sinkPtrs;
     static std::map<std::string, std::shared_ptr<spdlog::async_logger>> loggerPtrMap;
 };

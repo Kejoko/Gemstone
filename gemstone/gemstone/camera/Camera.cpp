@@ -1,5 +1,3 @@
-#include "gemstone/camera/Camera.hpp"
-
 #include <cmath>
 #include <string>
 #include <vector>
@@ -10,7 +8,9 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/camera/logger.hpp"
+#include "gemstone/camera/Camera.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
+#include "gemstone/renderer/context/Context.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -45,6 +45,7 @@ int GEM::Camera::windowHeightPixels = 0;
  */
 GEM::Camera::Camera() : GEM::Camera::Camera(
     nullptr,
+    nullptr,
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 0.0f, -1.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
@@ -59,6 +60,7 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
  * @brief Construct a new GEM::Camera::Camera object from the given parameters
  * 
  * @param p_inputManager A pointer to the input manager responsible for capturing input for this context
+ * @param p_context The context for which this camera will be used in. The glfw window and whatnot
  * @param initialWorldPosition The initial position in the world of the camera
  * @param initialLookVector The initial look vector of the camera
  * @param worldUpVector The vecteor pointing straight up in world coordinates (usually 0, 1, 0)
@@ -70,6 +72,7 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
  */
 GEM::Camera::Camera(
     std::shared_ptr<GEM::InputManager> p_inputManager,
+    std::shared_ptr<GEM::Context> p_context,
     const glm::vec3 initialWorldPosition,
     const glm::vec3 initialLookVector,
     const glm::vec3 worldUpVector,
@@ -81,6 +84,7 @@ GEM::Camera::Camera(
 ) :
     m_id(++GEM::Camera::cameraCount),
     mp_inputManager(p_inputManager),
+    mp_context(p_context),
     m_worldPosition(initialWorldPosition),
     m_lookVector(initialLookVector),    // updated in the updateOrientation call
     m_upVector(),                       // updated in the updateOrientation call
@@ -130,7 +134,7 @@ glm::mat4 GEM::Camera::getViewMatrix() {
 glm::mat4 GEM::Camera::getProjectionMatrix() {
     return glm::perspective(
         glm::radians(m_fovDegrees), 
-        static_cast<float>(GEM::Camera::windowWidthPixels) / static_cast<float>(GEM::Camera::windowHeightPixels),
+        static_cast<float>(mp_context->getWindowWidthPixels()) / static_cast<float>(mp_context->getWindowHeightPixels()),
         m_settings.nearClippingPlane,    
         m_settings.farClippingPlane    
     );

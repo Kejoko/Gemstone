@@ -1,5 +1,3 @@
-#include "gemstone/texture/Texture.hpp"
-
 #include <string>
 
 #include <glad/glad.h>
@@ -9,6 +7,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/texture/logger.hpp"
+#include "gemstone/texture/Texture.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "gemstone/managers/input/InputManager.hpp"
+#include "gemstone/renderer/context/Context.hpp"
 
 namespace GEM {
     class Camera;
@@ -46,6 +47,7 @@ public: // public member functions
     Camera();
     Camera(
         std::shared_ptr<GEM::InputManager> p_inputManager,
+        std::shared_ptr<GEM::Context> p_context,
         const glm::vec3 initialWorldPosition,
         const glm::vec3 initialLookVector,
         const glm::vec3 worldUpVector,
@@ -72,8 +74,8 @@ private: // private static variables
 private: // private member variables
     const uint32_t m_id;
 
-    // This should also go within the application's context probably
-    std::shared_ptr<GEM::InputManager> mp_inputManager;
+    const std::shared_ptr<GEM::InputManager> mp_inputManager;
+    const std::shared_ptr<GEM::Context> mp_context;
 
     // Orientation vectors
     glm::vec3 m_worldPosition;

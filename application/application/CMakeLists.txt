@@ -18,9 +18,26 @@ target_include_directories(
 # Link everything to the application
 target_link_libraries(
     ${APPLICATION_NAME}
-    PRIVATE glad glfw glm
-    PRIVATE UTIL_IO UTIL_Logger
-    PRIVATE GEM_Camera GEM_Managers_InputManager GEM_Mesh GEM_Shader GEM_Texture
+
+    # Vendor
+    PRIVATE
+    glad
+    glfw
+    glm
+
+    # Gemstone Utility
+    PRIVATE
+    UTIL_IO
+    UTIL_Logger
+
+    # Gemstone
+    PRIVATE
+    GEM_Camera
+    GEM_Managers_InputManager
+    GEM_Mesh
+    GEM_Renderer_Context
+    GEM_Shader
+    GEM_Texture
 )
 
 # pre compile definitions for the target
