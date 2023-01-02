@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "gemstone/mesh/Mesh.hpp"
+#include "gemstone/renderer/mesh/Mesh.hpp"
 
 namespace GEM {
     class Scene;

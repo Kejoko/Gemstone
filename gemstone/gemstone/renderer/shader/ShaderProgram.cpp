@@ -1,4 +1,5 @@
 #include <string>
+#include <utility>
 
 #include <glad/glad.h>
 
@@ -8,10 +9,10 @@
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
-#include "gemstone/texture/Texture.hpp"
-#include "gemstone/shader/logger.hpp"
-#include "gemstone/shader/CompiledShader.hpp"
-#include "gemstone/shader/ShaderProgram.hpp"
+#include "gemstone/renderer/texture/Texture.hpp"
+#include "gemstone/renderer/shader/logger.hpp"
+#include "gemstone/renderer/shader/CompiledShader.hpp"
+#include "gemstone/renderer/shader/ShaderProgram.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -22,9 +23,83 @@ const std::string GEM::ShaderProgram::LOGGER_NAME = SHADER_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
+/**
+ * @brief A map of vertex and fragment shader IDs to linked shader programs
+ */
+std::map<std::pair<uint32_t, uint32_t>, GEM::ShaderProgram::Info> GEM::ShaderProgram::shaderProgramIDMap;
+
 /* ------------------------------ public static functions ------------------------------ */
 
 /* ------------------------------ private static functions ------------------------------ */
+
+void GEM::ShaderProgram::addShaderProgramToMap(const std::pair<uint32_t, uint32_t>& compiledIDs, const uint32_t shaderProgramID) {
+    LOG_FUNCTION_ENTRY_TRACE("vertex id {} , fragment id {} , shader program id {}", compiledIDs.first, compiledIDs.second, shaderProgramID);
+
+    GEM::ShaderProgram::shaderProgramIDMap.insert({compiledIDs, {shaderProgramID, 0}});
+
+    GEM::ShaderProgram::incrementShaderProgramUseCount(compiledIDs);
+}
+
+void GEM::ShaderProgram::incrementShaderProgramUseCount(const std::pair<uint32_t, uint32_t>& compiledIDs) {
+    LOG_FUNCTION_ENTRY_TRACE("vertex id {} , fragment id {}", compiledIDs.first, compiledIDs.second);
+
+    GEM::ShaderProgram::Info info = GEM::ShaderProgram::shaderProgramIDMap[compiledIDs];
+
+    LOG_TRACE("Use count for shader program with id {} was: {}", info.id, info.useCount);
+
+    info.useCount += 1;
+
+    LOG_TRACE("Use count for shader program with id {} is now: {}", info.id, info.useCount);
+
+    GEM::ShaderProgram::shaderProgramIDMap[compiledIDs] = info;
+}
+
+void GEM::ShaderProgram::decrementShaderProgramUseCount(const std::pair<uint32_t, uint32_t>& compiledIDs) {
+    LOG_FUNCTION_ENTRY_TRACE("vertex id {} , fragment id {}", compiledIDs.first, compiledIDs.second);
+
+    GEM::ShaderProgram::Info info = GEM::ShaderProgram::shaderProgramIDMap[compiledIDs];
+
+    LOG_TRACE("Use count for shader program with id {} was: {}", info.id, info.useCount);
+
+    info.useCount -= 1;
+
+    LOG_TRACE("Use count for shader program with id {} is now: {}", info.id, info.useCount);
+
+    // If the shader is still in use then update the use count
+    if (info.useCount > 0) {
+        LOG_TRACE("Updating use count for shader program with id {}", info.id);
+        GEM::ShaderProgram::shaderProgramIDMap[compiledIDs] = info;
+        return;
+    }
+
+    LOG_TRACE("Erasing shader program with id {} from map", info.id);
+    GEM::ShaderProgram::shaderProgramIDMap.erase(compiledIDs);
+
+    LOG_TRACE("Deleting shader program with id {}", info.id);
+    glDeleteProgram(info.id);
+}
+
+bool GEM::ShaderProgram::shaderProgramIsLinked(const std::pair<uint32_t, uint32_t>& compiledIDs) {
+    LOG_FUNCTION_ENTRY_TRACE("vertex id {} , fragment id {}", compiledIDs.first, compiledIDs.second);
+
+    bool isLinked = GEM::ShaderProgram::shaderProgramIDMap.count(compiledIDs) > 0;
+
+    if (isLinked) {
+        LOG_DEBUG("Found shader program for vertex id {} and fragment id {}", compiledIDs.first, compiledIDs.second);
+    }
+
+    return isLinked;
+}
+
+uint32_t GEM::ShaderProgram::getShaderProgramID(const std::pair<uint32_t, uint32_t>& compiledIDs) {
+    LOG_FUNCTION_ENTRY_TRACE("vertex id {} , fragment id {}", compiledIDs.first, compiledIDs.second);
+
+    uint32_t shaderProgramID = GEM::ShaderProgram::shaderProgramIDMap[compiledIDs].id;
+
+    LOG_TRACE("Got shader program id {}", shaderProgramID);
+
+    return shaderProgramID;
+}
 
 /**
  * @brief Create a shader program from the desired vertex and fragment shaders
@@ -37,6 +112,20 @@ const std::string GEM::ShaderProgram::LOGGER_NAME = SHADER_LOGGER_NAME;
  */
 uint32_t GEM::ShaderProgram::createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID) {
     LOG_FUNCTION_CALL_INFO("vertex id {} , fragment id {}", vertexShaderID, fragmentShaderID);
+
+    // Before we try to link a new shader program, we should see if there is already one linked using the same
+    // compiled shaders
+    const std::pair<uint32_t, uint32_t> compiledIDs = {vertexShaderID, fragmentShaderID};
+    if (GEM::ShaderProgram::shaderProgramIsLinked(compiledIDs)) {
+        // We found one given the vertex and fragment shaders, yay!
+        uint32_t shaderProgramID = GEM::ShaderProgram::getShaderProgramID(compiledIDs);
+
+        GEM::ShaderProgram::incrementShaderProgramUseCount(compiledIDs);
+
+        LOG_DEBUG("Successfully found linked shader program with id {}", shaderProgramID);
+
+        return shaderProgramID;
+    }
 
     // Create a shader program to link the vertex and fragment shaders and attach the compiled shaders
     uint32_t shaderProgramID = glCreateProgram();
@@ -55,6 +144,8 @@ uint32_t GEM::ShaderProgram::createShaderProgram(const uint32_t vertexShaderID, 
         LOG_CRITICAL(errorMessage);
         throw std::invalid_argument(errorMessage);
     }
+
+    GEM::ShaderProgram::addShaderProgramToMap(compiledIDs, shaderProgramID);
 
     LOG_DEBUG("Successfully linked shader program with id {}", shaderProgramID);
 
@@ -76,12 +167,12 @@ GEM::ShaderProgram::ShaderProgram(const char* vertexShaderSource, const char* fr
 {}
 
 /**
- * @brief Destroy the GEM::ShaderProgram::ShaderProgram object and use glDeleteProgram to delete this shader
- * program
+ * @brief Decrement the use count for this shader program. If the use count falls to 0 then we delete
+ * the shader program
  */
 GEM::ShaderProgram::~ShaderProgram() {
     LOG_FUNCTION_CALL_TRACE("id {}", m_id);
-    glDeleteProgram(m_id);
+    GEM::ShaderProgram::decrementShaderProgramUseCount({m_vertexShader.getID(), m_fragmentShader.getID()});
 }
 
 /**

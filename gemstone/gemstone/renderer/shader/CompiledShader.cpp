@@ -8,8 +8,8 @@
 #include "util/macros.hpp"
 #include "util/logger/Logger.hpp"
 
-#include "gemstone/shader/logger.hpp"
-#include "gemstone/shader/CompiledShader.hpp"
+#include "gemstone/renderer/shader/logger.hpp"
+#include "gemstone/renderer/shader/CompiledShader.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -100,7 +100,7 @@ void GEM::CompiledShader::incrementShaderUseCount(const size_t shaderSourceHash,
     GEM::CompiledShader::Info info = shaderIDMap[shaderSourceHash];
     info.useCount = info.useCount + 1;
     
-    LOG_TRACE("Use count for {} shader with hash {} is now: {}", GEM::CompiledShader::getShaderTypeString(shaderType), shaderSourceHash, info.useCount);
+    LOG_TRACE("Use count for {} shader with id {} and hash {} is now: {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id, shaderSourceHash, info.useCount);
 
     shaderIDMap[shaderSourceHash] = info;
 }
@@ -118,18 +118,18 @@ void GEM::CompiledShader::decrementShaderUseCount(const size_t shaderSourceHash,
     std::map<size_t, GEM::CompiledShader::Info>& shaderIDMap = GEM::CompiledShader::getShaderIDMap(shaderType);
     
     GEM::CompiledShader::Info info = shaderIDMap[shaderSourceHash];
-    LOG_TRACE("Use count for {} shader with hash {} was: {}", GEM::CompiledShader::getShaderTypeString(shaderType), shaderSourceHash, info.useCount);
+    LOG_TRACE("Use count for {} shader with id {} and hash {} was: {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id, shaderSourceHash, info.useCount);
     info.useCount = info.useCount - 1;
 
-    LOG_TRACE("Use count for {} shader with hash {} is now: {}", GEM::CompiledShader::getShaderTypeString(shaderType), shaderSourceHash, info.useCount);
+    LOG_TRACE("Use count for {} shader with id {} and hash {} is now: {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id, shaderSourceHash, info.useCount);
 
     if (info.useCount > 0) {
-        LOG_TRACE("Updating {} use count for shader with hash {}", GEM::CompiledShader::getShaderTypeString(shaderType), shaderSourceHash);
+        LOG_TRACE("Updating {} use count for shader with id {} and hash {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id, shaderSourceHash);
         shaderIDMap[shaderSourceHash] = info;
         return;
     }
 
-    LOG_TRACE("Erasing {} shader with hash {}", GEM::CompiledShader::getShaderTypeString(shaderType), shaderSourceHash);
+    LOG_TRACE("Erasing {} shader with id {} and hash {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id, shaderSourceHash);
     shaderIDMap.erase(shaderSourceHash);
 
     LOG_TRACE("Deleting {} shader with id {}", GEM::CompiledShader::getShaderTypeString(shaderType), info.id);
@@ -208,7 +208,7 @@ uint32_t GEM::CompiledShader::compileShader(const char* shaderSource, const GLen
 
         GEM::CompiledShader::incrementShaderUseCount(shaderSourceHash, shaderType);
 
-        LOG_DEBUG("Successfully found compiled shader program with id {}", shaderID);
+        LOG_DEBUG("Successfully found compiled shader with id {}", shaderID);
 
         return shaderID;
     }

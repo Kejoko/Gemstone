@@ -24,14 +24,14 @@
 #include "gemstone/camera/Camera.hpp"
 #include "gemstone/managers/input/logger.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
-#include "gemstone/mesh/logger.hpp"
-#include "gemstone/mesh/Mesh.hpp"
 #include "gemstone/renderer/context/logger.hpp"
 #include "gemstone/renderer/context/Context.hpp"
-#include "gemstone/shader/logger.hpp"
-#include "gemstone/shader/ShaderProgram.hpp"
-#include "gemstone/texture/logger.hpp"
-#include "gemstone/texture/Texture.hpp"
+#include "gemstone/renderer/mesh/logger.hpp"
+#include "gemstone/renderer/mesh/Mesh.hpp"
+#include "gemstone/renderer/shader/logger.hpp"
+#include "gemstone/renderer/shader/ShaderProgram.hpp"
+#include "gemstone/renderer/texture/logger.hpp"
+#include "gemstone/renderer/texture/Texture.hpp"
 
 #include "application/core.hpp"
 #include "application/shaders.hpp"
@@ -79,14 +79,14 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {IO_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::trace}
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
     });
 
     /* ------------------------------------ initialization ------------------------------------ */
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     glm::vec3 cameraInitialPosition = glm::vec3(0.0f, 0.0f, 3.0f);
     glm::vec3 cameraInitialLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    GEM::Camera camera(
+    std::shared_ptr<GEM::Camera> p_camera = std::make_shared<GEM::Camera>(GEM::Camera(
         p_context,
         p_inputManager,
         cameraInitialPosition,
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
         0.0f,
         60.0f,
         {}
-    );
+    ));
 
     /* ------------------------------------ shader stuff ------------------------------------ */
 
@@ -192,9 +192,9 @@ int main(int argc, char* argv[]) {
         shaderPrograms[0]->use();
 
         // Update the camera's orientation, position, and zoom
-        camera.update();
-        shaderPrograms[0]->setUniformMat4("viewMatrix", camera.getViewMatrix());
-        shaderPrograms[0]->setUniformMat4("projectionMatrix", camera.getProjectionMatrix());
+        p_camera->update();
+        shaderPrograms[0]->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        shaderPrograms[0]->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
         // Render the mesh many times, each time with a different position and rotation
         for (uint32_t i = 0; i < meshPtrs.size(); ++i) {

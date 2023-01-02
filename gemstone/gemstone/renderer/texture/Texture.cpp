@@ -6,8 +6,8 @@
 
 #include "util/logger/Logger.hpp"
 
-#include "gemstone/texture/logger.hpp"
-#include "gemstone/texture/Texture.hpp"
+#include "gemstone/renderer/texture/logger.hpp"
+#include "gemstone/renderer/texture/Texture.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

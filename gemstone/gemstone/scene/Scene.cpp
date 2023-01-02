@@ -3,7 +3,7 @@
 
 #include "util/logger/Logger.hpp"
 
-#include "gemstone/mesh/Mesh.hpp"
+#include "gemstone/renderer/mesh/Mesh.hpp"
 #include "gemstone/scene/logger.hpp"
 #include "gemstone/scene/Scene.hpp"
 

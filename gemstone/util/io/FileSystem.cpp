@@ -21,7 +21,7 @@ const std::string GEM::util::FileSystem::LOGGER_NAME = IO_LOGGER_NAME;
  * just prepends the absolute path to the gemstone project directory.
  * 
  * @param path The path to the file within gemstone (ex: application/assets/textures/missing_texture.png,
- * or ex: gemstone/gemstone/shader/logger.hpp)
+ * or ex: gemstone/gemstone/renderer/shader/logger.hpp)
  * @return std::string The absolute path to the file within the gemstone project
  */
 std::string GEM::util::FileSystem::getFullPath(const std::string& path) {

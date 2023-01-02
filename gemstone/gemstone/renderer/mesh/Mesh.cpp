@@ -1,4 +1,4 @@
-#include "gemstone/mesh/Mesh.hpp"
+#include "gemstone/renderer/mesh/Mesh.hpp"
 
 #include <string>
 #include <vector>
@@ -9,7 +9,7 @@
 
 #include "util/logger/Logger.hpp"
 
-#include "gemstone/mesh/logger.hpp"
+#include "gemstone/renderer/mesh/logger.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
