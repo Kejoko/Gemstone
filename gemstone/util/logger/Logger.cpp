@@ -1,5 +1,3 @@
-#include "util/logger/Logger.hpp"
-
 #include <ctime>
 #include <iomanip>
 #include <iostream>
@@ -15,6 +13,8 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
+#include "util/logger/Logger.hpp"
+
 /* ------------------------------ public static variables ------------------------------ */
 
 /* ------------------------------ private static variables ------------------------------ */
@@ -29,6 +29,8 @@ uint32_t GEM::util::Logger::Scoper::indentationCount = 0;
  * @brief A flag representing whether or not the spdlog stuff has been initialized
  */
 bool GEM::util::Logger::initialized = false;
+
+std::shared_ptr<spdlog::details::thread_pool> GEM::util::Logger::threadPool = nullptr;
 
 /**
  * @brief The spdlog sink pointers we initialize and givse to each of our loggers
@@ -50,6 +52,7 @@ std::map<std::string, std::shared_ptr<spdlog::async_logger>> GEM::util::Logger::
  */
 void GEM::util::Logger::init() {
     spdlog::init_thread_pool(8192, 1);
+    GEM::util::Logger::threadPool = spdlog::thread_pool();
 
     // Create the stdout sink
     // Use trace as max detail (allow all types to go to stdout log)
@@ -85,7 +88,7 @@ void GEM::util::Logger::registerLogger(const std::string& loggerName, const GEM:
         loggerName,
         GEM::util::Logger::sinkPtrs.begin(),
         GEM::util::Logger::sinkPtrs.end(),
-        spdlog::thread_pool(),
+        GEM::util::Logger::threadPool,
         spdlog::async_overflow_policy::block
     );
 

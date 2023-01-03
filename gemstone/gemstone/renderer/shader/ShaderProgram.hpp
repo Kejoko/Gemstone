@@ -1,8 +1,10 @@
 #pragma once
 
 #include <array>
+#include <memory>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include <glad/glad.h>
 
@@ -10,11 +12,13 @@
 
 #include "util/macros.hpp"
 
-#include "gemstone/shader/CompiledShader.hpp"
-#include "gemstone/texture/Texture.hpp"
+#include "gemstone/renderer/shader/CompiledShader.hpp"
+#include "gemstone/renderer/texture/Texture.hpp"
 
 namespace GEM {
+namespace Renderer {
     class ShaderProgram;
+}
 }
 
 /**
@@ -22,7 +26,7 @@ namespace GEM {
  * create shader programs by simply supplying the vertex and fragment shader sources
  * then calling use()
  */
-class GEM::ShaderProgram {
+class GEM::Renderer::ShaderProgram {
 public: // public static variables
     static const std::string LOGGER_NAME;
     
@@ -73,10 +77,25 @@ public: // public member functions
     void setUniformMat3(const std::string& uniformName, const glm::mat3& matrix);
     void setUniformMat4(const std::string& uniformName, const glm::mat4& matrix);
 
-    void setUniformTextureSampler(const std::string& uniformName, const GEM::Texture& texture);
+    void setUniformTextureSampler(const std::string& uniformName, std::shared_ptr<const GEM::Renderer::Texture> p_texture);
+
+private: // private enums and classes
+    struct Info {
+        uint32_t id;
+        uint32_t useCount;
+    };
 
 private: // private static functions
+    static void addShaderProgramToMap(const std::pair<uint32_t, uint32_t>& compiledIDs, const uint32_t shaderProgramID);
+    static void incrementShaderProgramUseCount(const std::pair<uint32_t, uint32_t>& compiledIDs);
+    static void decrementShaderProgramUseCount(const std::pair<uint32_t, uint32_t>& compiledIDs);
+    static bool shaderProgramIsLinked(const std::pair<uint32_t, uint32_t>& compiledIDs);
+
+    static uint32_t getShaderProgramID(const std::pair<uint32_t, uint32_t>& compiledIDs);
     static uint32_t createShaderProgram(const uint32_t vertexShaderID, const uint32_t fragmentShaderID);
+
+private: // private static variables
+    static std::map<std::pair<uint32_t, uint32_t>, GEM::Renderer::ShaderProgram::Info> shaderProgramIDMap;
 
 private: // private member variables
     const CompiledShader m_vertexShader;

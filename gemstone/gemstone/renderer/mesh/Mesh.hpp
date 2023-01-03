@@ -6,10 +6,12 @@
 #include <glm/glm.hpp>
 
 namespace GEM {
+namespace Renderer{
     class Mesh;
 }
+}
 
-class GEM::Mesh {
+class GEM::Renderer::Mesh {
 public: // public static variables
     const static std::string LOGGER_NAME;
 
