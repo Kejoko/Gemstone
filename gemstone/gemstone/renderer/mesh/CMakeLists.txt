@@ -2,7 +2,7 @@
 # The mesh library
 #====================================================================
 add_library(
-    GEM_Mesh
+    GEM_Renderer_Mesh
     SHARED
     logger.hpp
     Mesh.hpp
@@ -10,7 +10,7 @@ add_library(
 )
 
 target_link_libraries(
-    GEM_Mesh
+    GEM_Renderer_Mesh
     PUBLIC
     glad
     glm

@@ -1,11 +1,10 @@
-#include "gemstone/application/Application.hpp"
-
 #include <string>
 #include <vector>
 
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/application/logger.hpp"
+#include "gemstone/application/Application.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 

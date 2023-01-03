@@ -14,7 +14,7 @@
 /**
  * @brief The name of the logger the Texure class uses
  */
-const std::string GEM::Texture::LOGGER_NAME = TEXTURE_LOGGER_NAME;
+const std::string GEM::Renderer::Texture::LOGGER_NAME = TEXTURE_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -28,7 +28,7 @@ const std::string GEM::Texture::LOGGER_NAME = TEXTURE_LOGGER_NAME;
  * @param filename The filename of the texture we are loading
  * @return GLenum The input data format. GL_RGB if jpg image or GL_RGBA if png image
  */
-GLenum GEM::Texture::getInputFormat(const std::string& filename) {
+GLenum GEM::Renderer::Texture::getInputFormat(const std::string& filename) {
     // Get the file extension (everything after the last .)
     const std::string extension = filename.substr(
         filename.find_last_of(".") + 1
@@ -53,7 +53,7 @@ GLenum GEM::Texture::getInputFormat(const std::string& filename) {
  * @param filename The filename from which to load the texture
  * @return uint32_t The id of the newly created texture
  */
-uint32_t GEM::Texture::createTexture(const std::string& filename) {
+uint32_t GEM::Renderer::Texture::createTexture(const std::string& filename) {
     LOG_FUNCTION_CALL_INFO("filename {}", filename);
 
     // Create the texture in open gl and bind it so the subsequent configuration options affect it
@@ -96,7 +96,7 @@ uint32_t GEM::Texture::createTexture(const std::string& filename) {
         textureWidth,                           // Set the width of the resulting texture
         textureHeight,                          // Set the height of the resulting texture
         0,                                      // Should always be 0 -- legacy stuff
-        GEM::Texture::getInputFormat(filename), // Format of the source image (include alpha for png images)
+        GEM::Renderer::Texture::getInputFormat(filename), // Format of the source image (include alpha for png images)
         GL_UNSIGNED_BYTE,                       // Data type of the source image
         p_textureData                           // The actual image data
     );
@@ -113,21 +113,21 @@ uint32_t GEM::Texture::createTexture(const std::string& filename) {
 /* ------------------------------ public member functions ------------------------------ */
 
 /**
- * @brief Construct a new GEM::Texture::Texture object given a filename and the specified
+ * @brief Construct a new GEM::Renderer::Texture::Texture object given a filename and the specified
  * parameters
  * 
  * @param filename The filename of the texture to load
  * @param index The index we are assigning this texture to
  */
-GEM::Texture::Texture(const std::string& filename, const uint32_t index) :
-    m_id(GEM::Texture::createTexture(filename)),
+GEM::Renderer::Texture::Texture(const std::string& filename, const uint32_t index) :
+    m_id(GEM::Renderer::Texture::createTexture(filename)),
     m_index(index)
 {}
 
 /**
- * @brief Destroy the GEM::Texture::Texture object by deleting the opengl texture
+ * @brief Destroy the GEM::Renderer::Texture::Texture object by deleting the opengl texture
  */
-GEM::Texture::~Texture() {
+GEM::Renderer::Texture::~Texture() {
     LOG_FUNCTION_CALL_TRACE("id {}", m_id);
     glDeleteTextures(1, &m_id);
 }
@@ -135,7 +135,7 @@ GEM::Texture::~Texture() {
 /**
  * @brief Make this texture active and use it
  */
-void GEM::Texture::activate() const {
+void GEM::Renderer::Texture::activate() const {
     glActiveTexture(GL_TEXTURE0 + m_index);
     glBindTexture(GL_TEXTURE_2D, m_id);
 }

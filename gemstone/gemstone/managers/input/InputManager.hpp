@@ -9,7 +9,9 @@
 #include "util/macros.hpp"
 
 namespace GEM {
+namespace Managers {
     class InputManager;
+}
 }
 
 /**
@@ -20,7 +22,7 @@ namespace GEM {
  * InputManager pointer use createPtr and to subsequently get the InputManager
  * pointer use getPtr. At the end of the program's runtime you should call clean().
  */
-class GEM::InputManager {
+class GEM::Managers::InputManager {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
@@ -81,14 +83,14 @@ private: // private classes and enums
         CallbackHelper() = delete;
 
     private: // private static variables
-        static std::map<GLFWwindow* const, GEM::InputManager::CallbackHelper::CursorPosition> lastCursorPositionMap;
+        static std::map<GLFWwindow* const, GEM::Managers::InputManager::CallbackHelper::CursorPosition> lastCursorPositionMap;
     };
 
     friend class CallbackHelper;
 
 private: // private static variables
     // The mapping of glfw windows to input managers
-    static std::map<GLFWwindow* const, std::shared_ptr<GEM::InputManager>> inputManagerPtrCallbackMap;
+    static std::map<GLFWwindow* const, std::shared_ptr<GEM::Managers::InputManager>> inputManagerPtrCallbackMap;
 
 private: // private member functions
     // Only want to be able to create instances within getPtr function

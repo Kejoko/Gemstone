@@ -16,7 +16,7 @@
 /**
  * @brief The name of the logger the Mesh class uses
  */
-const std::string GEM::Mesh::LOGGER_NAME = MESH_LOGGER_NAME;
+const std::string GEM::Renderer::Mesh::LOGGER_NAME = MESH_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -29,7 +29,7 @@ const std::string GEM::Mesh::LOGGER_NAME = MESH_LOGGER_NAME;
  * 
  * @return std::vector<float> The vector of vertices making up this mesh
  */
-std::vector<float> GEM::Mesh::loadVertices() {
+std::vector<float> GEM::Renderer::Mesh::loadVertices() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
 
     return {
@@ -78,24 +78,12 @@ std::vector<float> GEM::Mesh::loadVertices() {
     };
 }
 
-std::vector<float> GEM::Mesh::loadVertices(const glm::vec3& worldPosition) {
-    std::vector<float> vertices = GEM::Mesh::loadVertices();
-
-    for (size_t i = 0; i < vertices.size(); i += 8) {
-        vertices[i+0] += worldPosition.x;
-        vertices[i+1] += worldPosition.y;
-        vertices[i+2] += worldPosition.z;
-    }
-
-    return vertices;
-}
-
 /**
  * @brief Create a vertex array object to store all of our vertex attribute's informations
  * 
  * @return uint32_t The id of the VAO
  */
-uint32_t GEM::Mesh::createVertexArrayObject() {
+uint32_t GEM::Renderer::Mesh::createVertexArrayObject() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
 
     uint32_t vertexArrayObjectID;
@@ -112,7 +100,7 @@ uint32_t GEM::Mesh::createVertexArrayObject() {
  * @param vertices The vector of vertices, color values, and texture coords
  * @return uint32_t The id of the VBO
  */
-uint32_t GEM::Mesh::createVertexBufferObject(const std::vector<float>& vertices) {
+uint32_t GEM::Renderer::Mesh::createVertexBufferObject(const std::vector<float>& vertices) {
     LOG_FUNCTION_ENTRY_TRACE("vertices size {}", vertices.size());
 
     uint32_t vertexBufferObjectID;
@@ -131,7 +119,7 @@ uint32_t GEM::Mesh::createVertexBufferObject(const std::vector<float>& vertices)
  * @param vertices The vector of vertices, color values, and texture coords
  * @return uint32_t The id of the EBO
  */
-uint32_t GEM::Mesh::createElementBufferObject(const std::vector<float>& vertices) {
+uint32_t GEM::Renderer::Mesh::createElementBufferObject(const std::vector<float>& vertices) {
     LOG_FUNCTION_ENTRY_TRACE("vertices size {}", vertices.size());
 
     uint32_t elementBufferObjectID;
@@ -147,7 +135,7 @@ uint32_t GEM::Mesh::createElementBufferObject(const std::vector<float>& vertices
 /**
  * @brief Configure the vertex attribute pointers for position, color, and texture coordinate information
  */
-void GEM::Mesh::configureVertexAttributePointers() {
+void GEM::Renderer::Mesh::configureVertexAttributePointers() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
 
     // Tell OpenGL how it should interpret the vertex data
@@ -193,14 +181,13 @@ void GEM::Mesh::configureVertexAttributePointers() {
  * @brief Generate and configure the VAO, the VBO, the EBO, and attribute pointers to be
  * stored for later use
  */
-GEM::Mesh::Mesh() :
-    m_vertices(GEM::Mesh::loadVertices()),
-    m_vertexArrayObjectID(GEM::Mesh::createVertexArrayObject()),
-    m_vertexBufferObjectID(GEM::Mesh::createVertexBufferObject(m_vertices)),
-    m_elementBufferObjectID(GEM::Mesh::createElementBufferObject(m_vertices)),
-    m_worldPosition(0.0f, 0.0f, 0.0f)
+GEM::Renderer::Mesh::Mesh() :
+    m_vertices(GEM::Renderer::Mesh::loadVertices()),
+    m_vertexArrayObjectID(GEM::Renderer::Mesh::createVertexArrayObject()),
+    m_vertexBufferObjectID(GEM::Renderer::Mesh::createVertexBufferObject(m_vertices)),
+    m_elementBufferObjectID(GEM::Renderer::Mesh::createElementBufferObject(m_vertices))
 {
-    GEM::Mesh::configureVertexAttributePointers();
+    GEM::Renderer::Mesh::configureVertexAttributePointers();
 
     // Unbind our VAO, VBO, and EBO so the next objects loaded in can handle it
     glBindVertexArray(0);
@@ -208,22 +195,7 @@ GEM::Mesh::Mesh() :
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-GEM::Mesh::Mesh(const glm::vec3& worldPosition) :
-    m_vertices(GEM::Mesh::loadVertices(worldPosition)),
-    m_vertexArrayObjectID(GEM::Mesh::createVertexArrayObject()),
-    m_vertexBufferObjectID(GEM::Mesh::createVertexBufferObject(m_vertices)),
-    m_elementBufferObjectID(GEM::Mesh::createElementBufferObject(m_vertices)),
-    m_worldPosition(worldPosition)
-{
-    GEM::Mesh::configureVertexAttributePointers();
-
-    // Unbind our VAO, VBO, and EBO so the next objects loaded in can handle it
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-GEM::Mesh::~Mesh() {
+GEM::Renderer::Mesh::~Mesh() {
     LOG_FUNCTION_CALL_TRACE("vertices size {}, VAO id {}, VBO id {}, EBO id {}", m_vertices.size(), m_vertexArrayObjectID, m_vertexBufferObjectID, m_elementBufferObjectID);
     glDeleteVertexArrays(1, &m_vertexArrayObjectID);
     glDeleteBuffers(1, &m_vertexBufferObjectID);
@@ -233,7 +205,7 @@ GEM::Mesh::~Mesh() {
 /**
  * @brief Bind the corresponding VAO, draw it, then unbind the VAO
  */
-void GEM::Mesh::draw() {
+void GEM::Renderer::Mesh::draw() {
     glBindVertexArray(m_vertexArrayObjectID);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);

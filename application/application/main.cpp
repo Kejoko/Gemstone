@@ -22,6 +22,10 @@
 #include "gemstone/core.hpp"
 #include "gemstone/camera/logger.hpp"
 #include "gemstone/camera/Camera.hpp"
+#include "gemstone/object/logger.hpp"
+#include "gemstone/object/Object.hpp"
+#include "gemstone/scene/logger.hpp"
+#include "gemstone/scene/Scene.hpp"
 #include "gemstone/managers/input/logger.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/renderer/context/logger.hpp"
@@ -42,13 +46,101 @@
 #define GENERAL_LOGGER_NAME "GENERAL"
 const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
-/**
- * @brief Get user input
- * 
- * @param p_glfwWindow A pointer to the glfw window
- */
+void processInput(GLFWwindow* p_glfwWindow);
+
+void render(
+    const std::shared_ptr<const GEM::Camera> p_camera,
+    const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
+    const std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>>& shaderProgramPtrs
+);
+
+int main(int argc, char* argv[]) {
+    UNUSED(argc);
+    UNUSED(argv);
+
+    ASSERT_GEM_VERSION();
+    ASSERT_APP_VERSION();
+
+    GEM::util::Logger::registerLoggers({
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {SCENE_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
+    });
+
+    /* ------------------------------------ initialization ------------------------------------ */
+
+    std::shared_ptr<GEM::Renderer::Context> p_context = GEM::Renderer::Context::createPtr("Game boiiii", 800, 600);
+
+    std::shared_ptr<GEM::Managers::InputManager> p_inputManager = GEM::Managers::InputManager::createPtr(p_context->getGLFWWindowPtr().get());
+
+    /* ------------------------------------ shader stuff ------------------------------------ */
+
+    LOG_INFO("Creating shaders");
+
+    std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>> shaderProgramPtrs;
+    try {
+        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
+        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
+    } catch (const std::exception& ex) {
+        LOG_CRITICAL("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
+        return 1;
+    }
+
+    /* ------------------------------------ create the scene ------------------------------------ */
+
+    std::shared_ptr<GEM::Scene> p_scene = std::make_shared<GEM::Scene>(p_context, p_inputManager, "some_scene_file.json");
+
+    /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
+
+    // For frame rate
+    float deltaTime = 0.0f;
+    float lastFrameStartTime = 0.0f;
+    float currentFrameStartTime = glfwGetTime();
+
+    // Determine what color we want to clear the screen to
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+    // Create the render loop
+    LOG_INFO("Starting render loop");
+    while (!glfwWindowShouldClose(p_context->getGLFWWindowPtr().get())) {
+        
+        // ----- Update frame rating stuff ----- //
+
+        currentFrameStartTime = glfwGetTime();
+        deltaTime = currentFrameStartTime - lastFrameStartTime;
+        GEM::Camera::deltaTime = deltaTime;
+        lastFrameStartTime = currentFrameStartTime;
+
+        // ----- Get input and update the scene ----- //
+
+        processInput(p_context->getGLFWWindowPtr().get());
+        p_inputManager->collectInput();
+
+        p_scene->update();
+
+        // ----- Rendering ----- //
+        
+        render(p_scene->getCameraPtr(), p_scene->getObjectPtrs(), shaderProgramPtrs);
+
+        // ----- Check and call events and swap buffers before next pass ----- //
+
+        glfwSwapBuffers(p_context->getGLFWWindowPtr().get());
+    }
+
+    GEM::Managers::InputManager::clean();
+    GEM::Renderer::Context::clean();
+    return 0;
+}
+
 void processInput(GLFWwindow* p_glfwWindow) {
-    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::getPtr(p_glfwWindow);
+    std::shared_ptr<GEM::Managers::InputManager> p_inputManager = GEM::Managers::InputManager::getPtr(p_glfwWindow);
 
     // Put us into wireframe mode if we hit the '1' key
     if (p_inputManager->getPolygonWireframePressed()) {
@@ -71,181 +163,33 @@ void processInput(GLFWwindow* p_glfwWindow) {
     }
 }
 
-int main(int argc, char* argv[]) {
-    UNUSED(argc);
-    UNUSED(argv);
-
-    ASSERT_GEM_VERSION();
-    ASSERT_APP_VERSION();
-
-    GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
-    });
-
-    /* ------------------------------------ initialization ------------------------------------ */
-
-    std::shared_ptr<GEM::Context> p_context = GEM::Context::createPtr("Game boiiii", 800, 600);
-
-    std::shared_ptr<GEM::InputManager> p_inputManager = GEM::InputManager::createPtr(p_context->getGLFWWindowPtr().get());
-
-    glm::vec3 cameraInitialPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraInitialLookVector = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 worldUpVector = glm::vec3(0.0f, 1.0f, 0.0f);
-    std::shared_ptr<GEM::Camera> p_camera = std::make_shared<GEM::Camera>(GEM::Camera(
-        p_context,
-        p_inputManager,
-        cameraInitialPosition,
-        cameraInitialLookVector,
-        worldUpVector,
-        0.0f,
-        -90.0f,
-        0.0f,
-        60.0f,
-        {}
-    ));
-
-    /* ------------------------------------ shader stuff ------------------------------------ */
-
-    LOG_INFO("Creating shaders");
-
-    std::vector<std::shared_ptr<GEM::ShaderProgram>> shaderPrograms;
-    try {
-        shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
-        shaderPrograms.push_back(std::make_shared<GEM::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
-    } catch (const std::exception& ex) {
-        LOG_CRITICAL("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
-        return 1;
-    }
-
-    /* ------------------------------------ vertices, indices, and EBO for drawing a rectangle ------------------------------------ */
-
-    LOG_INFO("Creating meshes");
-
-    std::vector<std::shared_ptr<GEM::Mesh>> meshPtrs = {
-        std::make_shared<GEM::Mesh>(glm::vec3( 0.0f,  0.0f,  0.0f)),
-        std::make_shared<GEM::Mesh>(glm::vec3( 2.0f,  5.0f, -15.0f)),
-        std::make_shared<GEM::Mesh>(glm::vec3(-1.5f, -2.2f, -2.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3(-3.8f, -2.0f, -12.3f)),
-        std::make_shared<GEM::Mesh>(glm::vec3( 2.4f, -0.4f, -3.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3(-1.7f,  3.0f, -7.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3( 1.3f, -2.0f, -2.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3( 1.5f,  2.0f, -2.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3( 1.5f,  0.2f, -1.5f)),
-        std::make_shared<GEM::Mesh>(glm::vec3(-1.3f,  1.0f, -1.5))
-    };
-
-    /* ------------------------------------ textures ------------------------------------ */
-
-    LOG_INFO("Creating textures");
-
-    GEM::Texture texture(GEM::util::FileSystem::getFullPath("application/assets/textures/wes.png"), 0);
-    GEM::Texture texture2(GEM::util::FileSystem::getFullPath("application/assets/textures/texture_coords.png"), 1);
-
-    // Set the uniforms in the shader to the correct textures
-    // match the value we set it to as the same value as whichever active texture it is
-    shaderPrograms[0]->use();
-    shaderPrograms[0]->setUniformTextureSampler("ourTexture", texture);
-    shaderPrograms[0]->setUniformTextureSampler("ourTexture2", texture2);
-
-    /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
-
-    // For frame rate
-    float deltaTime = 0.0f;
-    float lastFrameStartTime = 0.0f;
-    float currentFrameStartTime = glfwGetTime();
-
-    // Determine what color we want to clear the screen to
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-    // Create the render loop
-    LOG_INFO("Starting render loop");
-    // while (!glfwWindowShouldClose(p_glfwWindow)) {
-    while (!glfwWindowShouldClose(p_context->getGLFWWindowPtr().get())) {
-        // ----- Update frame rating stuff ----- //
-        currentFrameStartTime = glfwGetTime();
-        deltaTime = currentFrameStartTime - lastFrameStartTime;
-        GEM::Camera::deltaTime = deltaTime;
-        lastFrameStartTime = currentFrameStartTime;
-
-        // ----- Get input ----- //
-
-        // processInput(p_glfwWindow);
-        processInput(p_context->getGLFWWindowPtr().get());
-        p_inputManager->collectInput();
-
-        // ----- Rendering ----- //
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // Activate and bind textures
-        texture.activate();
-        texture2.activate();
-
-        // Set the active shader program
-        shaderPrograms[0]->use();
-
-        // Update the camera's orientation, position, and zoom
-        p_camera->update();
-        shaderPrograms[0]->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
-        shaderPrograms[0]->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
-
-        // Render the mesh many times, each time with a different position and rotation
-        for (uint32_t i = 0; i < meshPtrs.size(); ++i) {
-            // Create the matrix for moving the mesh in world space
-            glm::mat4 modelMatrix = glm::mat4(1.0f);
-
-            // // Move in world space to the origin for rotation
-            // modelMatrix = glm::translate(modelMatrix, -1.0f * meshPtrs[i]->getWorldPosition());
-
-            // // Rotate an amount based on time over an axis changing over time
-            // float sign = (i % 2 == 0) ? -1 : 1;
-            // modelMatrix = glm::rotate(
-            //     modelMatrix,
-            //     static_cast<float>(glfwGetTime()) * glm::radians(sign * 45.0f) * (i+1),
-            //     glm::normalize(
-            //         glm::vec3(
-            //             // 0.5f,
-            //             // static_cast<float>(glfwGetTime()) / 10 * (i+1) * 1.0f,
-            //             // i
-            //             0.0f,
-            //             0.0f,
-            //             1.0f
-            //         )
-            //     )
-            // );
-
-            // // Subtract the translation part of the model matrix to put it back to the
-            // // point it was at prior to spinning it
-            // glm::vec4 currentTranslationColumn = glm::column(modelMatrix, 3);
-            // modelMatrix = glm::translate(
-            //     modelMatrix,
-            //     -1.0f * glm::vec3(
-            //         currentTranslationColumn.x,
-            //         currentTranslationColumn.y,
-            //         currentTranslationColumn.z
-            //     )
-            // );
-
-            // // Move in world space to its original position
-            // modelMatrix = glm::translate(modelMatrix, meshPtrs[i]->getWorldPosition());
+void render(
+    const std::shared_ptr<const GEM::Camera> p_camera,
+    const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
+    const std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>>& shaderProgramPtrs
+) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-            shaderPrograms[0]->setUniformMat4("modelMatrix", modelMatrix);
-        
-            meshPtrs[i]->draw();
-        }
+    // Set the active shader program
+    shaderProgramPtrs[0]->use();
 
-        // Check and call events and swap buffers
-        glfwSwapBuffers(p_context->getGLFWWindowPtr().get());
+    // Render each of the meshes
+    for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
+
+        // Activate and bind textures the current object is using then tell the shader to use them
+        objectPtrs[i]->getTexture()->activate();
+        objectPtrs[i]->getTexture2()->activate();
+        shaderProgramPtrs[0]->setUniformTextureSampler("ourTexture", objectPtrs[i]->getTexture());
+        shaderProgramPtrs[0]->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getTexture2());
+
+        // Set the uniform matrices for where the camera is oriented
+        shaderProgramPtrs[0]->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        shaderProgramPtrs[0]->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+
+        // Create the matrix for moving the mesh in world space and assign it to the shader
+        shaderProgramPtrs[0]->setUniformMat4("modelMatrix", objectPtrs[i]->getModelMatrix());
+    
+        // Draw the object
+        objectPtrs[i]->draw();
     }
-
-    GEM::InputManager::clean();
-    GEM::Context::clean();
-    return 0;
 }

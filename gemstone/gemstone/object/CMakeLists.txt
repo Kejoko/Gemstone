@@ -1,18 +1,22 @@
 #====================================================================
-# The texture library
+# The object library
 #====================================================================
 add_library(
-    GEM_Renderer_Texture
+    GEM_Object
     SHARED
     logger.hpp
-    Texture.hpp
-    Texture.cpp
+    Object.hpp
+    Object.cpp
 )
 
 target_link_libraries(
-    GEM_Renderer_Texture
+    GEM_Object
     PUBLIC
     glad
-    stb
+    glfw
+    glm
+    UTIL_IO
     UTIL_Logger
+    GEM_Renderer_Mesh
+    GEM_Renderer_Texture
 )

@@ -69,8 +69,8 @@ GEM::Camera::Camera() : GEM::Camera::Camera(
  * @param settings The settings for the camera (clipping planes, fov min/max, movement speeds)
  */
 GEM::Camera::Camera(
-    std::shared_ptr<GEM::Context> p_context,
-    std::shared_ptr<GEM::InputManager> p_inputManager,
+    std::shared_ptr<GEM::Renderer::Context> p_context,
+    std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
     const glm::vec3 initialWorldPosition,
     const glm::vec3 initialLookVector,
     const glm::vec3 worldUpVector,
@@ -136,7 +136,7 @@ void GEM::Camera::update() {
  * 
  * @return glm::mat4 The view matrix of the camera
  */
-glm::mat4 GEM::Camera::getViewMatrix() {
+glm::mat4 GEM::Camera::getViewMatrix() const {
     return glm::lookAt(m_worldPosition, m_worldPosition + m_lookVector, m_upVector);
 }
 
@@ -145,7 +145,7 @@ glm::mat4 GEM::Camera::getViewMatrix() {
  * 
  * @return glm::mat4 The projection matrix for the camera
  */
-glm::mat4 GEM::Camera::getProjectionMatrix() {
+glm::mat4 GEM::Camera::getProjectionMatrix() const {
     return glm::perspective(
         glm::radians(m_fovDegrees), 
         static_cast<float>(mp_context->getWindowWidthPixels()) / static_cast<float>(mp_context->getWindowHeightPixels()),

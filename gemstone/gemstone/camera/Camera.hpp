@@ -44,8 +44,8 @@ public: // public static variables
 public: // public member functions
     Camera();
     Camera(
-        std::shared_ptr<GEM::Context> p_context,
-        std::shared_ptr<GEM::InputManager> p_inputManager,
+        std::shared_ptr<GEM::Renderer::Context> p_context,
+        std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
         const glm::vec3 initialWorldPosition,
         const glm::vec3 initialLookVector,
         const glm::vec3 worldUpVector,
@@ -58,22 +58,25 @@ public: // public member functions
     ~Camera();
     Camera(const Camera& other) = default;
 
+    uint32_t getID() const { return m_id; }
+    glm::mat4 getViewMatrix() const;
+    glm::mat4 getProjectionMatrix() const;
+
     void update();
+    
+private: // private static variables
+    static uint32_t cameraCount;
+
+private: // private member functions
     void updateOrientation();
     void updateFieldOfView();
     void updatePosition();
-    
-    glm::mat4 getViewMatrix();
-    glm::mat4 getProjectionMatrix();
-
-private: // private static variables
-    static uint32_t cameraCount;
 
 private: // private member variables
     const uint32_t m_id;
 
-    const std::shared_ptr<GEM::Context> mp_context;
-    const std::shared_ptr<GEM::InputManager> mp_inputManager;
+    const std::shared_ptr<GEM::Renderer::Context> mp_context;
+    const std::shared_ptr<GEM::Managers::InputManager> mp_inputManager;
 
     // Orientation vectors
     glm::vec3 m_worldPosition;

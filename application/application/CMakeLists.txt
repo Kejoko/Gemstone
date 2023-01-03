@@ -33,11 +33,13 @@ target_link_libraries(
     # Gemstone
     PRIVATE
     GEM_Camera
+    GEM_Object
+    GEM_Scene
     GEM_Managers_InputManager
-    GEM_Mesh
+    GEM_Renderer_Mesh
     GEM_Renderer_Context
-    GEM_Shader
-    GEM_Texture
+    GEM_Renderer_Shader
+    GEM_Renderer_Texture
 )
 
 # pre compile definitions for the target

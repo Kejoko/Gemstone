@@ -82,12 +82,15 @@ list(APPEND UTIL_LIBS UTIL_Logger)
 set(GEMSTONE_SOURCE_DIR "${GEMSTONE_ROOT_DIR}/gemstone")
 
 add_subdirectory("${GEMSTONE_SOURCE_DIR}")
-list(APPEND GEMSTONE_LIBS GEM_Application)
+# list(APPEND GEMSTONE_LIBS GEM_Application)
 list(APPEND GEMSTONE_LIBS GEM_Camera)
-list(APPEND GEMSTONE_LIBS GEM_Mesh)
+list(APPEND GEMSTONE_LIBS GEM_Object)
 list(APPEND GEMSTONE_LIBS GEM_Scene)
-list(APPEND GEMSTONE_LIBS GEM_Shader)
-list(APPEND GEMSTONE_LIBS GEM_Texture)
+list(APPEND GEMSTONE_LIBS GEM_Managers_InputManager)
+list(APPEND GEMSTONE_LIBS GEM_Renderer_Context)
+list(APPEND GEMSTONE_LIBS GEM_Renderer_Mesh)
+list(APPEND GEMSTONE_LIBS GEM_Renderer_Shader)
+list(APPEND GEMSTONE_LIBS GEM_Renderer_Texture)
 
 #====================================================================
 # The assets for the application

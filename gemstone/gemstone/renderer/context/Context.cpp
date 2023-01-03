@@ -19,7 +19,7 @@
 /**
  * @brief The name of the logger the context class uses
  */
-const std::string GEM::Context::LOGGER_NAME = CONTEXT_LOGGER_NAME;
+const std::string GEM::Renderer::Context::LOGGER_NAME = CONTEXT_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -27,17 +27,17 @@ const std::string GEM::Context::LOGGER_NAME = CONTEXT_LOGGER_NAME;
  * @brief The flag keeping track of whether or not we have already initialized glfw so we
  * know not to do it on subsequent context creations
  */
-bool GEM::Context::glfwInitialized = false;
+bool GEM::Renderer::Context::glfwInitialized = false;
 
 /**
  * @brief The map of window names to contexts
  */
-std::map<const std::string, std::shared_ptr<GEM::Context>> GEM::Context::contextPtrMap;
+std::map<const std::string, std::shared_ptr<GEM::Renderer::Context>> GEM::Renderer::Context::contextPtrMap;
 
 /**
  * @brief The map of glfw windows to contexts
  */
-std::map<GLFWwindow* const, std::shared_ptr<GEM::Context>> GEM::Context::contextPtrCallbackMap;
+std::map<GLFWwindow* const, std::shared_ptr<GEM::Renderer::Context>> GEM::Renderer::Context::contextPtrCallbackMap;
 
 /* ------------------------------ public static functions ------------------------------ */
 
@@ -51,30 +51,30 @@ std::map<GLFWwindow* const, std::shared_ptr<GEM::Context>> GEM::Context::context
  * @param name The name of the window
  * @param initialWindowWidthPixels The initial width of the window in pixels
  * @param initialWindowHeightPixels The initial width of the window in pixels
- * @return std::shared_ptr<GEM::Context> The shared pointer to the newly created context
+ * @return std::shared_ptr<GEM::Renderer::Context> The shared pointer to the newly created context
  */
-std::shared_ptr<GEM::Context> GEM::Context::createPtr(const std::string& name, int initialWindowWidthPixels, int initialWindowHeightPixels) {
+std::shared_ptr<GEM::Renderer::Context> GEM::Renderer::Context::createPtr(const std::string& name, int initialWindowWidthPixels, int initialWindowHeightPixels) {
     LOG_FUNCTION_CALL_INFO("name {} , initial window width pixels {} , initial window height pixels {}", name, initialWindowWidthPixels, initialWindowHeightPixels);
     
     // Check if one already exists, if it does then just use that one
-    if (GEM::Context::contextPtrMap.count(name) > 0) {
+    if (GEM::Renderer::Context::contextPtrMap.count(name) > 0) {
         const std::string contextExistsError = "Context with name [" + name + "] already exists. Not creating new one";
         LOG_CRITICAL(contextExistsError);
         throw std::runtime_error(contextExistsError);
     }
 
     // Create a shared pointer to a context object
-    std::shared_ptr<GEM::Context> p_context;
+    std::shared_ptr<GEM::Renderer::Context> p_context;
     {
-        GEM::Context context(name, initialWindowWidthPixels, initialWindowHeightPixels);
-        p_context = std::make_shared<GEM::Context>(std::move(context));
+        GEM::Renderer::Context context(name, initialWindowWidthPixels, initialWindowHeightPixels);
+        p_context = std::make_shared<GEM::Renderer::Context>(std::move(context));
     }
 
     LOG_TRACE("Updating context maps");
 
     // Update the maps
-    GEM::Context::contextPtrMap.insert({name, p_context});
-    GEM::Context::contextPtrCallbackMap.insert({p_context->getGLFWWindowPtr().get(), p_context});
+    GEM::Renderer::Context::contextPtrMap.insert({name, p_context});
+    GEM::Renderer::Context::contextPtrCallbackMap.insert({p_context->getGLFWWindowPtr().get(), p_context});
 
     // Give the shared pointer to the caller
     LOG_DEBUG("Context ptr {}", static_cast<void*>(p_context.get()));
@@ -87,33 +87,33 @@ std::shared_ptr<GEM::Context> GEM::Context::createPtr(const std::string& name, i
  * @details This will throw if no context exists for the associated name
  * 
  * @param name The name of the desired context
- * @return std::shared_ptr<GEM::Context> The shared pointer to the context associated with
+ * @return std::shared_ptr<GEM::Renderer::Context> The shared pointer to the context associated with
  * the given name
  */
-std::shared_ptr<GEM::Context> GEM::Context::getPtr(const std::string& name) {
+std::shared_ptr<GEM::Renderer::Context> GEM::Renderer::Context::getPtr(const std::string& name) {
     LOG_FUNCTION_CALL_INFO("name {}", name);
 
-    if (GEM::Context::contextPtrMap.count(name) <= 0) {
+    if (GEM::Renderer::Context::contextPtrMap.count(name) <= 0) {
         const std::string contextDoesntExistError = "Context with name [" + name + "] doesn't exist" ;
         LOG_ERROR(contextDoesntExistError);
         throw std::runtime_error(contextDoesntExistError);
     }
 
     // Get the context associated with this name
-    return GEM::Context::contextPtrMap[name];
+    return GEM::Renderer::Context::contextPtrMap[name];
 }
 
 /**
- * @brief Clear all of the GEM::Contexts from the maps so they are no longer being counted and can
+ * @brief Clear all of the GEM::Renderer::Contexts from the maps so they are no longer being counted and can
  * be destructed. Also call GLFW terminate.
  * 
  * @note This should only be called once! And it should only be called at the end when we not longer
  * need to use glfw!
  */
-void GEM::Context::clean() {
+void GEM::Renderer::Context::clean() {
     LOG_TRACE("Clearing Context maps");
-    GEM::Context::contextPtrMap.clear();
-    GEM::Context::contextPtrCallbackMap.clear();
+    GEM::Renderer::Context::contextPtrMap.clear();
+    GEM::Renderer::Context::contextPtrCallbackMap.clear();
 
     LOG_TRACE("Terminating GLFW");
     glfwTerminate();
@@ -132,7 +132,7 @@ void GEM::Context::clean() {
  * @return std::shared_ptr<GLFWwindow> The resulting GLFW Window pointer in a shared pointer for easy
  * resource management
  */
-std::shared_ptr<GLFWwindow> GEM::Context::Context::glfwInitCreateWindow(
+std::shared_ptr<GLFWwindow> GEM::Renderer::Context::Context::glfwInitCreateWindow(
         const std::string& windowTitle,
         int initialWindowWidthPixels,
         int initialWindowHeightPixels,
@@ -148,7 +148,7 @@ std::shared_ptr<GLFWwindow> GEM::Context::Context::glfwInitCreateWindow(
         static_cast<void*>(p_glfwSharedWindow.get())
     );
 
-    if (!GEM::Context::glfwInitialized) {
+    if (!GEM::Renderer::Context::glfwInitialized) {
         LOG_INFO("Initializing GLFW");
 
         // Initialize glfw
@@ -167,7 +167,7 @@ std::shared_ptr<GLFWwindow> GEM::Context::Context::glfwInitCreateWindow(
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE); // For mac os
 #endif
 
-        GEM::Context::glfwInitialized = true;
+        GEM::Renderer::Context::glfwInitialized = true;
     }
 
     // Create the window
@@ -194,7 +194,7 @@ std::shared_ptr<GLFWwindow> GEM::Context::Context::glfwInitCreateWindow(
 
     // Tell opengl to use the framebuffer size callback when the window is resized
     // This will be called once upon start up so we don't need to call glViewport right away
-    glfwSetFramebufferSizeCallback(p_glfwWindow.get(), GEM::Context::CallbackHelper::windowResizeCallback);
+    glfwSetFramebufferSizeCallback(p_glfwWindow.get(), GEM::Renderer::Context::CallbackHelper::windowResizeCallback);
 
     // Initialize glad
     // Give glad the function to load the address of the OS specific OpenGL function pointers
@@ -218,8 +218,8 @@ std::shared_ptr<GLFWwindow> GEM::Context::Context::glfwInitCreateWindow(
  * @param updatedWindowWidthPixels The updated window width in pixels
  * @param updatedWindowHeightPixels The updated window height in pixels
  */
-void GEM::Context::CallbackHelper::windowResizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPixels, int updatedWindowHeightPixels) {
-    std::shared_ptr<GEM::Context> p_context = GEM::Context::contextPtrCallbackMap[p_glfwWindow];
+void GEM::Renderer::Context::CallbackHelper::windowResizeCallback(GLFWwindow* p_glfwWindow, int updatedWindowWidthPixels, int updatedWindowHeightPixels) {
+    std::shared_ptr<GEM::Renderer::Context> p_context = GEM::Renderer::Context::contextPtrCallbackMap[p_glfwWindow];
 
     if (p_context == nullptr) {
         LOG_ERROR("No context to resize window for");
@@ -233,28 +233,28 @@ void GEM::Context::CallbackHelper::windowResizeCallback(GLFWwindow* p_glfwWindow
 /* ------------------------------ public member functions ------------------------------ */
 
 /**
- * @brief Destroy the GEM::Context::Context object
+ * @brief Destroy the GEM::Renderer::Context::Context object
  */
-GEM::Context::~Context() {
+GEM::Renderer::Context::~Context() {
     LOG_FUNCTION_CALL_TRACE("this ptr {}", static_cast<void*>(this));
 }
 
 /* ------------------------------ private member functions ------------------------------ */
 
 /**
- * @brief Construct a new GEM::Context::Context object given the name of the window and the initial width,height in pixels
+ * @brief Construct a new GEM::Renderer::Context::Context object given the name of the window and the initial width,height in pixels
  * 
  * @param name The name of the window
  * @param initialWindowWidthPixels The initial width of the window in pixels
  * @param initialWindowHeightPixels The initial height of the window in pixels
  */
-GEM::Context::Context(const std::string& name, int initialWindowWidthPixels, int initialWindowHeightPixels) :
+GEM::Renderer::Context::Context(const std::string& name, int initialWindowWidthPixels, int initialWindowHeightPixels) :
     m_name(name),
     m_windowWidthPixels(initialWindowWidthPixels),
     m_windowHeightPixels(initialWindowHeightPixels),
     mp_glfwMonitor(nullptr),
     mp_glfwSharedWindow(nullptr),
-    mp_glfwWindow(GEM::Context::glfwInitCreateWindow(
+    mp_glfwWindow(GEM::Renderer::Context::glfwInitCreateWindow(
         m_name,
         m_windowWidthPixels,
         m_windowHeightPixels,

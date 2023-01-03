@@ -7,7 +7,9 @@
 #include <glad/glad.h>
 
 namespace GEM {
+namespace Renderer {
     class CompiledShader;
+}
 }
 
 /**
@@ -15,7 +17,7 @@ namespace GEM {
  * call glDeleteShader and be removed from the shaderIDMap in the Shader class
  * 
  */
-class GEM::CompiledShader {
+class GEM::Renderer::CompiledShader {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
@@ -34,7 +36,7 @@ private: // private static enums and classes
     };
 
 private: // private static functions
-    static std::map<size_t, GEM::CompiledShader::Info>& getShaderIDMap(const GLenum shaderType);
+    static std::map<size_t, GEM::Renderer::CompiledShader::Info>& getShaderIDMap(const GLenum shaderType);
 
     static std::string getShaderTypeString(const GLenum shaderType);
 
@@ -48,8 +50,8 @@ private: // private static functions
     static uint32_t compileShader(const char* shaderSource, const GLenum shaderType);
 
 private: // private static variables
-    static std::map<size_t, GEM::CompiledShader::Info> vertexShaderIDMap;
-    static std::map<size_t, GEM::CompiledShader::Info> fragmentShaderIDMap;
+    static std::map<size_t, GEM::Renderer::CompiledShader::Info> vertexShaderIDMap;
+    static std::map<size_t, GEM::Renderer::CompiledShader::Info> fragmentShaderIDMap;
 
 private: // private member variables
     const size_t m_sourceHash;

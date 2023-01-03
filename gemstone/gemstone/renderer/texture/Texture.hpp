@@ -5,10 +5,12 @@
 #include <glad/glad.h>
 
 namespace GEM {
+namespace Renderer {
     class Texture;
 }
+}
 
-class GEM::Texture {
+class GEM::Renderer::Texture {
 public: // public static variables
     static const std::string LOGGER_NAME;
 

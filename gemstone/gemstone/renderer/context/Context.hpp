@@ -7,7 +7,9 @@
 #include <GLFW/glfw3.h>
 
 namespace GEM {
+namespace Renderer {
     class Context;
+}
 }
 
 /**
@@ -16,7 +18,7 @@ namespace GEM {
  * At the end of the program's runtime we must call clean to get rid of all of the context's remaining in the maps.
  * 
  */
-class GEM::Context {
+class GEM::Renderer::Context {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
@@ -60,8 +62,8 @@ private: // private static functions
 
 private: // private static variables
     static bool glfwInitialized;
-    static std::map<const std::string, std::shared_ptr<GEM::Context>> contextPtrMap;
-    static std::map<GLFWwindow* const, std::shared_ptr<GEM::Context>> contextPtrCallbackMap;
+    static std::map<const std::string, std::shared_ptr<GEM::Renderer::Context>> contextPtrMap;
+    static std::map<GLFWwindow* const, std::shared_ptr<GEM::Renderer::Context>> contextPtrCallbackMap;
 
 private: // private member functions
     Context(const std::string& name, int initialWindowWidthPixels, int initialWindowHeightPixels);

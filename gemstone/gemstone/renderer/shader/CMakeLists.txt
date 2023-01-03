@@ -2,7 +2,7 @@
 # The shader library
 #====================================================================
 add_library(
-    GEM_Shader
+    GEM_Renderer_Shader
     SHARED
     logger.hpp
     CompiledShader.hpp
@@ -12,10 +12,10 @@ add_library(
 )
 
 target_link_libraries(
-    GEM_Shader
+    GEM_Renderer_Shader
     PUBLIC
     glad
     glm
     UTIL_Logger
-    GEM_Texture
+    GEM_Renderer_Texture
 )
