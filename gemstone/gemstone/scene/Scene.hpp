@@ -9,6 +9,7 @@
 #include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/renderer/context/Context.hpp"
 #include "gemstone/renderer/mesh/Mesh.hpp"
+#include "gemstone/renderer/shader/ShaderProgram.hpp"
 
 namespace GEM {
     class Scene;
@@ -22,7 +23,9 @@ public: // public member functions
     Scene(
         std::shared_ptr<GEM::Renderer::Context> p_context,
         std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
-        const std::string& filename
+        const std::string& filename,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
     );
     ~Scene();
 
@@ -32,6 +35,7 @@ public: // public member functions
 
     std::shared_ptr<const GEM::Camera> getCameraPtr() const { return mp_camera; }
     const std::vector<std::shared_ptr<GEM::Object>>& getObjectPtrs() const { return m_objectPtrs; }
+    const std::vector<std::shared_ptr<GEM::Object>>& getLightPtrs() const { return m_lightPtrs; }
 
     void update();
 
@@ -42,7 +46,14 @@ private: // private static functions
         std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
         const std::string& filename
     );
-    std::vector<std::shared_ptr<GEM::Object>> loadObjects(const std::string& filename);
+    std::vector<std::shared_ptr<GEM::Object>> loadObjects(
+        const std::string& filename,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader
+    );
+    std::vector<std::shared_ptr<GEM::Object>> loadLights(
+        const std::string& filename,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+    );
 
 private: // private static variables
     static uint32_t sceneCount;
@@ -57,4 +68,5 @@ private: // private member variables
     
     std::shared_ptr<GEM::Camera> mp_camera;
     std::vector<std::shared_ptr<GEM::Object>> m_objectPtrs;
+    std::vector<std::shared_ptr<GEM::Object>> m_lightPtrs;
 };

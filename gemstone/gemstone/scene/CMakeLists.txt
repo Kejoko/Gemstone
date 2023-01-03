@@ -18,6 +18,7 @@ target_link_libraries(
     GEM_Camera
     GEM_Object
     GEM_Managers_InputManager
-    GEM_Renderer_Mesh
     GEM_Renderer_Context
+    GEM_Renderer_Mesh
+    GEM_Renderer_Shader
 )

@@ -46,12 +46,20 @@
 #define GENERAL_LOGGER_NAME "GENERAL"
 const std::string LOGGER_NAME = GENERAL_LOGGER_NAME;
 
+#define SHADER1_INDEX 0
+#define SHADER2_INDEX 1
+#define OBJECT_LIGHTING_INDEX 2
+#define LIGHT_LIGHTING_INDEX 3
+
+#define CURRENT_OBJECT_SHADER_INDEX OBJECT_LIGHTING_INDEX
+#define CURRENT_LIGHT_SHADER_INDEX LIGHT_LIGHTING_INDEX
+
 void processInput(GLFWwindow* p_glfwWindow);
 
 void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>>& shaderProgramPtrs
+    const std::vector<std::shared_ptr<GEM::Object>>& lightPtrs
 );
 
 int main(int argc, char* argv[]) {
@@ -88,6 +96,8 @@ int main(int argc, char* argv[]) {
     try {
         shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
         shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
+        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(strippedVertexShaderSource, objectLightingFragShaderSource));
+        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(strippedVertexShaderSource, lightLightingFragShaderSource));
     } catch (const std::exception& ex) {
         LOG_CRITICAL("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
         return 1;
@@ -95,7 +105,13 @@ int main(int argc, char* argv[]) {
 
     /* ------------------------------------ create the scene ------------------------------------ */
 
-    std::shared_ptr<GEM::Scene> p_scene = std::make_shared<GEM::Scene>(p_context, p_inputManager, "some_scene_file.json");
+    std::shared_ptr<GEM::Scene> p_scene = std::make_shared<GEM::Scene>(
+        p_context,
+        p_inputManager,
+        "some_scene_file.json",
+        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX],
+        shaderProgramPtrs[CURRENT_LIGHT_SHADER_INDEX]
+    );
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
 
@@ -105,7 +121,7 @@ int main(int argc, char* argv[]) {
     float currentFrameStartTime = glfwGetTime();
 
     // Determine what color we want to clear the screen to
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.125f, 0.125f, 0.125f, 1.0f);
 
     // Create the render loop
     LOG_INFO("Starting render loop");
@@ -127,7 +143,7 @@ int main(int argc, char* argv[]) {
 
         // ----- Rendering ----- //
         
-        render(p_scene->getCameraPtr(), p_scene->getObjectPtrs(), shaderProgramPtrs);
+        render(p_scene->getCameraPtr(), p_scene->getObjectPtrs(), p_scene->getLightPtrs());
 
         // ----- Check and call events and swap buffers before next pass ----- //
 
@@ -166,28 +182,54 @@ void processInput(GLFWwindow* p_glfwWindow) {
 void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>>& shaderProgramPtrs
+    const std::vector<std::shared_ptr<GEM::Object>>& lightPtrs
 ) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-    // Set the active shader program
-    shaderProgramPtrs[0]->use();
+
+    glm::vec4 averageLightColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Render each of the lights
+    for (uint32_t i = 0; i < lightPtrs.size(); ++i) {
+        glm::vec4 currentLightColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Set the active shader program
+        lightPtrs[i]->getShaderProgramPtr()->use();
+        lightPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", currentLightColor);
+
+        // Set the uniform matrices for where the camera is oriented
+        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+
+        // Create the matrix for moving the mesh in world space and assign it to the shader
+        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("modelMatrix", lightPtrs[i]->getModelMatrix());
+    
+        // Draw the object
+        lightPtrs[i]->draw();
+
+        averageLightColor += currentLightColor;
+    }
+
+    averageLightColor /= averageLightColor.w;
 
     // Render each of the meshes
     for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
+        // Set the active shader program
+        objectPtrs[i]->getShaderProgramPtr()->use();
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("objectColor", {1.0f, 0.5f, 0.31f, 1.0f});
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", averageLightColor);
 
-        // Activate and bind textures the current object is using then tell the shader to use them
-        objectPtrs[i]->getTexture()->activate();
-        objectPtrs[i]->getTexture2()->activate();
-        shaderProgramPtrs[0]->setUniformTextureSampler("ourTexture", objectPtrs[i]->getTexture());
-        shaderProgramPtrs[0]->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getTexture2());
+        // // Activate and bind textures the current object is using then tell the shader to use them
+        // objectPtrs[i]->getTexturePtr()->activate();
+        // objectPtrs[i]->getTexture2Ptr()->activate();
+        // objectPtrs[i]->getShaderProgramPtr()->setUniformTextureSampler("ourTexture", objectPtrs[i]->getTexturePtr());
+        // objectPtrs[i]->getShaderProgramPtr()->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getTexture2Ptr());
 
         // Set the uniform matrices for where the camera is oriented
-        shaderProgramPtrs[0]->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
-        shaderProgramPtrs[0]->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
         // Create the matrix for moving the mesh in world space and assign it to the shader
-        shaderProgramPtrs[0]->setUniformMat4("modelMatrix", objectPtrs[i]->getModelMatrix());
+        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("modelMatrix", objectPtrs[i]->getModelMatrix());
     
         // Draw the object
         objectPtrs[i]->draw();

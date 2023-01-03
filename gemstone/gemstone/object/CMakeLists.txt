@@ -18,5 +18,6 @@ target_link_libraries(
     UTIL_IO
     UTIL_Logger
     GEM_Renderer_Mesh
+    GEM_Renderer_Shader
     GEM_Renderer_Texture
 )

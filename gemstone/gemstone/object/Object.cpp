@@ -62,6 +62,7 @@ std::shared_ptr<GEM::Renderer::Texture> GEM::Object::loadTexture(const std::stri
  * @param meshFilename The file where the object's mesh is stored
  * @param textureFilename The file where the object's texture is stored
  * @param textureFilename2 The file where the object's texture is stored
+ * @param p_shaderProgram The shader program for this object to use
  * @param initialWorldPosition The initial position in the world the object will spawn in
  * @param initialScale The initial scale the object has
  * @param initialRotationAxis The initial axis of rotation the object has
@@ -73,6 +74,7 @@ GEM::Object::Object(
     const std::string& meshFilename,
     const std::string& textureFilename,
     const std::string& textureFilename2,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram,
     const glm::vec3& initialWorldPosition,
     const glm::vec3& initialScale,
     const glm::vec3& initialRotationAxis,
@@ -85,6 +87,7 @@ GEM::Object::Object(
     mp_mesh(GEM::Object::loadMesh(m_meshFilename)),
     mp_texture(GEM::Object::loadTexture(m_textureFilename, 0)),
     mp_texture2(GEM::Object::loadTexture(m_textureFilename2, 1)),
+    mp_shaderProgram(p_shaderProgram),
     m_worldPosition(initialWorldPosition),
     m_scale(initialScale),
     m_rotationAxis(initialRotationAxis),
@@ -111,22 +114,22 @@ GEM::Object::~Object() {
  * @brief Update the object within the world (position, scale, rotation, etc)
  */
 void GEM::Object::update() {
-    const float glfwTime = glfwGetTime();
+    // const float glfwTime = glfwGetTime();
 
-    m_rotationAxis = glm::vec3(
-        std::sin(glfwTime),
-        std::sin(static_cast<float>(glfwTime) / 10 * (m_id + 1) * 1.0f),
-        std::cos(glfwTime)
-    );
+    // m_rotationAxis = glm::vec3(
+    //     std::sin(glfwTime),
+    //     std::sin(static_cast<float>(glfwTime) / 10 * (m_id + 1) * 1.0f),
+    //     std::cos(glfwTime)
+    // );
 
-    m_rotationAmountDegrees = static_cast<float>(m_id + 0.65 * glfwTime);
+    // m_rotationAmountDegrees = static_cast<float>(m_id + 0.65 * glfwTime);
 
-    glm::vec3 scaleOffset = 0.0015f * glm::vec3(
-        std::sin(1 * m_id + glfwTime),
-        std::sin(2 * m_id + glfwTime),
-        std::sin(3 * m_id + glfwTime)
-    );
-    m_scale = m_scale + scaleOffset;
+    // glm::vec3 scaleOffset = 0.0015f * glm::vec3(
+    //     std::sin(1 * m_id + glfwTime),
+    //     std::sin(2 * m_id + glfwTime),
+    //     std::sin(3 * m_id + glfwTime)
+    // );
+    // m_scale = m_scale + scaleOffset;
 }
 
 /**

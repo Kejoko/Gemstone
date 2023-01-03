@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 
 #include "gemstone/renderer/mesh/Mesh.hpp"
+#include "gemstone/renderer/shader/ShaderProgram.hpp"
 #include "gemstone/renderer/texture/Texture.hpp"
 
 namespace GEM {
@@ -22,6 +23,7 @@ public: // public member functions
         const std::string& meshFilename,
         const std::string& textureFilename,
         const std::string& textureFilename2,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram,
         const glm::vec3& initialWorldPosition,
         const glm::vec3& initialScale,
         const glm::vec3& initialRotationAxis,
@@ -33,8 +35,9 @@ public: // public member functions
     glm::vec3 getScale() const { return m_scale; }
     glm::mat4 getModelMatrix() const;
 
-    std::shared_ptr<const GEM::Renderer::Texture> getTexture() const { return mp_texture; }
-    std::shared_ptr<const GEM::Renderer::Texture> getTexture2() const { return mp_texture2; }
+    std::shared_ptr<const GEM::Renderer::Texture> getTexturePtr() const { return mp_texture; }
+    std::shared_ptr<const GEM::Renderer::Texture> getTexture2Ptr() const { return mp_texture2; }
+    std::shared_ptr<GEM::Renderer::ShaderProgram> getShaderProgramPtr() const { return mp_shaderProgram; }
 
     void update();
     void draw();
@@ -52,6 +55,7 @@ private: // private member variables
     std::shared_ptr<GEM::Renderer::Mesh> mp_mesh;
     std::shared_ptr<GEM::Renderer::Texture> mp_texture;
     std::shared_ptr<GEM::Renderer::Texture> mp_texture2;
+    std::shared_ptr<GEM::Renderer::ShaderProgram> mp_shaderProgram;
 
     glm::vec3 m_worldPosition;
     glm::vec3 m_scale;

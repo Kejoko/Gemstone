@@ -85,22 +85,64 @@ std::shared_ptr<GEM::Camera> GEM::Scene::loadCamera(
  * @brief Load all of the objects in the scene from the scene's file
  * 
  * @param filename The filename representing the scene
+ * @param p_objectShader The default shader program to use on the objects
  * @return std::vector<std::shared_ptr<GEM::Object>> The vector containing shared pointers for all of the objects
  */
-std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(const std::string& filename) {
+std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
+    const std::string& filename,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader
+) {
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    // Full scene with many objects scaling and rotating
+    // std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
+    //     std::make_shared<GEM::Object>(0, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3( 0.0f,  0.0f,   0.0f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(1, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 2.0f,  5.0f, -15.0f), glm::vec3(0.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(2, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3(-1.5f, -2.2f,  -2.5f), glm::vec3(1.0f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(3, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(4, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3( 2.4f, -0.4f,  -3.5f), glm::vec3(0.5f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(5, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3(-1.7f,  3.0f,  -7.5f), glm::vec3(0.5f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(6, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 1.3f, -2.0f,  -2.5f), glm::vec3(1.0f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(7, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  2.0f,  -2.5f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(8, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  0.2f,  -1.5f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
+    //     std::make_shared<GEM::Object>(9, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3(-1.3f,  1.0f,  -1.5f), glm::vec3(0.5f, 0.6f, 0.7f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f)
+    // };
+
+    std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
+        std::make_shared<GEM::Object>(
+            0,
+            "mesh.obj",
+            "application/assets/textures/wes.png",
+            "application/assets/textures/texture_coords.png",
+            p_objectShader,
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            0.0f
+        )
+    };
+
+    return objectPtrs;
+}
+
+std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadLights(
+    const std::string& filename,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
     std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
-        std::make_shared<GEM::Object>(0, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3( 0.0f,  0.0f,   0.0f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(1, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 2.0f,  5.0f, -15.0f), glm::vec3(0.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(2, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3(-1.5f, -2.2f,  -2.5f), glm::vec3(1.0f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(3, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(4, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3( 2.4f, -0.4f,  -3.5f), glm::vec3(0.5f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(5, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3(-1.7f,  3.0f,  -7.5f), glm::vec3(0.5f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(6, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 1.3f, -2.0f,  -2.5f), glm::vec3(1.0f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(7, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  2.0f,  -2.5f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(8, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  0.2f,  -1.5f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-        std::make_shared<GEM::Object>(9, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3(-1.3f,  1.0f,  -1.5f), glm::vec3(0.5f, 0.6f, 0.7f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f)
+        std::make_shared<GEM::Object>(
+            1,
+            "mesh.obj",
+            "application/assets/textures/wes.png",
+            "application/assets/textures/texture_coords.png",
+            p_lightShader,
+            glm::vec3(1.2f, 1.0f, -2.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            0.0f
+        )
     };
 
     return objectPtrs;
@@ -114,11 +156,15 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(const std::str
  * @param p_context The context for which this scene will be drawn
  * @param p_inputManager The input manager used by the players in this scene
  * @param filename The filename representing the scene. This has all of the objects and lights and such
+ * @param p_objectShader The default shader program to use on the objects in the scene
+ * @param p_lightShader The default shader program to use on the lights in the scene
  */
 GEM::Scene::Scene(
     std::shared_ptr<GEM::Renderer::Context> p_context,
     std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
-    const std::string& filename
+    const std::string& filename,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
 ) :
     m_id(++GEM::Scene::sceneCount),
     m_filename(GEM::util::FileSystem::getFullPath(filename)),
@@ -126,7 +172,8 @@ GEM::Scene::Scene(
     mp_context(p_context),
     mp_inputManager(p_inputManager),
     mp_camera(GEM::Scene::loadCamera(mp_context, mp_inputManager, m_filename)),
-    m_objectPtrs(GEM::Scene::loadObjects(m_filename))
+    m_objectPtrs(GEM::Scene::loadObjects(m_filename, p_objectShader)),
+    m_lightPtrs(GEM::Scene::loadLights(m_filename, p_lightShader))
 {
     LOG_FUNCTION_CALL_INFO(
         "id {} , filename {} , name {} , camera id {} , object count {}",
@@ -136,6 +183,7 @@ GEM::Scene::Scene(
         mp_camera->getID(),
         m_objectPtrs.size()
     );
+    UNUSED(p_lightShader);
 }
 
 /**

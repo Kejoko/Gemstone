@@ -196,7 +196,14 @@ GEM::Renderer::Mesh::Mesh() :
 }
 
 GEM::Renderer::Mesh::~Mesh() {
-    LOG_FUNCTION_CALL_TRACE("vertices size {}, VAO id {}, VBO id {}, EBO id {}", m_vertices.size(), m_vertexArrayObjectID, m_vertexBufferObjectID, m_elementBufferObjectID);
+    LOG_FUNCTION_CALL_TRACE(
+        "this ptr {} , vertices size {}, VAO id {}, VBO id {}, EBO id {}",
+        static_cast<void*>(this),
+        m_vertices.size(),
+        m_vertexArrayObjectID,
+        m_vertexBufferObjectID,
+        m_elementBufferObjectID
+    );
     glDeleteVertexArrays(1, &m_vertexArrayObjectID);
     glDeleteBuffers(1, &m_vertexBufferObjectID);
     glDeleteBuffers(1, &m_elementBufferObjectID);

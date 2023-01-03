@@ -348,29 +348,29 @@ void GEM::Renderer::ShaderProgram::setUniformFloat(const std::string& uniformNam
     }
     glUniform1f(uniformLocation, value);
 }
-void GEM::Renderer::ShaderProgram::setUniformVec2(const std::string& uniformName, const std::array<float, 2>& values) {
+void GEM::Renderer::ShaderProgram::setUniformVec2(const std::string& uniformName, const glm::vec2& values) {
     const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
     if (uniformLocation == -1) {
         LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
         return;
     }
-    glUniform2f(uniformLocation, values[0], values[1]);
+    glUniform2f(uniformLocation, values.x, values.y);
 }
-void GEM::Renderer::ShaderProgram::setUniformVec3(const std::string& uniformName, const std::array<float, 3>& values) {
+void GEM::Renderer::ShaderProgram::setUniformVec3(const std::string& uniformName, const glm::vec3& values) {
     const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
     if (uniformLocation == -1) {
         LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
         return;
     }
-    glUniform3f(uniformLocation, values[0], values[1], values[2]);
+    glUniform3f(uniformLocation, values.x, values.y, values.z);
 }
-void GEM::Renderer::ShaderProgram::setUniformVec4(const std::string& uniformName, const std::array<float, 4>& values) {
+void GEM::Renderer::ShaderProgram::setUniformVec4(const std::string& uniformName, const glm::vec4& values) {
     const int uniformLocation = glGetUniformLocation(m_id, uniformName.c_str());
     if (uniformLocation == -1) {
         LOG_CRITICAL("Could not find location of uniform: {}", uniformName);
         return;
     }
-    glUniform4f(uniformLocation, values[0], values[1], values[2], values[3]);
+    glUniform4f(uniformLocation, values.x, values.y, values.z, values.w);
 }
 
 /**

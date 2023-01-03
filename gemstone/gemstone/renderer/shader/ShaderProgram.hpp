@@ -69,9 +69,9 @@ public: // public member functions
     void setUniformUVec4(const std::string& uniformName, const std::array<uint32_t, 4>& values);
     
     void setUniformFloat(const std::string& uniformName, const float value);
-    void setUniformVec2(const std::string& uniformName, const std::array<float, 2>& values);
-    void setUniformVec3(const std::string& uniformName, const std::array<float, 3>& values);
-    void setUniformVec4(const std::string& uniformName, const std::array<float, 4>& values);
+    void setUniformVec2(const std::string& uniformName, const glm::vec2& values);
+    void setUniformVec3(const std::string& uniformName, const glm::vec3& values);
+    void setUniformVec4(const std::string& uniformName, const glm::vec4& values);
 
     void setUniformMat2(const std::string& uniformName, const glm::mat2& matrix);
     void setUniformMat3(const std::string& uniformName, const glm::mat3& matrix);

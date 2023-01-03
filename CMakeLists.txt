@@ -100,8 +100,11 @@ set(APPLICATION_SHADER_SOURCE_DIR "${APPLICATION_ASSET_DIR}/shaders")
 
 include(CreateRawStringFile)
 create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/vertex.vert)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/stripped.vert)
 create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment.frag)
 create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/fragment2.frag)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/objectLighting.frag)
+create_raw_string_file(${APPLICATION_SHADER_SOURCE_DIR}/lightLighting.frag)
 
 #====================================================================
 # The application and its assets
