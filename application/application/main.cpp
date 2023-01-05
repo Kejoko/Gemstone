@@ -220,8 +220,8 @@ void render(
         objectPtrs[i]->getShaderProgramPtr()->use();
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLightColor", ambientLight.color);
         objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLightStrength", ambientLight.strength);
-        // objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", lightColor);
-        // objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightPosition", lightPosition);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightColor);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightPosition", lightPosition);
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectColor", {1.0f, 0.5f, 0.31f});
 
         // // Activate and bind textures the current object is using then tell the shader to use them

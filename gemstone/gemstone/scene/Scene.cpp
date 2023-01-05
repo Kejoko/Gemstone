@@ -103,7 +103,7 @@ std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
             "application/assets/textures/wes.png",
             "application/assets/textures/texture_coords.png",
             p_lightShader,
-            glm::vec3(1.2f, 1.0f, -2.0f),
+            glm::vec3(1.2f, 1.0f, 4.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
