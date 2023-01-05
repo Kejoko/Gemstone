@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "gemstone/camera/Camera.hpp"
+#include "gemstone/light/Light.hpp"
 #include "gemstone/object/Object.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/renderer/context/Context.hpp"
@@ -16,6 +17,12 @@ namespace GEM {
 }
 
 class GEM::Scene {
+public: // public static classes and enums
+    struct AmbientLight {
+        glm::vec3 color;
+        float strength;
+    };
+
 public: // public static variables
     static const std::string LOGGER_NAME;
 
@@ -34,23 +41,25 @@ public: // public member functions
     std::string getName() const { return m_name; }
 
     std::shared_ptr<const GEM::Camera> getCameraPtr() const { return mp_camera; }
+    GEM::Scene::AmbientLight getAmbientLight() const { return m_ambientLight; }
+    const std::vector<std::shared_ptr<GEM::Light>>& getLightPtrs() const { return m_lightPtrs; }
     const std::vector<std::shared_ptr<GEM::Object>>& getObjectPtrs() const { return m_objectPtrs; }
-    const std::vector<std::shared_ptr<GEM::Object>>& getLightPtrs() const { return m_lightPtrs; }
 
     void update();
 
 private: // private static functions
-    std::string loadName(const std::string& filename);
-    std::shared_ptr<GEM::Camera> loadCamera(
+    static std::string loadName(const std::string& filename);
+    static std::shared_ptr<GEM::Camera> loadCamera(
         std::shared_ptr<GEM::Renderer::Context> p_context,
         std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
         const std::string& filename
     );
-    std::vector<std::shared_ptr<GEM::Object>> loadObjects(
+    static GEM::Scene::AmbientLight loadAmbientLight(const std::string& filename);
+    static std::vector<std::shared_ptr<GEM::Object>> loadObjects(
         const std::string& filename,
         std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader
     );
-    std::vector<std::shared_ptr<GEM::Object>> loadLights(
+    static std::vector<std::shared_ptr<GEM::Light>> loadLights(
         const std::string& filename,
         std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
     );
@@ -67,6 +76,7 @@ private: // private member variables
     const std::shared_ptr<GEM::Managers::InputManager> mp_inputManager;
     
     std::shared_ptr<GEM::Camera> mp_camera;
+    GEM::Scene::AmbientLight m_ambientLight;
+    std::vector<std::shared_ptr<GEM::Light>> m_lightPtrs;
     std::vector<std::shared_ptr<GEM::Object>> m_objectPtrs;
-    std::vector<std::shared_ptr<GEM::Object>> m_lightPtrs;
 };

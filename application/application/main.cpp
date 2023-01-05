@@ -22,6 +22,8 @@
 #include "gemstone/core.hpp"
 #include "gemstone/camera/logger.hpp"
 #include "gemstone/camera/Camera.hpp"
+#include "gemstone/light/logger.hpp"
+#include "gemstone/light/Light.hpp"
 #include "gemstone/object/logger.hpp"
 #include "gemstone/object/Object.hpp"
 #include "gemstone/scene/logger.hpp"
@@ -58,8 +60,9 @@ void processInput(GLFWwindow* p_glfwWindow);
 
 void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
+    const GEM::Scene::AmbientLight& ambientLight,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Object>>& lightPtrs
+    const std::vector<std::shared_ptr<GEM::Light>>& lightPtrs
 );
 
 int main(int argc, char* argv[]) {
@@ -75,8 +78,9 @@ int main(int argc, char* argv[]) {
         {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
         {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {SCENE_LOGGER_NAME, GEM::util::Logger::Level::error},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::error},
         {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
@@ -109,8 +113,8 @@ int main(int argc, char* argv[]) {
         p_context,
         p_inputManager,
         "some_scene_file.json",
-        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX],
-        shaderProgramPtrs[CURRENT_LIGHT_SHADER_INDEX]
+        shaderProgramPtrs[CURRENT_LIGHT_SHADER_INDEX],
+        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX]
     );
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
@@ -143,7 +147,7 @@ int main(int argc, char* argv[]) {
 
         // ----- Rendering ----- //
         
-        render(p_scene->getCameraPtr(), p_scene->getObjectPtrs(), p_scene->getLightPtrs());
+        render(p_scene->getCameraPtr(), p_scene->getAmbientLight(), p_scene->getObjectPtrs(), p_scene->getLightPtrs());
 
         // ----- Check and call events and swap buffers before next pass ----- //
 
@@ -181,20 +185,20 @@ void processInput(GLFWwindow* p_glfwWindow) {
 
 void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
+    const GEM::Scene::AmbientLight& ambientLight,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Object>>& lightPtrs
+    const std::vector<std::shared_ptr<GEM::Light>>& lightPtrs
 ) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::vec4 averageLightColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glm::vec3 lightColor(0.0f, 0.0f, 0.0f);
+    glm::vec4 lightPosition(0.0f, 0.0f, 0.0f, 0.0f);
 
     // Render each of the lights
     for (uint32_t i = 0; i < lightPtrs.size(); ++i) {
-        glm::vec4 currentLightColor(1.0f, 1.0f, 1.0f, 1.0f);
-
         // Set the active shader program
         lightPtrs[i]->getShaderProgramPtr()->use();
-        lightPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", currentLightColor);
+        lightPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightPtrs[i]->getColor());
 
         // Set the uniform matrices for where the camera is oriented
         lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
@@ -206,17 +210,19 @@ void render(
         // Draw the object
         lightPtrs[i]->draw();
 
-        averageLightColor += currentLightColor;
+        lightColor = lightPtrs[i]->getColor();
+        lightPosition = {lightPtrs[i]->getWorldPosition(), 1.0f};
     }
-
-    averageLightColor /= averageLightColor.w;
 
     // Render each of the meshes
     for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
         // Set the active shader program
         objectPtrs[i]->getShaderProgramPtr()->use();
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("objectColor", {1.0f, 0.5f, 0.31f, 1.0f});
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", averageLightColor);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLightColor", ambientLight.color);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLightStrength", ambientLight.strength);
+        // objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightColor", lightColor);
+        // objectPtrs[i]->getShaderProgramPtr()->setUniformVec4("lightPosition", lightPosition);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectColor", {1.0f, 0.5f, 0.31f});
 
         // // Activate and bind textures the current object is using then tell the shader to use them
         // objectPtrs[i]->getTexturePtr()->activate();

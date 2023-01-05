@@ -33,6 +33,7 @@ target_link_libraries(
     # Gemstone
     PRIVATE
     GEM_Camera
+    GEM_Light
     GEM_Object
     GEM_Scene
     GEM_Managers_InputManager

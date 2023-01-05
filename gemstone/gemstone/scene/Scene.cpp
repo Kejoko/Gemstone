@@ -81,6 +81,39 @@ std::shared_ptr<GEM::Camera> GEM::Scene::loadCamera(
     return p_camera;
 }
 
+GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filename) {
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    return {
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        0.1
+    };
+}
+
+std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
+    const std::string& filename,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+) {
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    std::vector<std::shared_ptr<GEM::Light>> lightPtrs = {
+        std::make_shared<GEM::Light>(
+            1,
+            "mesh.obj",
+            "application/assets/textures/wes.png",
+            "application/assets/textures/texture_coords.png",
+            p_lightShader,
+            glm::vec3(1.2f, 1.0f, -2.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            0.0f,
+            glm::vec3(1.0f, 1.0f, 1.0f)
+        )
+    };
+
+    return lightPtrs;
+}
+
 /**
  * @brief Load all of the objects in the scene from the scene's file
  * 
@@ -125,29 +158,6 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
     return objectPtrs;
 }
 
-std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadLights(
-    const std::string& filename,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
-) {
-    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
-
-    std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
-        std::make_shared<GEM::Object>(
-            1,
-            "mesh.obj",
-            "application/assets/textures/wes.png",
-            "application/assets/textures/texture_coords.png",
-            p_lightShader,
-            glm::vec3(1.2f, 1.0f, -2.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f),
-            0.0f
-        )
-    };
-
-    return objectPtrs;
-}
-
 /* ------------------------------ public member functions ------------------------------ */
 
 /**
@@ -156,15 +166,15 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadLights(
  * @param p_context The context for which this scene will be drawn
  * @param p_inputManager The input manager used by the players in this scene
  * @param filename The filename representing the scene. This has all of the objects and lights and such
- * @param p_objectShader The default shader program to use on the objects in the scene
  * @param p_lightShader The default shader program to use on the lights in the scene
+ * @param p_objectShader The default shader program to use on the objects in the scene
  */
 GEM::Scene::Scene(
     std::shared_ptr<GEM::Renderer::Context> p_context,
     std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
     const std::string& filename,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader,
+    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader
 ) :
     m_id(++GEM::Scene::sceneCount),
     m_filename(GEM::util::FileSystem::getFullPath(filename)),
@@ -172,8 +182,9 @@ GEM::Scene::Scene(
     mp_context(p_context),
     mp_inputManager(p_inputManager),
     mp_camera(GEM::Scene::loadCamera(mp_context, mp_inputManager, m_filename)),
-    m_objectPtrs(GEM::Scene::loadObjects(m_filename, p_objectShader)),
-    m_lightPtrs(GEM::Scene::loadLights(m_filename, p_lightShader))
+    m_ambientLight(GEM::Scene::loadAmbientLight(m_filename)),
+    m_lightPtrs(GEM::Scene::loadLights(m_filename, p_lightShader)),
+    m_objectPtrs(GEM::Scene::loadObjects(m_filename, p_objectShader))
 {
     LOG_FUNCTION_CALL_INFO(
         "id {} , filename {} , name {} , camera id {} , object count {}",
@@ -183,7 +194,6 @@ GEM::Scene::Scene(
         mp_camera->getID(),
         m_objectPtrs.size()
     );
-    UNUSED(p_lightShader);
 }
 
 /**

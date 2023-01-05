@@ -1,25 +1,18 @@
 #====================================================================
-# The scene library
+# The light library
 #====================================================================
 add_library(
-    GEM_Scene
+    GEM_Light
     SHARED
     logger.hpp
-    Scene.hpp
-    Scene.cpp
+    Light.hpp
+    Light.cpp
 )
 
 target_link_libraries(
-    GEM_Scene
+    GEM_Light
     PUBLIC
     glm
-    UTIL_IO
     UTIL_Logger
-    GEM_Camera
-    GEM_Light
     GEM_Object
-    GEM_Managers_InputManager
-    GEM_Renderer_Context
-    GEM_Renderer_Mesh
-    GEM_Renderer_Shader
 )

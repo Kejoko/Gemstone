@@ -3,6 +3,7 @@
 #====================================================================
 # add_subdirectory(application)
 add_subdirectory(camera)
+add_subdirectory(light)
 add_subdirectory(managers)
 add_subdirectory(object)
 add_subdirectory(renderer)

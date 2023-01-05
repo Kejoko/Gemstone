@@ -18,7 +18,7 @@
 
 /**
  * @brief A macro allowing us to assert at compile time that we have information about Gemstone's
- *  version from preprocessor directives. This is essentially just a check to ensure that we were
+ * version from preprocessor directives. This is essentially just a check to ensure that we were
  * compiled correctly with all of the information that we need.
  */
 #ifdef DEBUG
@@ -32,5 +32,9 @@ REQUIRE_SEMICOLON
 REQUIRE_SEMICOLON
 #endif
 
+/**
+ * @brief The version of glfw that we are using. This is also the core version of glsl we are
+ * using
+ */
 #define GEM_GLFW_MAJOR_VERSION 3
 #define GEM_GLFW_MINOR_VERSION 3
