@@ -218,11 +218,13 @@ void render(
     for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
         // Set the active shader program
         objectPtrs[i]->getShaderProgramPtr()->use();
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("cameraPosition", p_camera->getWorldPosition());
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLightColor", ambientLight.color);
         objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLightStrength", ambientLight.strength);
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightColor);
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightPosition", lightPosition);
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectColor", {1.0f, 0.5f, 0.31f});
+        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("objectShininess", 32.0f);
 
         // // Activate and bind textures the current object is using then tell the shader to use them
         // objectPtrs[i]->getTexturePtr()->activate();

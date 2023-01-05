@@ -15,6 +15,9 @@ uniform mat4 projectionMatrix;
 out vec3 fragmentPosition;
 out vec3 fragmentNormal;
 
+// @todo    calculate all of the relevent vectors in view space instead of in world space by using the
+//          view matrix
+
 void main() {
     // Giving all of aPosition to the constructor saves us from manually writing x, y, and z
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(i_position, 1.0f);

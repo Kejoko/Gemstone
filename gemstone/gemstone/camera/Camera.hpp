@@ -59,6 +59,7 @@ public: // public member functions
     Camera(const Camera& other) = default;
 
     uint32_t getID() const { return m_id; }
+    glm::vec3 getWorldPosition() const { return m_worldPosition; }
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
 
