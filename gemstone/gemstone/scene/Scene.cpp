@@ -86,7 +86,7 @@ GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filenam
 
     return {
         glm::vec3(1.0f, 1.0f, 1.0f),
-        0.1
+        0.2
     };
 }
 
@@ -107,6 +107,7 @@ std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
+            glm::vec3(0.5f, 0.5f, 0.5f),
             glm::vec3(1.0f, 1.0f, 1.0f)
         )
     };

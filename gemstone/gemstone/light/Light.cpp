@@ -35,7 +35,8 @@ GEM::Light::Light(
     const glm::vec3& initialScale,
     const glm::vec3& initialRotationAxis,
     const float initialRotationAmountDegrees,
-    const glm::vec3& initialColor
+    const glm::vec3& initialDiffuseColor,
+    const glm::vec3& initialSpecularColor
 ) :
     Object(
         id,
@@ -48,9 +49,14 @@ GEM::Light::Light(
         initialRotationAxis,
         initialRotationAmountDegrees
     ),
-    m_color(initialColor)
+    m_diffuseColor(initialDiffuseColor),
+    m_specularColor(initialSpecularColor)
 {
-    LOG_FUNCTION_CALL_INFO("initial color [ {} {} {} ]", m_color.r, m_color.g, m_color.b);
+    LOG_FUNCTION_CALL_INFO(
+        "initial diffuse color [ {} {} {} ] , initial specular color [ {} {} {} ]",
+        m_diffuseColor.r, m_diffuseColor.g, m_diffuseColor.b,
+        m_specularColor.r, m_specularColor.g, m_specularColor.b
+    );
 }
 
 GEM::Light::~Light() {

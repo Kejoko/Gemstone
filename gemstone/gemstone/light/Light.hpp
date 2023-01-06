@@ -28,12 +28,15 @@ public: // public member functions
         const glm::vec3& initialScale,
         const glm::vec3& initialRotationAxis,
         const float initialRotationAmountDegrees,
-        const glm::vec3& initialColor
+        const glm::vec3& initialDiffuseColor,
+        const glm::vec3& initialSpecularColor
     );
     ~Light();
 
-    glm::vec3 getColor() const { return m_color; }
+    glm::vec3 getDiffuseColor() const { return m_diffuseColor; }
+    glm::vec3 getSpecularColor() const { return m_specularColor; }
 
 private: // private member variables
-    glm::vec3 m_color;
+    glm::vec3 m_diffuseColor;
+    glm::vec3 m_specularColor;
 };

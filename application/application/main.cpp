@@ -191,14 +191,15 @@ void render(
 ) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::vec3 lightColor(0.0f, 0.0f, 0.0f);
-    glm::vec4 lightPosition(0.0f, 0.0f, 0.0f, 0.0f);
+    glm::vec3 lightDiffuseColor(0.0f, 0.0f, 0.0f);
+    glm::vec3 lightSpecularColor(0.0f, 0.0f, 0.0f);
+    glm::vec4 lightWorldPosition(0.0f, 0.0f, 0.0f, 0.0f);
 
     // Render each of the lights
     for (uint32_t i = 0; i < lightPtrs.size(); ++i) {
         // Set the active shader program
         lightPtrs[i]->getShaderProgramPtr()->use();
-        lightPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightPtrs[i]->getColor());
+        lightPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightPtrs[i]->getDiffuseColor());
 
         // Set the uniform matrices for where the camera is oriented
         lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
@@ -210,8 +211,9 @@ void render(
         // Draw the object
         lightPtrs[i]->draw();
 
-        lightColor = lightPtrs[i]->getColor();
-        lightPosition = {lightPtrs[i]->getWorldPosition(), 1.0f};
+        lightDiffuseColor = lightPtrs[i]->getDiffuseColor();
+        lightSpecularColor = lightPtrs[i]->getSpecularColor();
+        lightWorldPosition = {lightPtrs[i]->getWorldPosition(), 1.0f};
     }
 
     // Render each of the meshes
@@ -219,12 +221,15 @@ void render(
         // Set the active shader program
         objectPtrs[i]->getShaderProgramPtr()->use();
         objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("cameraPosition", p_camera->getWorldPosition());
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLightColor", ambientLight.color);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLightStrength", ambientLight.strength);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightColor);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightPosition", lightPosition);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectColor", {1.0f, 0.5f, 0.31f});
-        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("objectShininess", 32.0f);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLight.color", ambientLight.color);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLight.strength", ambientLight.strength);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.worldPosition", lightWorldPosition);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.diffuseColor", lightDiffuseColor);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.specularColor", lightSpecularColor);
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.ambientColor", {1.0f, 0.5f, 0.31f});
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.diffuseColor", {1.0f, 0.5f, 0.31f});
+        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.specularColor", {0.5f, 0.5f, 0.5f});
+        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("objectMaterial.shininess", 32.0f);
 
         // // Activate and bind textures the current object is using then tell the shader to use them
         // objectPtrs[i]->getTexturePtr()->activate();
