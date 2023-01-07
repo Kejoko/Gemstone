@@ -26,10 +26,18 @@
 uint32_t GEM::util::Logger::Scoper::indentationCount = 0;
 
 /**
+ * @brief The map that is tracking the corresponding logging levels for each of the loggers
+ */
+std::map<std::string, GEM::util::Logger::Level> GEM::util::Logger::loggerNameLevelMap;
+
+/**
  * @brief A flag representing whether or not the spdlog stuff has been initialized
  */
 bool GEM::util::Logger::initialized = false;
 
+/**
+ * @brief The underlying thread pool that spdlog uses for the asynchronous logging
+ */
 std::shared_ptr<spdlog::details::thread_pool> GEM::util::Logger::threadPool = nullptr;
 
 /**
@@ -44,39 +52,6 @@ std::vector<spdlog::sink_ptr> GEM::util::Logger::sinkPtrs;
 std::map<std::string, std::shared_ptr<spdlog::async_logger>> GEM::util::Logger::loggerPtrMap;
 
 /* ------------------------------ public static functions ------------------------------ */
-
-/**
- * @brief A function allowing us to initialize the logger so we don't need to do a
- * conditional check for initialization everytime we want to log something
- * time we want to 
- */
-void GEM::util::Logger::init() {
-    spdlog::init_thread_pool(8192, 1);
-    GEM::util::Logger::threadPool = spdlog::thread_pool();
-
-    // Create the stdout sink
-    // Use trace as max detail (allow all types to go to stdout log)
-    spdlog::sink_ptr p_stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    p_stdoutSink->set_level(spdlog::level::trace);
-
-    // Create the file sink with the name determined by the current date and time
-    // Use warnings as max detail (only warnings, errors, and critical go to file log)
-    time_t time = std::time(nullptr);
-    struct tm* p_currTime = std::localtime(&time);
-    std::ostringstream oss;
-    oss << std::put_time(p_currTime, "%Y.%m.%d.%H.%M.%S");
-    std::string dateString = oss.str();
-    std::string fileName = "GEMlog." + dateString + ".log";
-    spdlog::sink_ptr p_fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fileName, true);
-    p_fileSink->set_level(spdlog::level::warn);
-
-    // Put both the stdout and file sink as sinks we want to use
-    GEM::util::Logger::sinkPtrs.push_back(p_stdoutSink);
-    GEM::util::Logger::sinkPtrs.push_back(p_fileSink);
-
-    // Now that our sink pointers are initialized we are good to go
-    GEM::util::Logger::initialized = true;
-}
 
 void GEM::util::Logger::registerLogger(const std::string& loggerName, const GEM::util::Logger::Level level) {
     if (!GEM::util::Logger::initialized) {
@@ -126,6 +101,7 @@ void GEM::util::Logger::registerLogger(const std::string& loggerName, const GEM:
 
     p_logger->info("Logger {} initialized", loggerName);
 
+    GEM::util::Logger::loggerNameLevelMap[loggerName] = level;
     GEM::util::Logger::loggerPtrMap[loggerName] = p_logger;
 }
 
@@ -143,6 +119,39 @@ void GEM::util::Logger::registerLoggers(const std::vector<const GEM::util::Logge
 /* ------------------------------ private static functions ------------------------------ */
 
 /**
+ * @brief A function allowing us to initialize the logger so we don't need to do a
+ * conditional check for initialization everytime we want to log something
+ * time we want to 
+ */
+void GEM::util::Logger::init() {
+    spdlog::init_thread_pool(8192, 1);
+    GEM::util::Logger::threadPool = spdlog::thread_pool();
+
+    // Create the stdout sink
+    // Use trace as max detail (allow all types to go to stdout log)
+    spdlog::sink_ptr p_stdoutSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    p_stdoutSink->set_level(spdlog::level::trace);
+
+    // Create the file sink with the name determined by the current date and time
+    // Use warnings as max detail (only warnings, errors, and critical go to file log)
+    time_t time = std::time(nullptr);
+    struct tm* p_currTime = std::localtime(&time);
+    std::ostringstream oss;
+    oss << std::put_time(p_currTime, "%Y.%m.%d.%H.%M.%S");
+    std::string dateString = oss.str();
+    std::string fileName = "GEMlog." + dateString + ".log";
+    spdlog::sink_ptr p_fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(fileName, true);
+    p_fileSink->set_level(spdlog::level::warn);
+
+    // Put both the stdout and file sink as sinks we want to use
+    GEM::util::Logger::sinkPtrs.push_back(p_stdoutSink);
+    GEM::util::Logger::sinkPtrs.push_back(p_fileSink);
+
+    // Now that our sink pointers are initialized we are good to go
+    GEM::util::Logger::initialized = true;
+}
+
+/**
  * @brief A function allowing us to ensure that we have been initialized prior to attempting
  * to log anything.
  * 
@@ -156,6 +165,25 @@ void GEM::util::Logger::assertInitialized() {
         #endif
         throw std::runtime_error(initializationErrorMessage);
     }
+}
+
+/**
+ * @brief Get the level of the logger with the corresponding name. If no logger is found with this
+ * name then an exception will be thrown
+ * 
+ * @param loggerName The name of the logger to get the level for
+ * @return GEM::util::Logger::Level The level of the logger
+ */
+GEM::util::Logger::Level GEM::util::Logger::getLevel(const std::string& loggerName) {
+    if (GEM::util::Logger::loggerNameLevelMap.count(loggerName) <= 0) {
+        std::string levelErrorMessage = "No GEM::util::Logger found with name " + loggerName;
+        #if defined(BUILD_DEBUG) || defined(BUILD_TEST)
+        std::cerr << levelErrorMessage << "\n";
+        #endif
+        throw std::runtime_error(levelErrorMessage);
+    }
+
+    return GEM::util::Logger::loggerNameLevelMap[loggerName];
 }
 
 /**
@@ -182,8 +210,10 @@ GEM::util::Logger::Scoper::Scoper(const std::string& loggerName, const GEM::util
     m_loggerName(loggerName),
     m_level(level)
 {
-    GEM::util::Logger::log(m_loggerName, m_level, "{");
-    GEM::util::Logger::Scoper::indentationCount++;
+    if (m_level >= GEM::util::Logger::getLevel(m_loggerName)) {
+        GEM::util::Logger::log(m_loggerName, m_level, "{");
+        GEM::util::Logger::Scoper::indentationCount++;
+    }
 }
 
 /**
@@ -192,8 +222,10 @@ GEM::util::Logger::Scoper::Scoper(const std::string& loggerName, const GEM::util
  * this
  */
 GEM::util::Logger::Scoper::~Scoper() {
-    GEM::util::Logger::Scoper::indentationCount--;
-    GEM::util::Logger::log(m_loggerName, m_level, "}");
+    if (m_level >= GEM::util::Logger::getLevel(m_loggerName)) {
+        GEM::util::Logger::Scoper::indentationCount--;
+        GEM::util::Logger::log(m_loggerName, m_level, "}");
+    }
 }
 
 /* ------------------------------ private member functions ------------------------------ */

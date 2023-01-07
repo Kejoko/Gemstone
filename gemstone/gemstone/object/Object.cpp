@@ -97,7 +97,7 @@ GEM::Object::Object(
     m_rotationAxis(initialRotationAxis),
     m_rotationAmountDegrees(initialRotationAmountDegrees)
 {
-    LOG_FUNCTION_ENTRY_TRACE(
+    LOG_FUNCTION_ENTRY_INFO(
         "id {} , initial world position [ {} {} {} ]",
         m_id,
         m_worldPosition.x, m_worldPosition.y, m_worldPosition.z
@@ -108,7 +108,7 @@ GEM::Object::Object(
  * @brief Destroy the GEM::Object::Object object
  */
 GEM::Object::~Object() {
-    LOG_FUNCTION_ENTRY_TRACE("this ptr {} , id {}", static_cast<void*>(this), m_id);
+    LOG_FUNCTION_CALL_TRACE("this ptr {} , id {}", static_cast<void*>(this), m_id);
 }
 
 /**

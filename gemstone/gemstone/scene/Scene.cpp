@@ -92,11 +92,9 @@ GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filenam
 
 std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
     const std::string& filename,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader,
     const char* lightVertexShaderSource,
     const char* lightFragmentShaderSource
 ) {
-    UNUSED(p_lightShader);
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
     std::vector<std::shared_ptr<GEM::Light>> lightPtrs = {
@@ -129,11 +127,9 @@ std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
  */
 std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
     const std::string& filename,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
     const char* objectVertexShaderSource,
     const char* objectFragmentShaderSource
 ) {
-    UNUSED(p_objectShader);
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
     // Full scene with many objects scaling and rotating
@@ -184,8 +180,6 @@ GEM::Scene::Scene(
     std::shared_ptr<GEM::Renderer::Context> p_context,
     std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
     const std::string& filename,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
     const char* lightVertexShaderSource,
     const char* lightFragmentShaderSource,
     const char* objectVertexShaderSource,
@@ -198,8 +192,8 @@ GEM::Scene::Scene(
     mp_inputManager(p_inputManager),
     mp_camera(GEM::Scene::loadCamera(mp_context, mp_inputManager, m_filename)),
     m_ambientLight(GEM::Scene::loadAmbientLight(m_filename)),
-    m_lightPtrs(GEM::Scene::loadLights(m_filename, p_lightShader, lightVertexShaderSource, lightFragmentShaderSource)),
-    m_objectPtrs(GEM::Scene::loadObjects(m_filename, p_objectShader, objectVertexShaderSource, objectFragmentShaderSource))
+    m_lightPtrs(GEM::Scene::loadLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
+    m_objectPtrs(GEM::Scene::loadObjects(m_filename, objectVertexShaderSource, objectFragmentShaderSource))
 {
     LOG_FUNCTION_CALL_INFO(
         "id {} , filename {} , name {} , camera id {} , object count {}",

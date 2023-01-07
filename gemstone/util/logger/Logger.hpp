@@ -69,6 +69,12 @@ public: // public classes and enums
         Scoper(const std::string& loggerName, const GEM::util::Logger::Level level);
         ~Scoper();
 
+        Scoper(const Scoper& other) = delete;
+        Scoper& operator=(const Scoper& other) = delete;
+
+        Scoper(Scoper&& other) = delete;
+        Scoper& operator=(Scoper&& other) = delete;
+
     private: // private static variables
         static uint32_t indentationCount;
 
@@ -78,7 +84,6 @@ public: // public classes and enums
     };
 
 public: // public static functions
-    static void init();
     static void registerLogger(const std::string& loggerName, const GEM::util::Logger::Level level);
     static void registerLoggers(const std::vector<const GEM::util::Logger::RegistrationInfo>& loggerInfos);
 
@@ -155,12 +160,18 @@ public: // public member functions
     Logger() = delete;
 
 private: // private static functions
+    static void init();
     static void assertInitialized();
+
+    static GEM::util::Logger::Level getLevel(const std::string& loggerName);
 
     static std::string createIndentationString();
 
-private: // private static member variables
+private: // private static variables
     static bool initialized;
+
+    static std::map<std::string, GEM::util::Logger::Level> loggerNameLevelMap;
+
     static std::shared_ptr<spdlog::details::thread_pool> threadPool;
     static std::vector<spdlog::sink_ptr> sinkPtrs;
     static std::map<std::string, std::shared_ptr<spdlog::async_logger>> loggerPtrMap;

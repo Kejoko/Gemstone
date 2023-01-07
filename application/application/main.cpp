@@ -79,19 +79,19 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {MODEL_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::trace},
-        {SCENE_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {MODEL_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {SCENE_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
     });
 
     /* ------------------------------------ initialization ------------------------------------ */
@@ -100,29 +100,12 @@ int main(int argc, char* argv[]) {
 
     std::shared_ptr<GEM::Managers::InputManager> p_inputManager = GEM::Managers::InputManager::createPtr(p_context->getGLFWWindowPtr().get());
 
-    /* ------------------------------------ shader stuff ------------------------------------ */
-
-    LOG_INFO("Creating shaders");
-
-    std::vector<std::shared_ptr<GEM::Renderer::ShaderProgram>> shaderProgramPtrs;
-    try {
-        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShaderSource));
-        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShader2Source));
-        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(strippedVertexShaderSource, objectLightingFragShaderSource));
-        shaderProgramPtrs.push_back(std::make_shared<GEM::Renderer::ShaderProgram>(strippedVertexShaderSource, lightLightingFragShaderSource));
-    } catch (const std::exception& ex) {
-        LOG_CRITICAL("Caught exception when trying to create shaders:\n" + std::string(ex.what()));
-        return 1;
-    }
-
     /* ------------------------------------ create the scene ------------------------------------ */
 
     std::shared_ptr<GEM::Scene> p_scene = std::make_shared<GEM::Scene>(
         p_context,
         p_inputManager,
         "some_scene_file.json",
-        shaderProgramPtrs[CURRENT_LIGHT_SHADER_INDEX],
-        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX],
         strippedVertexShaderSource,
         lightLightingFragShaderSource,
         strippedVertexShaderSource,
@@ -165,6 +148,7 @@ int main(int argc, char* argv[]) {
 
         glfwSwapBuffers(p_context->getGLFWWindowPtr().get());
     }
+    LOG_INFO("Done rendering");
 
     GEM::Managers::InputManager::clean();
     GEM::Renderer::Context::clean();
