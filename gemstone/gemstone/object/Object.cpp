@@ -71,8 +71,8 @@ std::shared_ptr<GEM::Renderer::Texture> GEM::Object::loadTexture(const std::stri
 GEM::Object::Object(
     const uint32_t id,
     const std::string& meshFilename,
-    const std::string& textureFilename,
-    const std::string& textureFilename2,
+    const std::string& diffuseMapFilename,
+    const std::string& specularMapFileName,
     const float shininess,
     const char* vertexShaderSource,
     const char* fragmentShaderSource,
@@ -85,8 +85,8 @@ GEM::Object::Object(
     mp_model(
         std::make_shared<GEM::Renderer::Model>(
             meshFilename,
-            textureFilename,
-            textureFilename2,
+            diffuseMapFilename,
+            specularMapFileName,
             shininess,
             vertexShaderSource,
             fragmentShaderSource

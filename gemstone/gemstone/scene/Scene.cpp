@@ -101,8 +101,8 @@ std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
         std::make_shared<GEM::Light>(
             1,
             "mesh.obj",
-            "application/assets/textures/wes.png",
-            "application/assets/textures/texture_coords.png",
+            "application/assets/textures/container_diffuse.png",
+            "application/assets/textures/container_specular.png",
             32.0f,
             lightVertexShaderSource,
             lightFragmentShaderSource,
@@ -150,8 +150,8 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
         std::make_shared<GEM::Object>(
             0,
             "mesh.obj",
-            "application/assets/textures/wes.png",
-            "application/assets/textures/texture_coords.png",
+            "application/assets/textures/container_diffuse.png",
+            "application/assets/textures/container_specular.png",
             32.0f,
             objectVertexShaderSource,
             objectFragmentShaderSource,

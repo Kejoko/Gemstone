@@ -79,19 +79,19 @@ int main(int argc, char* argv[]) {
     ASSERT_APP_VERSION();
 
     GEM::util::Logger::registerLoggers({
-        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {IO_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MESH_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {MODEL_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {SCENE_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::info},
-        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::info}
+        {GENERAL_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CAMERA_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MODEL_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {SCENE_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {SHADER_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {TEXTURE_LOGGER_NAME, GEM::util::Logger::Level::error}
     });
 
     /* ------------------------------------ initialization ------------------------------------ */
@@ -235,16 +235,16 @@ void render(
         p_shaderProgram->setUniformVec3("light.specularColor", lightSpecularColor);
         
         // Object's material
-        p_shaderProgram->setUniformVec3("objectMaterial.ambientColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getAmbientColor());
-        p_shaderProgram->setUniformVec3("objectMaterial.diffuseColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseColor());
+        // p_shaderProgram->setUniformVec3("objectMaterial.ambientColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getAmbientColor());
+        // p_shaderProgram->setUniformVec3("objectMaterial.diffuseColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseColor());
         p_shaderProgram->setUniformVec3("objectMaterial.specularColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularColor());
         p_shaderProgram->setUniformFloat("objectMaterial.shininess", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShininess());
 
-        // // Activate and bind textures the current object is using then tell the shader to use them
-        // objectPtrs[i]->getTexturePtr()->activate();
-        // objectPtrs[i]->getTexture2Ptr()->activate();
-        // objectPtrs[i]->getShaderProgramPtr()->setUniformTextureSampler("ourTexture", objectPtrs[i]->getTexturePtr());
-        // objectPtrs[i]->getShaderProgramPtr()->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getTexture2Ptr());
+        // Activate and bind textures the current object is using then tell the shader to use them
+        objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr()->activate();
+        objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr()->activate();
+        p_shaderProgram->setUniformTextureSampler("objectMaterial.diffuseMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr());
+        // p_shaderProgram->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr());
 
         // Set the uniform matrices for where the camera is oriented
         p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());

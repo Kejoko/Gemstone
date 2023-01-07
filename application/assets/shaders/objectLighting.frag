@@ -1,8 +1,7 @@
 #version 330 core
 
 struct Material {
-    vec3 ambientColor;
-    vec3 diffuseColor;
+    sampler2D diffuseMap;
     vec3 specularColor;
     float shininess;
 };
@@ -38,14 +37,20 @@ uniform Material objectMaterial;
 in vec3 fragmentPosition;
 in vec3 fragmentNormal;
 
+// The input texture coordinates of the current fragment
+in vec2 diffuseMapCoords;
+// in vec2 specularMapCoords;
+
 // The output color
 out vec4 fragmentColor;
 
 void main() {
 
+    vec3 diffuseColor = vec3(texture(objectMaterial.diffuseMap, diffuseMapCoords));
+
     // ----- calculate the ambient light amount ----- //
 
-    vec3 ambientResult = (ambientLight.strength * ambientLight.color) * objectMaterial.ambientColor;
+    vec3 ambientResult = (ambientLight.strength * ambientLight.color) * diffuseColor;
 
     // ----- calculate the diffuse light amount ----- //
 
@@ -56,7 +61,8 @@ void main() {
         dot(normal, lightDirection),
         0.0
     );
-    vec3 diffuseResult = light.diffuseColor * (diffuseImpact * objectMaterial.diffuseColor);
+
+    vec3 diffuseResult = light.diffuseColor * (diffuseImpact * diffuseColor);
 
     // ----- calculate the specular light amount ----- //
 

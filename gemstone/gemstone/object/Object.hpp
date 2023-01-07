@@ -19,8 +19,8 @@ public: // public member functions
     Object(
         const uint32_t id,
         const std::string& meshFilename,
-        const std::string& textureFilename,
-        const std::string& textureFilename2,
+        const std::string& diffuseMapFilename,
+        const std::string& specularMapFileName,
         const float shininess,
         const char* vertexShaderSource,
         const char* fragmentShaderSource,

@@ -39,7 +39,7 @@ GEM::Renderer::Material::Material(
 ) :
     m_id(++GEM::Renderer::Material::materialCount),
     mp_diffuseMap(std::make_shared<GEM::Renderer::Texture>(GEM::util::FileSystem::getFullPath(diffuseMapFilename), 0)),
-    mp_specularMap(std::make_shared<GEM::Renderer::Texture>(GEM::util::FileSystem::getFullPath(specularMapFilename), 0)),
+    mp_specularMap(std::make_shared<GEM::Renderer::Texture>(GEM::util::FileSystem::getFullPath(specularMapFilename), 1)),
     m_shininess(shininess),
     mp_shaderProgram(std::make_shared<GEM::Renderer::ShaderProgram>(vertexShaderSource, fragmentShaderSource))
 {
