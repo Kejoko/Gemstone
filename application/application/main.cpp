@@ -28,12 +28,18 @@
 #include "gemstone/object/Object.hpp"
 #include "gemstone/scene/logger.hpp"
 #include "gemstone/scene/Scene.hpp"
+
 #include "gemstone/managers/input/logger.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
+
 #include "gemstone/renderer/context/logger.hpp"
 #include "gemstone/renderer/context/Context.hpp"
+#include "gemstone/renderer/material/logger.hpp"
+#include "gemstone/renderer/material/Material.hpp"
 #include "gemstone/renderer/mesh/logger.hpp"
 #include "gemstone/renderer/mesh/Mesh.hpp"
+#include "gemstone/renderer/model/logger.hpp"
+#include "gemstone/renderer/model/Model.hpp"
 #include "gemstone/renderer/shader/logger.hpp"
 #include "gemstone/renderer/shader/ShaderProgram.hpp"
 #include "gemstone/renderer/texture/logger.hpp"
@@ -79,7 +85,9 @@ int main(int argc, char* argv[]) {
         {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
         {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::trace},
+        {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::error},
         {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {MODEL_LOGGER_NAME, GEM::util::Logger::Level::error},
         {OBJECT_LOGGER_NAME, GEM::util::Logger::Level::trace},
         {SCENE_LOGGER_NAME, GEM::util::Logger::Level::error},
         {SHADER_LOGGER_NAME, GEM::util::Logger::Level::error},
@@ -114,7 +122,11 @@ int main(int argc, char* argv[]) {
         p_inputManager,
         "some_scene_file.json",
         shaderProgramPtrs[CURRENT_LIGHT_SHADER_INDEX],
-        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX]
+        shaderProgramPtrs[CURRENT_OBJECT_SHADER_INDEX],
+        strippedVertexShaderSource,
+        lightLightingFragShaderSource,
+        strippedVertexShaderSource,
+        objectLightingFragShaderSource
     );
 
     /* ------------------------------------ actually drawing! yay :D ------------------------------------ */
@@ -198,15 +210,19 @@ void render(
     // Render each of the lights
     for (uint32_t i = 0; i < lightPtrs.size(); ++i) {
         // Set the active shader program
-        lightPtrs[i]->getShaderProgramPtr()->use();
-        lightPtrs[i]->getShaderProgramPtr()->setUniformVec3("lightColor", lightPtrs[i]->getDiffuseColor());
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = lightPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
+        p_shaderProgram->use();
+
+
+        p_shaderProgram->use();
+        p_shaderProgram->setUniformVec3("lightColor", lightPtrs[i]->getDiffuseColor());
 
         // Set the uniform matrices for where the camera is oriented
-        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
-        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+        p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        p_shaderProgram->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
         // Create the matrix for moving the mesh in world space and assign it to the shader
-        lightPtrs[i]->getShaderProgramPtr()->setUniformMat4("modelMatrix", lightPtrs[i]->getModelMatrix());
+        p_shaderProgram->setUniformMat4("modelMatrix", lightPtrs[i]->getModelMatrix());
     
         // Draw the object
         lightPtrs[i]->draw();
@@ -219,17 +235,26 @@ void render(
     // Render each of the meshes
     for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
         // Set the active shader program
-        objectPtrs[i]->getShaderProgramPtr()->use();
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("cameraPosition", p_camera->getWorldPosition());
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("ambientLight.color", ambientLight.color);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("ambientLight.strength", ambientLight.strength);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.worldPosition", lightWorldPosition);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.diffuseColor", lightDiffuseColor);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("light.specularColor", lightSpecularColor);
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.ambientColor", {1.0f, 0.5f, 0.31f});
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.diffuseColor", {1.0f, 0.5f, 0.31f});
-        objectPtrs[i]->getShaderProgramPtr()->setUniformVec3("objectMaterial.specularColor", {0.5f, 0.5f, 0.5f});
-        objectPtrs[i]->getShaderProgramPtr()->setUniformFloat("objectMaterial.shininess", 32.0f);
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
+        p_shaderProgram->use();
+
+        // Camera
+        p_shaderProgram->setUniformVec3("cameraPosition", p_camera->getWorldPosition());
+
+        // Ambient light
+        p_shaderProgram->setUniformVec3("ambientLight.color", ambientLight.color);
+        p_shaderProgram->setUniformFloat("ambientLight.strength", ambientLight.strength);
+        
+        // Point light source
+        p_shaderProgram->setUniformVec3("light.worldPosition", lightWorldPosition);
+        p_shaderProgram->setUniformVec3("light.diffuseColor", lightDiffuseColor);
+        p_shaderProgram->setUniformVec3("light.specularColor", lightSpecularColor);
+        
+        // Object's material
+        p_shaderProgram->setUniformVec3("objectMaterial.ambientColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getAmbientColor());
+        p_shaderProgram->setUniformVec3("objectMaterial.diffuseColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseColor());
+        p_shaderProgram->setUniformVec3("objectMaterial.specularColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularColor());
+        p_shaderProgram->setUniformFloat("objectMaterial.shininess", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShininess());
 
         // // Activate and bind textures the current object is using then tell the shader to use them
         // objectPtrs[i]->getTexturePtr()->activate();
@@ -238,11 +263,11 @@ void render(
         // objectPtrs[i]->getShaderProgramPtr()->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getTexture2Ptr());
 
         // Set the uniform matrices for where the camera is oriented
-        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
-        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+        p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+        p_shaderProgram->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
         // Create the matrix for moving the mesh in world space and assign it to the shader
-        objectPtrs[i]->getShaderProgramPtr()->setUniformMat4("modelMatrix", objectPtrs[i]->getModelMatrix());
+        p_shaderProgram->setUniformMat4("modelMatrix", objectPtrs[i]->getModelMatrix());
     
         // Draw the object
         objectPtrs[i]->draw();

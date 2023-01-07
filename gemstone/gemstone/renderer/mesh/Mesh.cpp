@@ -1,5 +1,3 @@
-#include "gemstone/renderer/mesh/Mesh.hpp"
-
 #include <string>
 #include <vector>
 
@@ -10,6 +8,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/renderer/mesh/logger.hpp"
+#include "gemstone/renderer/mesh/Mesh.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -31,48 +30,6 @@ const std::string GEM::Renderer::Mesh::LOGGER_NAME = MESH_LOGGER_NAME;
  */
 std::vector<float> GEM::Renderer::Mesh::loadVertices() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
-
-  
-   
-   
-   
-   
-   
-
-  
-  
-  
-  
-  
-  
-
- 
- 
- 
- 
- 
- 
-
-  
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-  
-  
-  
-  
-  
 
     return {
         // position             // normal               // color            // texture coord
@@ -266,7 +223,7 @@ GEM::Renderer::Mesh::~Mesh() {
 /**
  * @brief Bind the corresponding VAO, draw it, then unbind the VAO
  */
-void GEM::Renderer::Mesh::draw() {
+void GEM::Renderer::Mesh::draw() const {
     glBindVertexArray(m_vertexArrayObjectID);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -31,8 +31,12 @@ public: // public member functions
         std::shared_ptr<GEM::Renderer::Context> p_context,
         std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
         const std::string& filename,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader,
         std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
-        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+        const char* lightVertexShaderSource,
+        const char* lightFragmentShaderSource,
+        const char* objectVertexShaderSource,
+        const char* objectFragmentShaderSource
     );
     ~Scene();
 
@@ -55,13 +59,17 @@ private: // private static functions
         const std::string& filename
     );
     static GEM::Scene::AmbientLight loadAmbientLight(const std::string& filename);
-    static std::vector<std::shared_ptr<GEM::Object>> loadObjects(
-        const std::string& filename,
-        std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader
-    );
     static std::vector<std::shared_ptr<GEM::Light>> loadLights(
         const std::string& filename,
-        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_lightShader,
+        const char* lightVertexShaderSource,
+        const char* lightFragmentShaderSource
+    );
+    static std::vector<std::shared_ptr<GEM::Object>> loadObjects(
+        const std::string& filename,
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_objectShader,
+        const char* objectVertexShaderSource,
+        const char* objectFragmentShaderSource
     );
 
 private: // private static variables

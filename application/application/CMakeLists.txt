@@ -37,7 +37,9 @@ target_link_libraries(
     GEM_Object
     GEM_Scene
     GEM_Managers_InputManager
+    GEM_Renderer_Material
     GEM_Renderer_Mesh
+    GEM_Renderer_Model
     GEM_Renderer_Context
     GEM_Renderer_Shader
     GEM_Renderer_Texture

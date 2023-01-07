@@ -19,7 +19,7 @@ public: // public member functions
     Mesh();
     ~Mesh();
 
-    void draw();
+    void draw() const;
 
 private: // private static functions
     static std::vector<float> loadVertices();

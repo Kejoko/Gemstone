@@ -1,21 +1,19 @@
 #====================================================================
-# The object library
+# The mesh library
 #====================================================================
 add_library(
-    GEM_Object
+    GEM_Renderer_Material
     SHARED
     logger.hpp
-    Object.hpp
-    Object.cpp
+    Material.hpp
+    Material.cpp
 )
 
 target_link_libraries(
-    GEM_Object
+    GEM_Renderer_Material
     PUBLIC
-    glad
-    glfw
-    glm
     UTIL_IO
     UTIL_Logger
-    GEM_Renderer_Model
+    GEM_Renderer_Shader
+    GEM_Renderer_Texture
 )

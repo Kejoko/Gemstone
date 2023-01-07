@@ -15,8 +15,7 @@
 
 #include "gemstone/object/logger.hpp"
 #include "gemstone/object/Object.hpp"
-#include "gemstone/renderer/mesh/Mesh.hpp"
-#include "gemstone/renderer/texture/Texture.hpp"
+#include "gemstone/renderer/model/Model.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
@@ -74,31 +73,33 @@ GEM::Object::Object(
     const std::string& meshFilename,
     const std::string& textureFilename,
     const std::string& textureFilename2,
-    std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram,
+    const float shininess,
+    const char* vertexShaderSource,
+    const char* fragmentShaderSource,
     const glm::vec3& initialWorldPosition,
     const glm::vec3& initialScale,
     const glm::vec3& initialRotationAxis,
     const float initialRotationAmountDegrees
 ) :
     m_id(id),
-    m_meshFilename(GEM::util::FileSystem::getFullPath(meshFilename)),
-    m_textureFilename(GEM::util::FileSystem::getFullPath(textureFilename)),
-    m_textureFilename2(GEM::util::FileSystem::getFullPath(textureFilename2)),
-    mp_mesh(GEM::Object::loadMesh(m_meshFilename)),
-    mp_texture(GEM::Object::loadTexture(m_textureFilename, 0)),
-    mp_texture2(GEM::Object::loadTexture(m_textureFilename2, 1)),
-    mp_shaderProgram(p_shaderProgram),
+    mp_model(
+        std::make_shared<GEM::Renderer::Model>(
+            meshFilename,
+            textureFilename,
+            textureFilename2,
+            shininess,
+            vertexShaderSource,
+            fragmentShaderSource
+        )
+    ),
     m_worldPosition(initialWorldPosition),
     m_scale(initialScale),
     m_rotationAxis(initialRotationAxis),
     m_rotationAmountDegrees(initialRotationAmountDegrees)
 {
     LOG_FUNCTION_ENTRY_TRACE(
-        "id {} , mesh filename {} , texture filename {} , texture filename 2 {} , initial world position [ {} {} {} ]",
+        "id {} , initial world position [ {} {} {} ]",
         m_id,
-        m_meshFilename,
-        m_textureFilename,
-        m_textureFilename2,
         m_worldPosition.x, m_worldPosition.y, m_worldPosition.z
     );
 }
@@ -135,8 +136,8 @@ void GEM::Object::update() {
 /**
  * @brief Draw the mesh
  */
-void GEM::Object::draw() {
-    mp_mesh->draw();
+void GEM::Object::draw() const {
+    mp_model->getMeshPtr()->draw();
 }
 
 /**
