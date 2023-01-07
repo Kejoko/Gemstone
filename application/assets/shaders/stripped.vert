@@ -6,6 +6,7 @@ layout (location = 1) in vec3 i_normal;
 layout (location = 2) in vec3 i_color;
 layout (location = 3) in vec2 i_diffuseMapCoords;
 layout (location = 4) in vec2 i_specularMapCoords;
+layout (location = 5) in vec2 i_emissionMapCoords;
 
 // Input transformation matrix
 uniform mat4 modelMatrix;
@@ -19,6 +20,7 @@ out vec3 fragmentNormal;
 // Output the texture coordinates
 out vec2 diffuseMapCoords;
 out vec2 specularMapCoords;
+out vec2 emissionMapCoords;
 
 // @todo    calculate all of the relevent vectors in view space instead of in world space by using the
 //          view matrix
@@ -32,4 +34,5 @@ void main() {
 
     diffuseMapCoords = i_diffuseMapCoords;
     specularMapCoords = i_specularMapCoords;
+    emissionMapCoords = i_emissionMapCoords;
 }

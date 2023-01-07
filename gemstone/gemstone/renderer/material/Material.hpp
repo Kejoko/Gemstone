@@ -20,6 +20,7 @@ public: // public member functions
     Material(
         const std::string& diffuseMapFilename,
         const std::string& specularMapFilename,
+        const std::string& emissionMapFilename,
         const float shininess,
         const char* vertexShaderSource,
         const char* fragmentShaderSource
@@ -28,13 +29,10 @@ public: // public member functions
 
     std::shared_ptr<const GEM::Renderer::Texture> getDiffuseMapPtr() const { return mp_diffuseMap; }
     std::shared_ptr<const GEM::Renderer::Texture> getSpecularMapPtr() const { return mp_specularMap; }
+    std::shared_ptr<const GEM::Renderer::Texture> getEmissionMapPtr() const { return mp_emissionMap; }
     float getShininess() const { return m_shininess; }
 
     std::shared_ptr<GEM::Renderer::ShaderProgram> getShaderProgramPtr() const { return mp_shaderProgram; }
-
-    glm::vec3 getAmbientColor() const { return {1.0f, 0.5f, 0.31f}; }
-    glm::vec3 getDiffuseColor() const { return {1.0f, 0.5f, 0.31f}; }
-    glm::vec3 getSpecularColor() const { return {0.5f, 0.5f, 0.5f}; }
 
 private: // private static variables
     static uint32_t materialCount;
@@ -47,6 +45,7 @@ private: // private member variables
 
     std::shared_ptr<GEM::Renderer::Texture> mp_diffuseMap;
     std::shared_ptr<GEM::Renderer::Texture> mp_specularMap;
+    std::shared_ptr<GEM::Renderer::Texture> mp_emissionMap;
     float m_shininess;
 
     std::shared_ptr<GEM::Renderer::ShaderProgram> mp_shaderProgram;

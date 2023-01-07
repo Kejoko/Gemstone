@@ -237,8 +237,10 @@ void render(
         // Object's material
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr()->activate();
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr()->activate();
+        objectPtrs[i]->getModelPtr()->getMaterialPtr()->getEmissionMapPtr()->activate();
         p_shaderProgram->setUniformTextureSampler("objectMaterial.diffuseMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr());
         p_shaderProgram->setUniformTextureSampler("objectMaterial.specularMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr());
+        p_shaderProgram->setUniformTextureSampler("objectMaterial.emissionMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getEmissionMapPtr());
         p_shaderProgram->setUniformFloat("objectMaterial.shininess", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShininess());
 
         // Set the uniform matrices for where the camera is oriented

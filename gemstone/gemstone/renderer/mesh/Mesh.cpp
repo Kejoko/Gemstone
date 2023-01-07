@@ -32,48 +32,48 @@ std::vector<float> GEM::Renderer::Mesh::loadVertices() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
 
     return {
-        // position             // normal               // color            // diffuse map  // specular map
-        -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,     0.0f, 0.0f,
+        // position             // normal               // color            // diffuse map      // specular map     // emission map
+        -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 0.0f, 0.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
 
-        -0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 0.0f, 0.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 1.0f, 1.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 1.0f, 1.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 0.0f, 0.0f,   0.0f, 0.0f,     0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 0.0f, 0.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 1.0f, 1.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     1.0f, 1.0f, 1.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,     0.0f,  0.0f, 1.0f,     0.0f, 0.0f, 0.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
 
-        -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
 
-         0.5f,  0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,     1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 1.0f, 1.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f, 0.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,     0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
 
-        -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,     0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,     1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,     1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,     0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,     0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 1.0f, 0.0f,   1.0f, 1.0f,         1.0f, 1.0f,         1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    1.0f, 0.0f, 1.0f,   1.0f, 0.0f,         1.0f, 0.0f,         1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 0.0f, 1.0f,   0.0f, 0.0f,         0.0f, 0.0f,         0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,     0.0f,  1.0f,  0.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,         0.0f, 1.0f,         0.0f, 1.0f
     };
 }
 
@@ -137,15 +137,18 @@ uint32_t GEM::Renderer::Mesh::createElementBufferObject(const std::vector<float>
 void GEM::Renderer::Mesh::configureVertexAttributePointers() {
     LOG_FUNCTION_ENTRY_TRACE("{}", nullptr);
 
+    // Stride length of 15 becasue : 3 position + 3 normal + 3 color + 2 texture (diffuse) + 2 specular + 2 emission
+    const uint32_t strideLength = 15;
+
     // Tell OpenGL how it should interpret the vertex data
     const int p_vertexPositionAttribute = 0;
     glVertexAttribPointer(
-        p_vertexPositionAttribute,  // The vertex attribute we want to configure (0 because we used 'location = 0' in our vertex shader, we want to pass this to our vertex shader)
-        3,                          // The size of the vertex attribute (vec3 has 3 values)
-        GL_FLOAT,                   // Data type (vec<N> in GLSL consists of floating point values)
-        GL_FALSE,                   // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
-        13 * sizeof(float),         // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
-        static_cast<void*>(0)       // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
+        p_vertexPositionAttribute,      // The vertex attribute we want to configure (0 because we used 'location = 0' in our vertex shader, we want to pass this to our vertex shader)
+        3,                              // The size of the vertex attribute (vec3 has 3 values)
+        GL_FLOAT,                       // Data type (vec<N> in GLSL consists of floating point values)
+        GL_FALSE,                       // To normalize or not to normalize (when using int types this sets the data to -1, 0, or 1 upon conversion to float)
+        strideLength * sizeof(float),   // The stride length, the space between consecutive vertex attributes (each vertex and color is 3 floats so the starts of each vertex differs by 6 floats)
+        static_cast<void*>(0)           // The offset of where the position data begins in the buffer (0 because position data starts at the beggining of the buffer)
     );
     glEnableVertexAttribArray(p_vertexPositionAttribute);
 
@@ -156,7 +159,7 @@ void GEM::Renderer::Mesh::configureVertexAttributePointers() {
         3,
         GL_FLOAT,
         GL_FALSE,
-        13 * sizeof(float),
+        strideLength * sizeof(float),
         (void*)(3 * sizeof(float))
     );
     glEnableVertexAttribArray(p_vertexNormalAttribute);
@@ -168,34 +171,46 @@ void GEM::Renderer::Mesh::configureVertexAttributePointers() {
         3,
         GL_FLOAT,
         GL_FALSE,
-        13 * sizeof(float),         // Stride length of 13 becasue : 3 position + 3 normal + 3 color + 2 texture (diffuse) + 2 specular
-        (void*)(6 * sizeof(float))  // Offset 6 floats into the array because the first 3 values are position data, second 3 are normal
+        strideLength * sizeof(float),         
+        (void*)(6 * sizeof(float))
     );
     glEnableVertexAttribArray(p_vertexColorAttribute);
 
-    // Configure the texture vertex attribute like the color and positions
+    // Configure the texture (diffuse map) vertex attribute like the color and positions
     const int p_vertexTextureAttribute = 3;
     glVertexAttribPointer(
         p_vertexTextureAttribute,
         2,
         GL_FLOAT,
         GL_FALSE,
-        13 * sizeof(float),         // Stride length of 13 becasue : 3 position + 3 normal + 3 color + 2 texture (diffuse) + 2 specular
-        (void*)(9 * sizeof(float))  // Offset 9 floats into the array because 3 position, 3 normal, and 3 color preceeding this
+        strideLength * sizeof(float),
+        (void*)(9 * sizeof(float))
     );
     glEnableVertexAttribArray(p_vertexTextureAttribute);
 
-    // Configure the texture vertex attribute like the color and positions
+    // Configure the specular map vertex attribute like the color and positions
     const int p_vertexSpecularMapAttribute = 4;
     glVertexAttribPointer(
         p_vertexSpecularMapAttribute,
         2,
         GL_FLOAT,
         GL_FALSE,
-        13 * sizeof(float),          // Stride length of 13 becasue : 3 position + 3 normal + 3 color + 2 texture (diffuse) + 2 specular
-        (void*)(11 * sizeof(float))  // Offset 9 floats into the array because 3 position, 3 normal, 3 color, and 2 texture (diffuse) preceeding this
+        strideLength * sizeof(float),
+        (void*)(11 * sizeof(float))
     );
     glEnableVertexAttribArray(p_vertexSpecularMapAttribute);
+
+    // Configure the emission map vertex attribute like the color and positions
+    const int p_vertexEmissionMapAttribute = 5;
+    glVertexAttribPointer(
+        p_vertexEmissionMapAttribute,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        strideLength * sizeof(float),
+        (void*)(13 * sizeof(float))
+    );
+    glEnableVertexAttribArray(p_vertexEmissionMapAttribute);
 }
 
 /* ------------------------------ public member functions ------------------------------ */

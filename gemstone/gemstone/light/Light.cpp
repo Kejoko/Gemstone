@@ -28,8 +28,9 @@ const std::string GEM::Light::LOGGER_NAME = LIGHT_LOGGER_NAME;
 GEM::Light::Light(
     const uint32_t id,
     const std::string& meshFilename,
-    const std::string& textureFilename,
-    const std::string& textureFilename2,
+    const std::string& diffuseMapFilename,
+    const std::string& specularMapFilename,
+    const std::string& emissionMapFilename,
     const float shininess,
     const char* vertexShaderSource,
     const char* fragmentShaderSource,
@@ -43,8 +44,9 @@ GEM::Light::Light(
     Object(
         id,
         meshFilename,
-        textureFilename,
-        textureFilename2,
+        diffuseMapFilename,
+        specularMapFilename,
+        emissionMapFilename,
         shininess,
         vertexShaderSource,
         fragmentShaderSource,

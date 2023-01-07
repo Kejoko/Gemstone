@@ -3,6 +3,7 @@
 struct Material {
     sampler2D diffuseMap;
     sampler2D specularMap;
+    sampler2D emissionMap;
     float shininess;
 };
 
@@ -36,6 +37,7 @@ in vec3 fragmentNormal;
 // The input texture coordinates of the current fragment
 in vec2 diffuseMapCoords;
 in vec2 specularMapCoords;
+in vec2 emissionMapCoords;
 
 // The output color
 out vec4 fragmentColor;
@@ -52,10 +54,10 @@ void main() {
     // ----- calculate the diffuse light amount ----- //
 
     vec3 normal = normalize(fragmentNormal);
-    vec3 lightDirection = normalize(light.worldPosition - fragmentPosition);
+    vec3 fragmentToLight = normalize(light.worldPosition - fragmentPosition);
     
     float diffuseImpact = max(
-        dot(normal, lightDirection),
+        dot(normal, fragmentToLight),
         0.0
     );
 
@@ -63,8 +65,9 @@ void main() {
 
     // ----- calculate the specular light amount ----- //
 
+    vec3 lightToFragment = -fragmentToLight;
     vec3 cameraDirection = normalize(cameraPosition - fragmentPosition);
-    vec3 reflectionDirection = reflect(-lightDirection, normal);
+    vec3 reflectionDirection = reflect(lightToFragment, normal);
 
     float specularImpact = pow(
         max(
@@ -75,8 +78,15 @@ void main() {
     );
     vec3 specularResult = light.specularColor * (specularImpact * specularIntensity);
 
+    // ----- calculate the emission amount ----- //
+
+    vec3 emissionResult = vec3(0.0, 0.0, 0.0);
+    if (specularIntensity == vec3(0.0, 0.0, 0.0)) {
+        emissionResult = texture(objectMaterial.emissionMap, emissionMapCoords).rgb;
+    }
+
     // ----- calculate the result ----- //
 
-    fragmentColor = vec4(ambientResult + diffuseResult + specularResult, 1.0);
+    fragmentColor = vec4(ambientResult + diffuseResult + specularResult + emissionResult, 1.0);
 
 }

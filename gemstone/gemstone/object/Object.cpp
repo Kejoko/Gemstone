@@ -73,6 +73,7 @@ GEM::Object::Object(
     const std::string& meshFilename,
     const std::string& diffuseMapFilename,
     const std::string& specularMapFileName,
+    const std::string& emissionMapFilename,
     const float shininess,
     const char* vertexShaderSource,
     const char* fragmentShaderSource,
@@ -87,6 +88,7 @@ GEM::Object::Object(
             meshFilename,
             diffuseMapFilename,
             specularMapFileName,
+            emissionMapFilename,
             shininess,
             vertexShaderSource,
             fragmentShaderSource

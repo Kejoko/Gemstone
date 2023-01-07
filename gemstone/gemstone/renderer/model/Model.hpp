@@ -21,6 +21,7 @@ public: // public member functions
         const std::string& meshFilename,
         const std::string& diffuseMapFilename,
         const std::string& specularMapFilename,
+        const std::string& emissionMapFilename,
         const float shininess,
         const char* vertexShaderSource,
         const char* fragmentShaderSource
