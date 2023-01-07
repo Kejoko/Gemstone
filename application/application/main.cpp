@@ -235,16 +235,11 @@ void render(
         p_shaderProgram->setUniformVec3("light.specularColor", lightSpecularColor);
         
         // Object's material
-        // p_shaderProgram->setUniformVec3("objectMaterial.ambientColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getAmbientColor());
-        // p_shaderProgram->setUniformVec3("objectMaterial.diffuseColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseColor());
-        p_shaderProgram->setUniformVec3("objectMaterial.specularColor", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularColor());
-        p_shaderProgram->setUniformFloat("objectMaterial.shininess", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShininess());
-
-        // Activate and bind textures the current object is using then tell the shader to use them
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr()->activate();
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr()->activate();
         p_shaderProgram->setUniformTextureSampler("objectMaterial.diffuseMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr());
-        // p_shaderProgram->setUniformTextureSampler("ourTexture2", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr());
+        p_shaderProgram->setUniformTextureSampler("objectMaterial.specularMap", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr());
+        p_shaderProgram->setUniformFloat("objectMaterial.shininess", objectPtrs[i]->getModelPtr()->getMaterialPtr()->getShininess());
 
         // Set the uniform matrices for where the camera is oriented
         p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
