@@ -5,7 +5,9 @@
 #include <vector>
 
 #include "gemstone/camera/Camera.hpp"
-#include "gemstone/light/Light.hpp"
+#include "gemstone/light/DirectionalLight.hpp"
+#include "gemstone/light/PointLight.hpp"
+#include "gemstone/light/SpotLight.hpp"
 #include "gemstone/object/Object.hpp"
 #include "gemstone/managers/input/InputManager.hpp"
 #include "gemstone/renderer/context/Context.hpp"
@@ -44,7 +46,9 @@ public: // public member functions
 
     std::shared_ptr<const GEM::Camera> getCameraPtr() const { return mp_camera; }
     GEM::Scene::AmbientLight getAmbientLight() const { return m_ambientLight; }
-    const std::vector<std::shared_ptr<GEM::Light>>& getLightPtrs() const { return m_lightPtrs; }
+    const std::vector<std::shared_ptr<GEM::DirectionalLight>>& getDirectionalLightPtrs() const { return m_directionalLightPtrs; }
+    const std::vector<std::shared_ptr<GEM::PointLight>>& getPointLightPtrs() const { return m_pointLightPtrs; }
+    const std::vector<std::shared_ptr<GEM::SpotLight>>& getSpotLightPtrs() const { return m_spotLightPtrs; }
     const std::vector<std::shared_ptr<GEM::Object>>& getObjectPtrs() const { return m_objectPtrs; }
 
     void update();
@@ -57,7 +61,17 @@ private: // private static functions
         const std::string& filename
     );
     static GEM::Scene::AmbientLight loadAmbientLight(const std::string& filename);
-    static std::vector<std::shared_ptr<GEM::Light>> loadLights(
+    static std::vector<std::shared_ptr<GEM::DirectionalLight>> loadDirectionalLights(
+        const std::string& filename,
+        const char* lightVertexShaderSource,
+        const char* lightFragmentShaderSource
+    );
+    static std::vector<std::shared_ptr<GEM::PointLight>> loadPointLights(
+        const std::string& filename,
+        const char* lightVertexShaderSource,
+        const char* lightFragmentShaderSource
+    );
+    static std::vector<std::shared_ptr<GEM::SpotLight>> loadSpotLights(
         const std::string& filename,
         const char* lightVertexShaderSource,
         const char* lightFragmentShaderSource
@@ -81,6 +95,8 @@ private: // private member variables
     
     std::shared_ptr<GEM::Camera> mp_camera;
     GEM::Scene::AmbientLight m_ambientLight;
-    std::vector<std::shared_ptr<GEM::Light>> m_lightPtrs;
+    std::vector<std::shared_ptr<GEM::DirectionalLight>> m_directionalLightPtrs;
+    std::vector<std::shared_ptr<GEM::PointLight>> m_pointLightPtrs;
+    std::vector<std::shared_ptr<GEM::SpotLight>> m_spotLightPtrs;
     std::vector<std::shared_ptr<GEM::Object>> m_objectPtrs;
 };

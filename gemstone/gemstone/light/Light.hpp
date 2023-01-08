@@ -13,24 +13,12 @@ namespace GEM {
     class Light;
 }
 
-class GEM::Light : public GEM::Object {
+class GEM::Light {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
 public: // public member functions
     Light(
-        const uint32_t id,
-        const std::string& meshFilename,
-        const std::string& diffuseMapFilename,
-        const std::string& specularMapFilename,
-        const std::string& emissionMapFilename,
-        const float shininess,
-        const char* vertexShaderSource,
-        const char* fragmentShaderSource,
-        const glm::vec3& initialWorldPosition,
-        const glm::vec3& initialScale,
-        const glm::vec3& initialRotationAxis,
-        const float initialRotationAmountDegrees,
         const glm::vec3& initialDiffuseColor,
         const glm::vec3& initialSpecularColor
     );
@@ -39,7 +27,7 @@ public: // public member functions
     glm::vec3 getDiffuseColor() const { return m_diffuseColor; }
     glm::vec3 getSpecularColor() const { return m_specularColor; }
 
-private: // private member variables
+protected: // protected member variables
     glm::vec3 m_diffuseColor;
     glm::vec3 m_specularColor;
 };

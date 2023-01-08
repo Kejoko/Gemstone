@@ -90,15 +90,35 @@ GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filenam
     };
 }
 
-std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
+std::vector<std::shared_ptr<GEM::DirectionalLight>> GEM::Scene::loadDirectionalLights(
+    const std::string& filename,
+    const char* lightVertexShaderSource,
+    const char* lightFragmentShaderSource
+) {
+    UNUSED(lightVertexShaderSource);
+    UNUSED(lightFragmentShaderSource);
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    std::vector<std::shared_ptr<GEM::DirectionalLight>> directionalLightPtrs = {
+        std::make_shared<GEM::DirectionalLight>(
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3{0.25, 0.5, 1.0}
+        )
+    };
+
+    return directionalLightPtrs;
+}
+
+std::vector<std::shared_ptr<GEM::PointLight>> GEM::Scene::loadPointLights(
     const std::string& filename,
     const char* lightVertexShaderSource,
     const char* lightFragmentShaderSource
 ) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
-    std::vector<std::shared_ptr<GEM::Light>> lightPtrs = {
-        std::make_shared<GEM::Light>(
+    std::vector<std::shared_ptr<GEM::PointLight>> pointLightPtrs = {
+        std::make_shared<GEM::PointLight>(
             1,
             "mesh.obj",
             "application/assets/textures/container_diffuse.png",
@@ -112,11 +132,48 @@ std::vector<std::shared_ptr<GEM::Light>> GEM::Scene::loadLights(
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
             glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            1.0f,
+            1.0f,
+            1.0f
         )
     };
 
-    return lightPtrs;
+    return pointLightPtrs;
+}
+
+std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
+    const std::string& filename,
+    const char* lightVertexShaderSource,
+    const char* lightFragmentShaderSource
+) {
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    std::vector<std::shared_ptr<GEM::SpotLight>> spotLightPtrs = {
+        std::make_shared<GEM::SpotLight>(
+            1,
+            "mesh.obj",
+            "application/assets/textures/container_diffuse.png",
+            "application/assets/textures/container_specular.png",
+            "application/assets/textures/matrix.jpg",
+            32.0f,
+            lightVertexShaderSource,
+            lightFragmentShaderSource,
+            glm::vec3(1.2f, 1.0f, 4.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            0.0f,
+            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            1.0f,
+            1.0f,
+            1.0f,
+            glm::vec3{0.5, 0.25, 1.0},
+            5.5f
+        )
+    };
+
+    return spotLightPtrs;
 }
 
 /**
@@ -194,7 +251,9 @@ GEM::Scene::Scene(
     mp_inputManager(p_inputManager),
     mp_camera(GEM::Scene::loadCamera(mp_context, mp_inputManager, m_filename)),
     m_ambientLight(GEM::Scene::loadAmbientLight(m_filename)),
-    m_lightPtrs(GEM::Scene::loadLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
+    m_directionalLightPtrs(GEM::Scene::loadDirectionalLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
+    m_pointLightPtrs(GEM::Scene::loadPointLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
+    m_spotLightPtrs(GEM::Scene::loadSpotLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
     m_objectPtrs(GEM::Scene::loadObjects(m_filename, objectVertexShaderSource, objectFragmentShaderSource))
 {
     LOG_FUNCTION_CALL_INFO(

@@ -6,15 +6,15 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/light/logger.hpp"
+#include "gemstone/light/DirectionalLight.hpp"
 #include "gemstone/light/Light.hpp"
-#include "gemstone/object/Object.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
 /**
- * @brief The name of the logger the light class uses
+ * @brief The name of the logger the ambient light class uses
  */
-const std::string GEM::Light::LOGGER_NAME = LIGHT_LOGGER_NAME;
+const std::string GEM::DirectionalLight::LOGGER_NAME = LIGHT_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -24,21 +24,21 @@ const std::string GEM::Light::LOGGER_NAME = LIGHT_LOGGER_NAME;
 
 /* ------------------------------ public member functions ------------------------------ */
 
-GEM::Light::Light(
+GEM::DirectionalLight::DirectionalLight(
     const glm::vec3& initialDiffuseColor,
-    const glm::vec3& initialSpecularColor
+    const glm::vec3& initialSpecularColor,
+    const glm::vec3& initialDirection
 ) :
-    m_diffuseColor(initialDiffuseColor),
-    m_specularColor(initialSpecularColor)
+    GEM::Light::Light(
+        initialDiffuseColor,
+        initialSpecularColor
+    ),
+    m_direction(glm::normalize(initialDirection))
 {
-    LOG_FUNCTION_CALL_INFO(
-        "initial diffuse color [ {} {} {} ] , initial specular color [ {} {} {} ]",
-        m_diffuseColor.r, m_diffuseColor.g, m_diffuseColor.b,
-        m_specularColor.r, m_specularColor.g, m_specularColor.b
-    );
+    LOG_FUNCTION_CALL_INFO("direction [ {} {} {} ]", m_direction.x, m_direction.y, m_direction.z);
 }
 
-GEM::Light::~Light() {
+GEM::DirectionalLight::~DirectionalLight() {
     LOG_FUNCTION_CALL_TRACE("this ptr {}", static_cast<void*>(this));
 }
 

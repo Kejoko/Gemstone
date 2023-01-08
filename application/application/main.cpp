@@ -1,8 +1,10 @@
+#include <chrono>
 #include <cmath>
 #include <exception>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <glad/glad.h>
@@ -23,7 +25,9 @@
 #include "gemstone/camera/logger.hpp"
 #include "gemstone/camera/Camera.hpp"
 #include "gemstone/light/logger.hpp"
-#include "gemstone/light/Light.hpp"
+#include "gemstone/light/DirectionalLight.hpp"
+#include "gemstone/light/PointLight.hpp"
+#include "gemstone/light/SpotLight.hpp"
 #include "gemstone/object/logger.hpp"
 #include "gemstone/object/Object.hpp"
 #include "gemstone/scene/logger.hpp"
@@ -68,7 +72,9 @@ void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
     const GEM::Scene::AmbientLight& ambientLight,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Light>>& lightPtrs
+    const std::vector<std::shared_ptr<GEM::DirectionalLight>>& directionalLightPtrs,
+    const std::vector<std::shared_ptr<GEM::PointLight>>& pointLightPtrs,
+    const std::vector<std::shared_ptr<GEM::SpotLight>>& spotLightPtrs
 );
 
 int main(int argc, char* argv[]) {
@@ -142,7 +148,14 @@ int main(int argc, char* argv[]) {
 
         // ----- Rendering ----- //
         
-        render(p_scene->getCameraPtr(), p_scene->getAmbientLight(), p_scene->getObjectPtrs(), p_scene->getLightPtrs());
+        render(
+            p_scene->getCameraPtr(),
+            p_scene->getAmbientLight(),
+            p_scene->getObjectPtrs(),
+            p_scene->getDirectionalLightPtrs(),
+            p_scene->getPointLightPtrs(),
+            p_scene->getSpotLightPtrs()
+        );
 
         // ----- Check and call events and swap buffers before next pass ----- //
 
@@ -183,8 +196,12 @@ void render(
     const std::shared_ptr<const GEM::Camera> p_camera,
     const GEM::Scene::AmbientLight& ambientLight,
     const std::vector<std::shared_ptr<GEM::Object>>& objectPtrs,
-    const std::vector<std::shared_ptr<GEM::Light>>& lightPtrs
+    const std::vector<std::shared_ptr<GEM::DirectionalLight>>& directionalLightPtrs,
+    const std::vector<std::shared_ptr<GEM::PointLight>>& pointLightPtrs,
+    const std::vector<std::shared_ptr<GEM::SpotLight>>& spotLightPtrs
 ) {
+    UNUSED(directionalLightPtrs);
+    UNUSED(spotLightPtrs);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::vec3 lightDiffuseColor(0.0f, 0.0f, 0.0f);
@@ -192,28 +209,26 @@ void render(
     glm::vec4 lightWorldPosition(0.0f, 0.0f, 0.0f, 0.0f);
 
     // Render each of the lights
-    for (uint32_t i = 0; i < lightPtrs.size(); ++i) {
+    for (uint32_t i = 0; i < pointLightPtrs.size(); ++i) {
         // Set the active shader program
-        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = lightPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
+        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = pointLightPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
         p_shaderProgram->use();
 
-
-        p_shaderProgram->use();
-        p_shaderProgram->setUniformVec3("lightColor", lightPtrs[i]->getDiffuseColor());
+        p_shaderProgram->setUniformVec3("lightColor", pointLightPtrs[i]->getDiffuseColor());
 
         // Set the uniform matrices for where the camera is oriented
         p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
         p_shaderProgram->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
         // Create the matrix for moving the mesh in world space and assign it to the shader
-        p_shaderProgram->setUniformMat4("modelMatrix", lightPtrs[i]->getModelMatrix());
+        p_shaderProgram->setUniformMat4("modelMatrix", pointLightPtrs[i]->getModelMatrix());
     
         // Draw the object
-        lightPtrs[i]->draw();
+        pointLightPtrs[i]->draw();
 
-        lightDiffuseColor = lightPtrs[i]->getDiffuseColor();
-        lightSpecularColor = lightPtrs[i]->getSpecularColor();
-        lightWorldPosition = {lightPtrs[i]->getWorldPosition(), 1.0f};
+        lightDiffuseColor = pointLightPtrs[i]->getDiffuseColor();
+        lightSpecularColor = pointLightPtrs[i]->getSpecularColor();
+        lightWorldPosition = {pointLightPtrs[i]->getWorldPosition(), 1.0f};
     }
 
     // Render each of the meshes
