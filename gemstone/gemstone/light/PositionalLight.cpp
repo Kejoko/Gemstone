@@ -7,14 +7,14 @@
 
 #include "gemstone/light/logger.hpp"
 #include "gemstone/light/Light.hpp"
-#include "gemstone/light/ObjectLight.hpp"
+#include "gemstone/light/PositionalLight.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
 
 /**
  * @brief The name of the logger the ambient light class uses
  */
-const std::string GEM::ObjectLight::LOGGER_NAME = LIGHT_LOGGER_NAME;
+const std::string GEM::PositionalLight::LOGGER_NAME = LIGHT_LOGGER_NAME;
 
 /* ------------------------------ private static variables ------------------------------ */
 
@@ -24,7 +24,7 @@ const std::string GEM::ObjectLight::LOGGER_NAME = LIGHT_LOGGER_NAME;
 
 /* ------------------------------ public member functions ------------------------------ */
 
-GEM::ObjectLight::ObjectLight(
+GEM::PositionalLight::PositionalLight(
         const uint32_t id,
         const std::string& meshFilename,
         const std::string& diffuseMapFilename,
@@ -68,7 +68,7 @@ GEM::ObjectLight::ObjectLight(
     LOG_FUNCTION_CALL_INFO("constant {} , linear {} , quadratic {}", m_constant, m_linear, m_quadratic);
 }
 
-GEM::ObjectLight::~ObjectLight() {
+GEM::PositionalLight::~PositionalLight() {
     LOG_FUNCTION_CALL_TRACE("this ptr {}", static_cast<void*>(this));
 }
 

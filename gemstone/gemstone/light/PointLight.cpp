@@ -6,7 +6,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/light/logger.hpp"
-#include "gemstone/light/ObjectLight.hpp"
+#include "gemstone/light/PositionalLight.hpp"
 #include "gemstone/light/PointLight.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
@@ -43,7 +43,7 @@ GEM::PointLight::PointLight(
         const float linear,
         const float quadratic
 ) :
-    GEM::ObjectLight::ObjectLight(
+    GEM::PositionalLight::PositionalLight(
         id,
         meshFilename,
         diffuseMapFilename,

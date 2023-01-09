@@ -60,6 +60,7 @@ public: // public member functions
 
     uint32_t getID() const { return m_id; }
     glm::vec3 getWorldPosition() const { return m_worldPosition; }
+    glm::vec3 getLookVector() const { return m_lookVector; }
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
 

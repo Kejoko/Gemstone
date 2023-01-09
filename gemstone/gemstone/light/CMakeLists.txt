@@ -9,8 +9,8 @@ add_library(
     Light.cpp
     DirectionalLight.hpp
     DirectionalLight.cpp
-    ObjectLight.hpp
-    ObjectLight.cpp
+    PositionalLight.hpp
+    PositionalLight.cpp
     PointLight.hpp
     PointLight.cpp
     SpotLight.hpp

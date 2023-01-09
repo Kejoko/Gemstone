@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         {CONTEXT_LOGGER_NAME, GEM::util::Logger::Level::error},
         {INPUT_MANAGER_LOGGER_NAME, GEM::util::Logger::Level::error},
         {IO_LOGGER_NAME, GEM::util::Logger::Level::error},
-        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::error},
+        {LIGHT_LOGGER_NAME, GEM::util::Logger::Level::info},
         {MATERIAL_LOGGER_NAME, GEM::util::Logger::Level::error},
         {MESH_LOGGER_NAME, GEM::util::Logger::Level::error},
         {MODEL_LOGGER_NAME, GEM::util::Logger::Level::error},
@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
     float currentFrameStartTime = glfwGetTime();
 
     // Determine what color we want to clear the screen to
-    glClearColor(0.125f, 0.125f, 0.125f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Create the render loop
     LOG_INFO("Starting render loop");
@@ -201,35 +201,32 @@ void render(
     const std::vector<std::shared_ptr<GEM::SpotLight>>& spotLightPtrs
 ) {
     UNUSED(directionalLightPtrs);
+    UNUSED(pointLightPtrs);
     UNUSED(spotLightPtrs);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::vec3 lightDiffuseColor(0.0f, 0.0f, 0.0f);
-    glm::vec3 lightSpecularColor(0.0f, 0.0f, 0.0f);
-    glm::vec4 lightWorldPosition(0.0f, 0.0f, 0.0f, 0.0f);
+    // glm::vec3 lightDiffuseColor(0.0f, 0.0f, 0.0f);
+    // glm::vec3 lightSpecularColor(0.0f, 0.0f, 0.0f);
+    // glm::vec4 lightWorldPosition(0.0f, 0.0f, 0.0f, 0.0f);
 
-    // Render each of the lights
-    for (uint32_t i = 0; i < pointLightPtrs.size(); ++i) {
-        // Set the active shader program
-        std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = pointLightPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
-        p_shaderProgram->use();
+    // // Render each of the lights
+    // for (uint32_t i = 0; i < pointLightPtrs.size(); ++i) {
+    //     // Set the active shader program
+    //     std::shared_ptr<GEM::Renderer::ShaderProgram> p_shaderProgram = pointLightPtrs[i]->getModelPtr()->getMaterialPtr()->getShaderProgramPtr();
+    //     p_shaderProgram->use();
 
-        p_shaderProgram->setUniformVec3("lightColor", pointLightPtrs[i]->getDiffuseColor());
+    //     p_shaderProgram->setUniformVec3("lightColor", pointLightPtrs[i]->getDiffuseColor());
 
-        // Set the uniform matrices for where the camera is oriented
-        p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
-        p_shaderProgram->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
+    //     // Set the uniform matrices for where the camera is oriented
+    //     p_shaderProgram->setUniformMat4("viewMatrix", p_camera->getViewMatrix());
+    //     p_shaderProgram->setUniformMat4("projectionMatrix", p_camera->getProjectionMatrix());
 
-        // Create the matrix for moving the mesh in world space and assign it to the shader
-        p_shaderProgram->setUniformMat4("modelMatrix", pointLightPtrs[i]->getModelMatrix());
+    //     // Create the matrix for moving the mesh in world space and assign it to the shader
+    //     p_shaderProgram->setUniformMat4("modelMatrix", pointLightPtrs[i]->getModelMatrix());
     
-        // Draw the object
-        pointLightPtrs[i]->draw();
-
-        lightDiffuseColor = pointLightPtrs[i]->getDiffuseColor();
-        lightSpecularColor = pointLightPtrs[i]->getSpecularColor();
-        lightWorldPosition = {pointLightPtrs[i]->getWorldPosition(), 1.0f};
-    }
+    //     // Draw the object
+    //     pointLightPtrs[i]->draw();
+    // }
 
     // Render each of the meshes
     for (uint32_t i = 0; i < objectPtrs.size(); ++i) {
@@ -244,10 +241,29 @@ void render(
         p_shaderProgram->setUniformVec3("ambientLight.color", ambientLight.color);
         p_shaderProgram->setUniformFloat("ambientLight.strength", ambientLight.strength);
         
-        // Point light source
-        p_shaderProgram->setUniformVec3("light.worldPosition", lightWorldPosition);
-        p_shaderProgram->setUniformVec3("light.diffuseColor", lightDiffuseColor);
-        p_shaderProgram->setUniformVec3("light.specularColor", lightSpecularColor);
+        // // Directional light source
+        // p_shaderProgram->setUniformVec3("directionalLight.direction", directionalLightPtrs[0]->getDirection());
+        // p_shaderProgram->setUniformVec3("directionalLight.diffuseColor", directionalLightPtrs[0]->getDiffuseColor());
+        // p_shaderProgram->setUniformVec3("directionalLight.specularColor", directionalLightPtrs[0]->getSpecularColor());
+
+        // // Point light source
+        // p_shaderProgram->setUniformVec3("pointLight.worldPosition", pointLightPtrs[0]->getWorldPosition());
+        // p_shaderProgram->setUniformVec3("pointLight.diffuseColor", pointLightPtrs[0]->getDiffuseColor());
+        // p_shaderProgram->setUniformVec3("pointLight.specularColor", pointLightPtrs[0]->getSpecularColor());
+        // p_shaderProgram->setUniformFloat("pointLight.constant", pointLightPtrs[0]->getConstant());
+        // p_shaderProgram->setUniformFloat("pointLight.linear", pointLightPtrs[0]->getLinear());
+        // p_shaderProgram->setUniformFloat("pointLight.quadratic", pointLightPtrs[0]->getQuadratic());
+
+        // Spot light source
+        p_shaderProgram->setUniformVec3("spotLight.worldPosition", p_camera->getWorldPosition());
+        p_shaderProgram->setUniformVec3("spotLight.direction", p_camera->getLookVector());
+        p_shaderProgram->setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        p_shaderProgram->setUniformVec3("spotLight.diffuseColor", spotLightPtrs[0]->getDiffuseColor());
+        p_shaderProgram->setUniformVec3("spotLight.specularColor", spotLightPtrs[0]->getSpecularColor());
+        p_shaderProgram->setUniformFloat("spotLight.constant", spotLightPtrs[0]->getConstant());
+        p_shaderProgram->setUniformFloat("spotLight.linear", spotLightPtrs[0]->getLinear());
+        p_shaderProgram->setUniformFloat("spotLight.quadratic", spotLightPtrs[0]->getQuadratic());
+
         
         // Object's material
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr()->activate();

@@ -6,7 +6,7 @@
 #include "util/logger/Logger.hpp"
 
 #include "gemstone/light/logger.hpp"
-#include "gemstone/light/ObjectLight.hpp"
+#include "gemstone/light/PositionalLight.hpp"
 #include "gemstone/light/SpotLight.hpp"
 
 /* ------------------------------ public static variables ------------------------------ */
@@ -45,7 +45,7 @@ GEM::SpotLight::SpotLight(
     const glm::vec3& initialDirection,
     const float radiusDegrees
 ) :
-    GEM::ObjectLight::ObjectLight(
+    GEM::PositionalLight::PositionalLight(
         id,
         meshFilename,
         diffuseMapFilename,

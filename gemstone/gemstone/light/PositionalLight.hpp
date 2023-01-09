@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -7,15 +8,15 @@
 #include "gemstone/light/Light.hpp"
 
 namespace GEM {
-    class ObjectLight;
+    class PositionalLight;
 };
 
-class GEM::ObjectLight : public GEM::Object , public GEM::Light {
+class GEM::PositionalLight : public GEM::Object , public GEM::Light {
 public: // public static variables
     static const std::string LOGGER_NAME;
 
 public: // public member functions
-    ObjectLight(
+    PositionalLight(
         const uint32_t id,
         const std::string& meshFilename,
         const std::string& diffuseMapFilename,
@@ -34,7 +35,7 @@ public: // public member functions
         const float linear,
         const float quadratic
     );
-    virtual ~ObjectLight() = 0;
+    virtual ~PositionalLight() = 0;
 
     float getConstant() const { return m_constant; }
     float getLinear() const { return m_linear; }

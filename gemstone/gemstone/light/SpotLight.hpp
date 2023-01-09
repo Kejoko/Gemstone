@@ -4,13 +4,13 @@
 
 #include <glm/glm.hpp>
 
-#include "gemstone/light/ObjectLight.hpp"
+#include "gemstone/light/PositionalLight.hpp"
 
 namespace GEM {
     class SpotLight;
 };
 
-class GEM::SpotLight : public GEM::ObjectLight {
+class GEM::SpotLight : public GEM::PositionalLight {
 public: // public static variables
     static const std::string LOGGER_NAME;
 

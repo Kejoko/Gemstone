@@ -101,9 +101,9 @@ std::vector<std::shared_ptr<GEM::DirectionalLight>> GEM::Scene::loadDirectionalL
 
     std::vector<std::shared_ptr<GEM::DirectionalLight>> directionalLightPtrs = {
         std::make_shared<GEM::DirectionalLight>(
-            glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3{0.25, 0.5, 1.0}
+            glm::vec3( 0.5f,  0.5f,  0.5f),
+            glm::vec3( 1.0f,  1.0f,  1.0f),
+            glm::vec3{-0.2f, -1.0f, -0.3f}
         )
     };
 
@@ -127,15 +127,17 @@ std::vector<std::shared_ptr<GEM::PointLight>> GEM::Scene::loadPointLights(
             32.0f,
             lightVertexShaderSource,
             lightFragmentShaderSource,
-            glm::vec3(1.2f, 1.0f, 4.0f),
+            glm::vec3(1.2f, 1.0f, 2.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
             glm::vec3(0.5f, 0.5f, 0.5f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
-            1.0f,
-            1.0f
+            0.09f,
+            0.032f
+            // 0.7f,
+            // 1.8f
         )
     };
 
@@ -163,11 +165,11 @@ std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
-            glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(0.8f, 0.8f, 0.8f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
-            1.0f,
-            1.0f,
+            0.09f,
+            0.032f,
             glm::vec3{0.5, 0.25, 1.0},
             5.5f
         )
@@ -204,22 +206,56 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
     //     std::make_shared<GEM::Object>(9, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3(-1.3f,  1.0f,  -1.5f), glm::vec3(0.5f, 0.6f, 0.7f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f)
     // };
 
-    std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
-        std::make_shared<GEM::Object>(
-            0,
-            "mesh.obj",
-            "application/assets/textures/container_diffuse.png",
-            "application/assets/textures/container_specular.png",
-            "application/assets/textures/matrix.jpg",
-            32.0f,
-            objectVertexShaderSource,
-            objectFragmentShaderSource,
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f),
-            0.0f
-        )
+    // std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
+    //     std::make_shared<GEM::Object>(
+    //         0,
+    //         "mesh.obj",
+    //         "application/assets/textures/container_diffuse.png",
+    //         "application/assets/textures/container_specular.png",
+    //         "application/assets/textures/matrix.jpg",
+    //         32.0f,
+    //         objectVertexShaderSource,
+    //         objectFragmentShaderSource,
+    //         glm::vec3(0.0f, 0.0f, 0.0f),
+    //         glm::vec3(1.0f, 1.0f, 1.0f),
+    //         glm::vec3(0.0f, 0.0f, 1.0f),
+    //         0.0f
+    //     )
+    // };
+
+    std::vector<glm::vec3> cubePositions = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
     };
+
+    std::vector<std::shared_ptr<GEM::Object>> objectPtrs;
+
+    for (size_t i = 0; i < cubePositions.size(); ++i) {
+        objectPtrs.push_back(
+            std::make_shared<GEM::Object>(
+                i,
+                "mesh.obj",
+                "application/assets/textures/container_diffuse.png",
+                "application/assets/textures/container_specular.png",
+                "application/assets/textures/matrix.jpg",
+                32.0f,
+                objectVertexShaderSource,
+                objectFragmentShaderSource,
+                cubePositions[i],
+                glm::vec3(1.0f, 1.0f, 1.0f),
+                glm::vec3(1.0f, 0.3f, 0.5f),
+                20.0f * i
+            )
+        );
+    }
 
     return objectPtrs;
 }
