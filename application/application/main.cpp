@@ -257,14 +257,14 @@ void render(
         // Spot light source
         p_shaderProgram->setUniformVec3("spotLight.worldPosition", p_camera->getWorldPosition());
         p_shaderProgram->setUniformVec3("spotLight.direction", p_camera->getLookVector());
-        p_shaderProgram->setUniformFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        p_shaderProgram->setUniformFloat("spotLight.innerCutOffRadiusDegrees", spotLightPtrs[0]->getInnerCutOffRadiusDegrees());
+        p_shaderProgram->setUniformFloat("spotLight.outerCutOffRadiusDegrees", spotLightPtrs[0]->getOuterCutOffRadiusDegrees());
         p_shaderProgram->setUniformVec3("spotLight.diffuseColor", spotLightPtrs[0]->getDiffuseColor());
         p_shaderProgram->setUniformVec3("spotLight.specularColor", spotLightPtrs[0]->getSpecularColor());
         p_shaderProgram->setUniformFloat("spotLight.constant", spotLightPtrs[0]->getConstant());
         p_shaderProgram->setUniformFloat("spotLight.linear", spotLightPtrs[0]->getLinear());
         p_shaderProgram->setUniformFloat("spotLight.quadratic", spotLightPtrs[0]->getQuadratic());
 
-        
         // Object's material
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getDiffuseMapPtr()->activate();
         objectPtrs[i]->getModelPtr()->getMaterialPtr()->getSpecularMapPtr()->activate();

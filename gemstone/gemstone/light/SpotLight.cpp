@@ -43,7 +43,8 @@ GEM::SpotLight::SpotLight(
     const float linear,
     const float quadratic,
     const glm::vec3& initialDirection,
-    const float radiusDegrees
+    const float innerCutOffRadiusDegrees,
+    const float outerCutOffRadiusDegrees
 ) :
     GEM::PositionalLight::PositionalLight(
         id,
@@ -65,9 +66,10 @@ GEM::SpotLight::SpotLight(
         quadratic
     ),
     m_direction(glm::normalize(initialDirection)),
-    m_radiusDegrees(radiusDegrees)
+    m_innerCutOffRadiusDegrees(innerCutOffRadiusDegrees),
+    m_outerCutOffRadiusDegrees(outerCutOffRadiusDegrees)
 {
-    LOG_FUNCTION_CALL_INFO("direction [ {} {} {} ] , radius {}", m_direction.x, m_direction.y, m_direction.z, m_radiusDegrees);
+    LOG_FUNCTION_CALL_INFO("direction [ {} {} {} ] , inner cut off radius degrees {} , outer cut off radius degrees {}", m_direction.x, m_direction.y, m_direction.z, m_innerCutOffRadiusDegrees, m_outerCutOffRadiusDegrees);
 }
 
 GEM::SpotLight::~SpotLight() {

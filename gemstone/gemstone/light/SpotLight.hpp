@@ -34,16 +34,19 @@ public: // public member functions
         const float linear,
         const float quadratic,
         const glm::vec3& initialDirection,
-        const float radiusDegrees
+        const float innerRadiusDegrees,
+        const float outerRadiusDegrees
     );
     ~SpotLight();
 
     glm::vec3 getDirection() const { return m_direction; }
-    float getRadiusDegrees() const { return m_radiusDegrees; }
+    float getInnerCutOffRadiusDegrees() const { return m_innerCutOffRadiusDegrees; }
+    float getOuterCutOffRadiusDegrees() const { return m_outerCutOffRadiusDegrees; }
 
 private: // private member functions
 
 private: // private member variables
     glm::vec3 m_direction;
-    float m_radiusDegrees;
+    float m_innerCutOffRadiusDegrees;
+    float m_outerCutOffRadiusDegrees;
 };

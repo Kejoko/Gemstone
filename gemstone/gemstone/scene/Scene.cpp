@@ -171,7 +171,8 @@ std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
             0.09f,
             0.032f,
             glm::vec3{0.5, 0.25, 1.0},
-            5.5f
+            12.5f,
+            17.5f
         )
     };
 

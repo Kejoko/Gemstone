@@ -34,8 +34,8 @@ struct SpotLight {
     vec3 worldPosition;
     vec3 direction;
 
-    // float radiusDegrees;
-    float cutOff;
+    float innerCutOffRadiusDegrees;
+    float outerCutOffRadiusDegrees;
     
     vec3 diffuseColor;
     vec3 specularColor;
@@ -92,6 +92,15 @@ void main() {
         normalize(-spotLight.direction)
     );
 
+    float innerCutOffTheta = cos(radians(spotLight.innerCutOffRadiusDegrees));
+    float outerCutOffTheta = cos(radians(spotLight.outerCutOffRadiusDegrees));
+    float cutOffEpsilon = innerCutOffTheta - outerCutOffTheta;
+    float intensity = clamp(
+        (theta - outerCutOffTheta) / cutOffEpsilon,
+        0.0,
+        1.0
+    );
+
     // float fragmentToLightDistance = length(pointLight.worldPosition - fragmentPosition);
     // float attenuation = 1.0 / (
     //     (pointLight.constant) +
@@ -113,41 +122,39 @@ void main() {
     
     vec3 diffuseResult = vec3(0.0, 0.0, 0.0);
 
-    if (theta > spotLight.cutOff) {
-        float diffuseImpact = max(
-            dot(normal, fragmentToLight),
-            0.0
-        );
+    float diffuseImpact = max(
+        dot(normal, fragmentToLight),
+        0.0
+    );
 
-        // diffuseResult = directionalLight.diffuseColor * (diffuseImpact * objectDiffuseColor);
-        // diffuseResult = pointLight.diffuseColor * diffuseImpact * objectDiffuseColor;
-        diffuseResult = spotLight.diffuseColor * diffuseImpact * objectDiffuseColor;
+    // diffuseResult = directionalLight.diffuseColor * (diffuseImpact * objectDiffuseColor);
+    // diffuseResult = pointLight.diffuseColor * diffuseImpact * objectDiffuseColor;
+    diffuseResult = spotLight.diffuseColor * diffuseImpact * objectDiffuseColor;
 
-        diffuseResult *= attenuation;
-    }
+    diffuseResult *= attenuation;
+    diffuseResult *= intensity;
 
     // ----- calculate the specular light amount ----- //
 
     vec3 specularResult = vec3(0.0, 0.0, 0.0);
 
-    if (theta > spotLight.cutOff) {
-        vec3 cameraDirection = normalize(cameraPosition - fragmentPosition);
-        vec3 reflectionDirection = reflect(lightToFragment, normal);
+    vec3 cameraDirection = normalize(cameraPosition - fragmentPosition);
+    vec3 reflectionDirection = reflect(lightToFragment, normal);
 
-        float specularImpact = pow(
-            max(
-                dot(cameraDirection, reflectionDirection),
-                0.0
-            ),
-            objectMaterial.shininess
-        );
-    
-        // specularResult = directionalLight.specularColor * (specularImpact * objectSpecularIntensity);
-        // specularResult = pointLight.specularColor * specularImpact * objectSpecularIntensity;
-        specularResult = spotLight.specularColor * specularImpact * objectSpecularIntensity;
+    float specularImpact = pow(
+        max(
+            dot(cameraDirection, reflectionDirection),
+            0.0
+        ),
+        objectMaterial.shininess
+    );
 
-        specularResult *= attenuation;
-    }
+    // specularResult = directionalLight.specularColor * (specularImpact * objectSpecularIntensity);
+    // specularResult = pointLight.specularColor * specularImpact * objectSpecularIntensity;
+    specularResult = spotLight.specularColor * specularImpact * objectSpecularIntensity;
+
+    specularResult *= attenuation;
+    specularResult *= intensity;
 
     // ----- calculate the emission amount ----- //
 
