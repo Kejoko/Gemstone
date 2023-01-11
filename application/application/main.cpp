@@ -241,18 +241,18 @@ void render(
         p_shaderProgram->setUniformVec3("ambientLight.color", ambientLight.color);
         p_shaderProgram->setUniformFloat("ambientLight.strength", ambientLight.strength);
         
-        // // Directional light source
-        // p_shaderProgram->setUniformVec3("directionalLight.direction", directionalLightPtrs[0]->getDirection());
-        // p_shaderProgram->setUniformVec3("directionalLight.diffuseColor", directionalLightPtrs[0]->getDiffuseColor());
-        // p_shaderProgram->setUniformVec3("directionalLight.specularColor", directionalLightPtrs[0]->getSpecularColor());
+        // Directional light source
+        p_shaderProgram->setUniformVec3("directionalLight.direction", directionalLightPtrs[0]->getDirection());
+        p_shaderProgram->setUniformVec3("directionalLight.diffuseColor", directionalLightPtrs[0]->getDiffuseColor());
+        p_shaderProgram->setUniformVec3("directionalLight.specularColor", directionalLightPtrs[0]->getSpecularColor());
 
-        // // Point light source
-        // p_shaderProgram->setUniformVec3("pointLight.worldPosition", pointLightPtrs[0]->getWorldPosition());
-        // p_shaderProgram->setUniformVec3("pointLight.diffuseColor", pointLightPtrs[0]->getDiffuseColor());
-        // p_shaderProgram->setUniformVec3("pointLight.specularColor", pointLightPtrs[0]->getSpecularColor());
-        // p_shaderProgram->setUniformFloat("pointLight.constant", pointLightPtrs[0]->getConstant());
-        // p_shaderProgram->setUniformFloat("pointLight.linear", pointLightPtrs[0]->getLinear());
-        // p_shaderProgram->setUniformFloat("pointLight.quadratic", pointLightPtrs[0]->getQuadratic());
+        // Point light source
+        p_shaderProgram->setUniformVec3("pointLight.worldPosition", pointLightPtrs[0]->getWorldPosition());
+        p_shaderProgram->setUniformVec3("pointLight.diffuseColor", pointLightPtrs[0]->getDiffuseColor());
+        p_shaderProgram->setUniformVec3("pointLight.specularColor", pointLightPtrs[0]->getSpecularColor());
+        p_shaderProgram->setUniformFloat("pointLight.constant", pointLightPtrs[0]->getConstant());
+        p_shaderProgram->setUniformFloat("pointLight.linear", pointLightPtrs[0]->getLinear());
+        p_shaderProgram->setUniformFloat("pointLight.quadratic", pointLightPtrs[0]->getQuadratic());
 
         // Spot light source
         p_shaderProgram->setUniformVec3("spotLight.worldPosition", p_camera->getWorldPosition());

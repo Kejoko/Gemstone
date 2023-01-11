@@ -86,7 +86,7 @@ GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filenam
 
     return {
         glm::vec3(1.0f, 1.0f, 1.0f),
-        0.2
+        0.05f
     };
 }
 
@@ -101,9 +101,11 @@ std::vector<std::shared_ptr<GEM::DirectionalLight>> GEM::Scene::loadDirectionalL
 
     std::vector<std::shared_ptr<GEM::DirectionalLight>> directionalLightPtrs = {
         std::make_shared<GEM::DirectionalLight>(
-            glm::vec3( 0.5f,  0.5f,  0.5f),
+            // glm::vec3( 0.5f,  0.5f,  0.5f),
+            glm::vec3( 1.0f,  0.0f,  0.0f),
             glm::vec3( 1.0f,  1.0f,  1.0f),
-            glm::vec3{-0.2f, -1.0f, -0.3f}
+            // glm::vec3{-0.2f, -1.0f, -0.3f}
+            glm::vec3{0.0f, 1.0f, 0.0f}
         )
     };
 
@@ -127,17 +129,17 @@ std::vector<std::shared_ptr<GEM::PointLight>> GEM::Scene::loadPointLights(
             32.0f,
             lightVertexShaderSource,
             lightFragmentShaderSource,
-            glm::vec3(1.2f, 1.0f, 2.0f),
+            // glm::vec3(1.2f, 1.0f, 2.0f),
+            glm::vec3(0.0f, 0.0f, 2.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
-            glm::vec3(0.5f, 0.5f, 0.5f),
+            // glm::vec3(0.5f, 0.5f, 0.5f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
             0.09f,
             0.032f
-            // 0.7f,
-            // 1.8f
         )
     };
 
@@ -165,7 +167,8 @@ std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
-            glm::vec3(0.8f, 0.8f, 0.8f),
+            // glm::vec3(0.8f, 0.8f, 0.8f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
             0.09f,
@@ -192,37 +195,6 @@ std::vector<std::shared_ptr<GEM::Object>> GEM::Scene::loadObjects(
     const char* objectFragmentShaderSource
 ) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
-
-    // Full scene with many objects scaling and rotating
-    // std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
-    //     std::make_shared<GEM::Object>(0, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3( 0.0f,  0.0f,   0.0f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(1, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 2.0f,  5.0f, -15.0f), glm::vec3(0.5f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(2, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3(-1.5f, -2.2f,  -2.5f), glm::vec3(1.0f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(3, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(1.0f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(4, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3( 2.4f, -0.4f,  -3.5f), glm::vec3(0.5f, 0.5f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(5, "mesh.obj", "application/assets/textures/wes.png",                 "application/assets/textures/texture_coords.png", glm::vec3(-1.7f,  3.0f,  -7.5f), glm::vec3(0.5f, 1.0f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(6, "mesh.obj", "application/assets/textures/awesome_face.png",        "application/assets/textures/texture_coords.png", glm::vec3( 1.3f, -2.0f,  -2.5f), glm::vec3(1.0f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(7, "mesh.obj", "application/assets/textures/brick_wall.jpg",          "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  2.0f,  -2.5f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(8, "mesh.obj", "application/assets/textures/missing_texture.png",     "application/assets/textures/texture_coords.png", glm::vec3( 1.5f,  0.2f,  -1.5f), glm::vec3(0.6f, 0.6f, 0.6f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f),
-    //     std::make_shared<GEM::Object>(9, "mesh.obj", "application/assets/textures/wooden_container.jpg",    "application/assets/textures/texture_coords.png", glm::vec3(-1.3f,  1.0f,  -1.5f), glm::vec3(0.5f, 0.6f, 0.7f), glm::vec3(0.0f, 0.0f, 1.0f), 0.0f)
-    // };
-
-    // std::vector<std::shared_ptr<GEM::Object>> objectPtrs = {
-    //     std::make_shared<GEM::Object>(
-    //         0,
-    //         "mesh.obj",
-    //         "application/assets/textures/container_diffuse.png",
-    //         "application/assets/textures/container_specular.png",
-    //         "application/assets/textures/matrix.jpg",
-    //         32.0f,
-    //         objectVertexShaderSource,
-    //         objectFragmentShaderSource,
-    //         glm::vec3(0.0f, 0.0f, 0.0f),
-    //         glm::vec3(1.0f, 1.0f, 1.0f),
-    //         glm::vec3(0.0f, 0.0f, 1.0f),
-    //         0.0f
-    //     )
-    // };
 
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
