@@ -25,6 +25,14 @@ set(APPLICATION_ROOT_DIR "${PROJECT_SOURCE_DIR}/application")
 set(GEMSTONE_ROOT_DIR "${PROJECT_SOURCE_DIR}/gemstone")
 
 #====================================================================
+# Compile time determined scene information
+#====================================================================
+
+set(MAX_NUMBER_DIRECTIONAL_LIGHTS 4)
+set(MAX_NUMBER_POINT_LIGHTS 10)
+set(MAX_NUMBER_SPOT_LIGHTS 10)
+
+#====================================================================
 # C++ 17 Support and compiler flags
 #====================================================================
 set(CMAKE_CXX_STANDARD 17)
@@ -61,6 +69,12 @@ add_compile_definitions(
     GEMSTONE_MAJOR_VERSION=${GEMSTONE_MAJOR_VERSION}
     GEMSTONE_MINOR_VERSION=${GEMSTONE_MINOR_VERSION}
     GEMSTONE_PATCH_VERSION=${GEMSTONE_PATCH_VERSION}
+)
+
+add_compile_definitions(
+    MAX_NUMBER_DIRECTIONAL_LIGHTS=${MAX_NUMBER_DIRECTIONAL_LIGHTS}
+    MAX_NUMBER_POINT_LIGHTS=${MAX_NUMBER_POINT_LIGHTS}
+    MAX_NUMBER_SPOT_LIGHTS=${MAX_NUMBER_SPOT_LIGHTS}
 )
 
 include_directories(

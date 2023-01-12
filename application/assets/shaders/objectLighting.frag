@@ -1,6 +1,14 @@
 #version 330 core
 
 // --------------------------------------------------------------------------------
+// Preprocessor definitions
+// --------------------------------------------------------------------------------
+
+#define MAX_NUMBER_DIRECTIONAL_LIGHTS 5
+#define MAX_NUMBER_POINT_LIGHTS 10
+#define MAX_NUMBER_SPOT_LIGHTS 10
+
+// --------------------------------------------------------------------------------
 // The structs representing the data we need
 // --------------------------------------------------------------------------------
 
@@ -63,6 +71,15 @@ uniform AmbientLight ambientLight;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLight;
 uniform SpotLight spotLight;
+
+uniform DirectionalLight directionalLights[MAX_NUMBER_DIRECTIONAL_LIGHTS];
+uniform int numberDirectionalLightsGiven;
+
+uniform PointLight pointLights[MAX_NUMBER_POINT_LIGHTS];
+uniform int numberPointLightsGiven;
+
+uniform SpotLight spotLights[MAX_NUMBER_SPOT_LIGHTS];
+uniform int numberSpotLightsGiven;
 
 // The material of the object
 uniform Material objectMaterial;
@@ -166,62 +183,69 @@ void main() {
     vec3 objectSpecularIntensity = vec3(1.0, 1.0, 1.0);
     vec3 normal = normalize(fragmentNormal);
 
+    // ----- where we store the result ----- //
+
+    vec3 result = vec3(0.0, 0.0, 0.0);
+
     // ----- calculate the ambient light amount ----- //
 
-    vec3 ambientResult = getAmbientLightContribution(ambientLight, objectDiffuseColor);
+    vec3 ambientLightContribution = getAmbientLightContribution(ambientLight, objectDiffuseColor);
+
+    result += ambientLightContribution;
 
     // ----- calculate contribution of directional lights ----- //
 
-    vec3 directionalLightContribution = getDirectionalLightContribution(
-        directionalLight,
-        fragmentPosition,
-        cameraPosition,
-        normal,
-        objectDiffuseColor,
-        objectSpecularIntensity,
-        objectMaterial.shininess
-    );
+    for (int i = 0; i < numberDirectionalLightsGiven && i < MAX_NUMBER_DIRECTIONAL_LIGHTS; ++i) {
+        result += getDirectionalLightContribution(
+            directionalLights[i],
+            fragmentPosition,
+            cameraPosition,
+            normal,
+            objectDiffuseColor,
+            objectSpecularIntensity,
+            objectMaterial.shininess
+        );
+    }
 
     // ----- calculate contribution of point lights ----- //
 
-    vec3 pointLightContribution = getPointLightContribution(
-        pointLight,
-        fragmentPosition,
-        cameraPosition,
-        normal,
-        objectDiffuseColor,
-        objectSpecularIntensity,
-        objectMaterial.shininess
-    );
+    for (int i = 0; i < numberPointLightsGiven && i < MAX_NUMBER_POINT_LIGHTS; ++i) {
+        result += getPointLightContribution(
+            pointLights[i],
+            fragmentPosition,
+            cameraPosition,
+            normal,
+            objectDiffuseColor,
+            objectSpecularIntensity,
+            objectMaterial.shininess
+        );
+    }
 
     // ----- calculate contribution of spot lights ----- //
 
-    vec3 spotLightContribution = getSpotLightContribution(
-        spotLight,
-        fragmentPosition,
-        cameraPosition,
-        normal,
-        objectDiffuseColor,
-        objectSpecularIntensity,
-        objectMaterial.shininess
-    );
+    for (int i = 0; i < numberSpotLightsGiven && i < MAX_NUMBER_SPOT_LIGHTS; ++i) {
+        result += getSpotLightContribution(
+            spotLights[i],
+            fragmentPosition,
+            cameraPosition,
+            normal,
+            objectDiffuseColor,
+            objectSpecularIntensity,
+            objectMaterial.shininess
+        );
+    }
 
     // ----- calculate the emission amount ----- //
 
-    vec3 emissionResult = vec3(0.0, 0.0, 0.0);
     if (objectSpecularIntensity == vec3(0.0, 0.0, 0.0)) {
-        emissionResult = texture(objectMaterial.emissionMap, emissionMapCoords).rgb;
+        vec3 emissionResult = texture(objectMaterial.emissionMap, emissionMapCoords).rgb;
+
+        result += emissionResult;
     }
 
     // ----- calculate the result ----- //
 
-    vec3 fullResult = vec3(0.0, 0.0, 0.0);
-    fullResult = ambientResult;
-    // fullResult += directionalLightContribution;
-    // fullResult += pointLightContribution;
-    fullResult += spotLightContribution;
-    fullResult += emissionResult;
-    fragmentColor = vec4(fullResult, 1.0);
+    fragmentColor = vec4(result, 1.0);
 }
 
 // --------------------------------------------------------------------------------

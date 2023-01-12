@@ -35,3 +35,18 @@
 #define CONCAT(a, b) CONCAT_INNER(a, b)
 #define CONCAT_INNER(a, b) a ## b
 #define UNIQUE_NAME(baseName) CONCAT(baseName, __LINE__)
+
+/**
+ * @brief If the macros definining the maximum number of lights in a given scen aren't
+ * defined then define them here as -1 to force errors. This is also so they are forced
+ * to be defined for linting purposes
+ */
+#ifndef MAX_NUMBER_DIRECTIONAL_LIGHTS
+#define MAX_NUMBER_DIRECTIONAL_LIGHTS -1
+#endif
+#ifndef MAX_NUMBER_POINT_LIGHTS
+#define MAX_NUMBER_POINT_LIGHTS -1
+#endif
+#ifndef MAX_NUMBER_SPOT_LIGHTS
+#define MAX_NUMBER_SPOT_LIGHTS -1
+#endif

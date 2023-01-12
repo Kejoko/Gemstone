@@ -45,6 +45,7 @@ public: // public member functions
     std::string getName() const { return m_name; }
 
     std::shared_ptr<const GEM::Camera> getCameraPtr() const { return mp_camera; }
+    glm::vec3 getClearColor() const { return m_clearColor; }
     GEM::Scene::AmbientLight getAmbientLight() const { return m_ambientLight; }
     const std::vector<std::shared_ptr<GEM::DirectionalLight>>& getDirectionalLightPtrs() const { return m_directionalLightPtrs; }
     const std::vector<std::shared_ptr<GEM::PointLight>>& getPointLightPtrs() const { return m_pointLightPtrs; }
@@ -60,6 +61,7 @@ private: // private static functions
         std::shared_ptr<GEM::Managers::InputManager> p_inputManager,
         const std::string& filename
     );
+    static glm::vec3 loadClearColor(const std::string& filename);
     static GEM::Scene::AmbientLight loadAmbientLight(const std::string& filename);
     static std::vector<std::shared_ptr<GEM::DirectionalLight>> loadDirectionalLights(
         const std::string& filename,
@@ -94,6 +96,7 @@ private: // private member variables
     const std::shared_ptr<GEM::Managers::InputManager> mp_inputManager;
     
     std::shared_ptr<GEM::Camera> mp_camera;
+    glm::vec3 m_clearColor;
     GEM::Scene::AmbientLight m_ambientLight;
     std::vector<std::shared_ptr<GEM::DirectionalLight>> m_directionalLightPtrs;
     std::vector<std::shared_ptr<GEM::PointLight>> m_pointLightPtrs;

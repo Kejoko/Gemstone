@@ -81,6 +81,12 @@ std::shared_ptr<GEM::Camera> GEM::Scene::loadCamera(
     return p_camera;
 }
 
+glm::vec3 GEM::Scene::loadClearColor(const std::string& filename) {
+    LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    return glm::vec3(0.49f, 0.46f, 0.89f);
+}
+
 GEM::Scene::AmbientLight GEM::Scene::loadAmbientLight(const std::string& filename) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
@@ -99,13 +105,16 @@ std::vector<std::shared_ptr<GEM::DirectionalLight>> GEM::Scene::loadDirectionalL
     UNUSED(lightFragmentShaderSource);
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
+    /**
+     * @todo clamp this to the max number of directional lights determined by the preprocessor
+     * definition
+     */
+
     std::vector<std::shared_ptr<GEM::DirectionalLight>> directionalLightPtrs = {
         std::make_shared<GEM::DirectionalLight>(
-            // glm::vec3( 0.5f,  0.5f,  0.5f),
-            glm::vec3( 1.0f,  0.0f,  0.0f),
-            glm::vec3( 1.0f,  1.0f,  1.0f),
-            // glm::vec3{-0.2f, -1.0f, -0.3f}
-            glm::vec3{0.0f, 1.0f, 0.0f}
+            glm::vec3(0.97f, 0.51f, 0.16f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3{0.0f, -15.0f, 100.0f}
         )
     };
 
@@ -119,7 +128,31 @@ std::vector<std::shared_ptr<GEM::PointLight>> GEM::Scene::loadPointLights(
 ) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
 
+    /**
+     * @todo clamp this to the max number of point lights determined by the preprocessor
+     * definition
+     */
+
     std::vector<std::shared_ptr<GEM::PointLight>> pointLightPtrs = {
+        std::make_shared<GEM::PointLight>(
+            0,
+            "mesh.obj",
+            "application/assets/textures/container_diffuse.png",
+            "application/assets/textures/container_specular.png",
+            "application/assets/textures/matrix.jpg",
+            32.0f,
+            lightVertexShaderSource,
+            lightFragmentShaderSource,
+            glm::vec3(1.2f, 1.0f, 2.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            0.0f,
+            glm::vec3(0.95f, 0.78f, 0.27),
+            glm::vec3(1.0f, 1.0f, 1.0f),
+            1.0f,
+            0.09f,
+            0.032f
+        ),
         std::make_shared<GEM::PointLight>(
             1,
             "mesh.obj",
@@ -129,17 +162,15 @@ std::vector<std::shared_ptr<GEM::PointLight>> GEM::Scene::loadPointLights(
             32.0f,
             lightVertexShaderSource,
             lightFragmentShaderSource,
-            // glm::vec3(1.2f, 1.0f, 2.0f),
-            glm::vec3(0.0f, 0.0f, 2.0f),
+            glm::vec3(50.0f, 25.0f, -50.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
-            // glm::vec3(0.5f, 0.5f, 0.5f),
-            glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3(0.8f, 0.8f, 0.8f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
-            0.09f,
-            0.032f
+            0.007f,
+            0.0002f
         )
     };
 
@@ -152,6 +183,11 @@ std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
     const char* lightFragmentShaderSource
 ) {
     LOG_FUNCTION_CALL_TRACE("filename {}", filename);
+
+    /**
+     * @todo clamp this to the max number of spot lights determined by the preprocessor
+     * definition
+     */
 
     std::vector<std::shared_ptr<GEM::SpotLight>> spotLightPtrs = {
         std::make_shared<GEM::SpotLight>(
@@ -167,12 +203,11 @@ std::vector<std::shared_ptr<GEM::SpotLight>> GEM::Scene::loadSpotLights(
             glm::vec3(1.0f, 1.0f, 1.0f),
             glm::vec3(0.0f, 0.0f, 1.0f),
             0.0f,
-            // glm::vec3(0.8f, 0.8f, 0.8f),
-            glm::vec3(0.0f, 0.0f, 1.0f),
+            glm::vec3(0.89f, 0.90f, 1.0f),
             glm::vec3(1.0f, 1.0f, 1.0f),
             1.0f,
-            0.09f,
-            0.032f,
+            0.35f,
+            0.44f,
             glm::vec3{0.5, 0.25, 1.0},
             12.5f,
             17.5f
@@ -259,6 +294,7 @@ GEM::Scene::Scene(
     mp_context(p_context),
     mp_inputManager(p_inputManager),
     mp_camera(GEM::Scene::loadCamera(mp_context, mp_inputManager, m_filename)),
+    m_clearColor(GEM::Scene::loadClearColor(m_filename)),
     m_ambientLight(GEM::Scene::loadAmbientLight(m_filename)),
     m_directionalLightPtrs(GEM::Scene::loadDirectionalLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),
     m_pointLightPtrs(GEM::Scene::loadPointLights(m_filename, lightVertexShaderSource, lightFragmentShaderSource)),

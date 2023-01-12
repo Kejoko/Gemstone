@@ -213,6 +213,16 @@ uint32_t GEM::Renderer::CompiledShader::compileShader(const char* shaderSource, 
         return shaderID;
     }
 
+    /**
+     * @todo Replace the string "#define MAX_NUMBER_DIRECTIONAL_LIGHTS -1" with the string containing the correct amoun
+     * according to the preprocessor definition dictating the maximum number of that type of light for the scene. We must
+     * do this for each of the three light types. For this to work we must set the three macros in the fragment shader
+     * to be defined to -1 so the find and replace regex works nicely
+     * 
+     * @example The string ("#define MAX_NUMBER_POINT_LIGHTS -1") in the fragment shader gets changed to be the string
+     * ("#define MAX_NUMBER_POINT_LIGHTS " + std::to_string(MAX_NUMBER_POINT_LIGHTS))
+     */
+
     // Create a shader object, attach the shader source code, and compile
     // We must give the shader to compile, how many strings we are giving it as source,
     // the actual source code, and nullptr representing that the 1 source string is
